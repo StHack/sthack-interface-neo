@@ -1,0 +1,7 @@
+{
+  "name": "sthack-interface-neo",
+  "version": "0.0.0",
+  "dependencies": {
+    "bootstrap.css": "~2.3.2"
+  }
+}

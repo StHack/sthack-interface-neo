@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>St'hack</title>
+  <link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="/static/css/reset.css" rel="stylesheet">
+  <link href="/static/css/style_interface.css" rel="stylesheet"/>
+  <link href="/static/css/style_box.css" rel="stylesheet"/>
+  <link href="/static/css/style_scoreboard.css" rel="stylesheet"/>
+  <link href="/static/icone.ico" type="image/x-icon" rel="shortcut icon">
+  <script src="/static/js/jquery.js"></script>
+  <script src="/static/js/sthack.js"></script>
+  <script src="/static/js/scoreboard.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+</head>
+<body>
+      <div id="bandeau_haut">
+          <img id="logo_sthack" src="/static/img/logo_sthack.png" />
+          <ul>
+              <li id="liste1"><a href="/"><div style="height:30px; width:110%;"><p style="padding:8px 11px;">Control Interface</p></div></a></li>
+              <li id="liste"><a href="scoreboard.html"><div style="height:30px; width:102%;"><p style="padding:8px 11px;">Scoreboard</p></div></a></li>
+              <li id="logo_team"></li>
+              <li id="nom_team"></li>
+              <li id="score_team"></li>
+              <li id="bt_team"></li>
+          </ul>
+      </div>
+          <div id="div_console">
+          </div>
+          <div id="div_bouton">
+              <div id="bandeau_bouton">
+                  <p id="title_bandeau">Scoreboard</p>
+              </div>
+              <div id="admin_interface">
+              <table id="scoreboard" class="table table-hover table-bordered">
+
+              </table>
+          </div>
+</body>
+</html>
