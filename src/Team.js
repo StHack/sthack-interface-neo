@@ -3,16 +3,19 @@ var crypto = require('crypto');
 var DB = require('./DB').DB;
 var _ = require('lodash');
 
-var Team = function() {};
+var Team = function(db) {
+  this.db = db || new DB();
+};
 
 Team.prototype.isAuthenticated = function(session){
   return session.authenticated;
 }
 
 Team.prototype.areLoginsValid = function(teamName, password){
+  db = this.db;
   return new Promise(function(fulfill, reject){
     hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-    new DB().find({'teamName' : teamName, 'password' : hashedPassword}).then(function(result){
+    db.find({'teamName' : teamName, 'password' : hashedPassword}).then(function(result){
       if(result.length==0){
         fulfill(false);
       }

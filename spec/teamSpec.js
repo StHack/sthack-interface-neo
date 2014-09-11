@@ -1,26 +1,40 @@
 var Team = require('../src/Team').Team;
 var Promise = require('bluebird');
 var crypto = require('crypto');
+var _ = require('lodash');
 
-collTeams = [{'teamName' : 'exists', 'password' : crypto.createHash('sha256').update('exists').digest('hex')}];
 adminName = process.env.ADMIN_NAME;
 
 describe("Not authenticated team", function() {
-  session = { 
-              cookie: { 
-                path: '/',
-                _expires: null,
-                originalMaxAge: null,
-                httpOnly: true 
-              } 
-            }
+  var session;
+  var DB;
+
+  beforeEach(function(){
+    session = { 
+                cookie: { 
+                 path: '/',
+                  _expires: null,
+                  originalMaxAge: null,
+                  httpOnly: true 
+                } 
+              }
+    DB = {
+      find: function(request){
+        return new Promise(function(fulfill, reject){
+          fulfill(_.where([{'teamName' : 'exists',
+                            'password' : crypto.createHash('sha256').update('exists').digest('hex')
+                          }], request));
+        });
+      }
+    }
+  });
 
   it("is not authenticated", function(){
-    expect(new Team().isAuthenticated(session)).toBeFalsy();
+    expect(new Team(DB).isAuthenticated(session)).toBeUndefined();
   });
 
   it("can't authenticate with invalid logins", function(done){
-    var promise = new Team().areLoginsValid('doesntexist', 'doesntexist');
+    var promise = new Team(DB).areLoginsValid('doesntexist', 'doesntexist');
     promise.then(function(result){
       expect(result).toBeFalsy();
     },function(error){
@@ -29,7 +43,7 @@ describe("Not authenticated team", function() {
   });
 
   it("can authenticate with valid logins", function(done){
-    var promise = new Team().areLoginsValid('admin', 'secret');
+    var promise = new Team(DB).areLoginsValid('exists', 'exists');
     promise.then(function(result){
       expect(result).toBeTruthy();
     },function(error){
@@ -39,23 +53,26 @@ describe("Not authenticated team", function() {
 });
 
 describe("Authenticated team", function() {
-  session = { 
-              cookie: { 
-                path: '/',
-                _expires: null,
-                originalMaxAge: null,
-                httpOnly: true 
-              },
-              logged: { 
-                _id: '54116cb46bf7c8561a40af57',
-                teamName: 'exists',
-                password: 'ad5aabc97d88f6e56deaffc34c7a6e292e9e12db04a56799d773cfb64ca9898d'
-              },
-              sid: '1C5IFGgm1XSGBgbhEryXlg8w' 
-            }
+  var session;
+  beforeEach(function(){
+    session = { 
+                cookie: { 
+                  path: '/',
+                  _expires: null,
+                  originalMaxAge: null,
+                  httpOnly: true 
+                },
+                authenticated: { 
+                  _id: '54116cb46bf7c8561a40af57',
+                  teamName: 'exists',
+                  password: 'ad5aabc97d88f6e56deaffc34c7a6e292e9e12db04a56799d773cfb64ca9898d'
+                },
+                sid: '1C5IFGgm1XSGBgbhEryXlg8w' 
+              }
+  });
 
   it("is authenticated", function(){
-    expect(new Team().isAuthenticated(session)).toBeFalsy();
+    expect(new Team().isAuthenticated(session)).toBeDefined();
   });
 
   it("is not admin", function(){
