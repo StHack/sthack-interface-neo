@@ -1,4 +1,5 @@
 var Team = require('../src/Team').Team;
+var Promise = require('bluebird');
 var crypto = require('crypto');
 
 collTeams = [{'teamName' : 'exists', 'password' : crypto.createHash('sha256').update('exists').digest('hex')}];
@@ -18,12 +19,22 @@ describe("Not authenticated team", function() {
     expect(new Team().isAuthenticated(session)).toBeFalsy();
   });
 
-  it("can't authenticate with invalid logins", function(){
-    expect(new Team().areLoginsValid('doesntexist', 'doesntexist')).toBeFalsy();
+  it("can't authenticate with invalid logins", function(done){
+    var promise = new Team().areLoginsValid('doesntexist', 'doesntexist');
+    promise.then(function(result){
+      expect(result).toBeFalsy();
+    },function(error){
+      expect("Error: " + error).toBe(false);
+    }).finally(done);
   });
 
-  it("can authenticate with valid logins", function(){
-    expect(new Team().areLoginsValid('exists', 'exists')).toBeTruthy();
+  it("can authenticate with valid logins", function(done){
+    var promise = new Team().areLoginsValid('admin', 'secret');
+    promise.then(function(result){
+      expect(result).toBeTruthy();
+    },function(error){
+      expect("Error: " + error).toBe(false);
+    }).finally(done);
   });
 });
 

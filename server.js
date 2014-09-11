@@ -29,7 +29,18 @@ app.configure(function(){
 	app.set('view engine', 'ejs');
 	app.set('views', __dirname +'/views');
 
+	app.use(express.cookieParser());
+	app.use(express.json());
+	app.use(express.urlencoded());
 	app.use(device.capture());
+
+	//Prepare session
+	app.sessionStore = new express.session.MemoryStore({reapInterval: 60000 * 10 });
+	app.use(express.session({
+	  'secret': process.env.SESSION_SECRET,
+  	'store':  app.sessionStore
+		})
+	);
 });
 
 

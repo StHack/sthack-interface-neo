@@ -7,6 +7,7 @@ var RUNNING_PORT = 4443; // <- if you change this, you need to change in public/
 var RUNNING_CERT_PATH = 'server.crt';
 var RUNNING_KEY_PATH = 'server.key';
 var RUNNING_ADMIN_NAME = 'admin';
+var RUNNING_SESSION_SECRET = 'change_me';
 var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
 var mountFolder = function (connect, dir) {
   return connect.static(require('path').resolve(dir));
@@ -185,7 +186,8 @@ module.exports = function (grunt) {
             PORT: RUNNING_PORT,
             CERT_PATH: RUNNING_CERT_PATH,
             KEY_PATH: RUNNING_KEY_PATH,
-            ADMIN_NAME: RUNNING_ADMIN_NAME
+            ADMIN_NAME: RUNNING_ADMIN_NAME,
+            SESSION_SECRET: RUNNING_SESSION_SECRET
           },
           cwd: __dirname
         }
