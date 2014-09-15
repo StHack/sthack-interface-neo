@@ -12,6 +12,9 @@ var server = require('http').createServer(app)
 var io = require('socket.io');
 var device = require('express-device');
 var fs = require('fs');
+var cookie = require('cookie');
+var connect = require('express/node_modules/connect')
+var parseSignedCookie = connect.utils.parseSignedCookie
 
 // Sthack prototypes
 var Team = require('./src/Team').Team;
@@ -77,13 +80,10 @@ app.get("/", function(req, res){
 	res.render('index',{});
 });
 
-
-
 app.post("/", function(req, res){
 	team.areLoginsValid(req.body.teamName, req.body.password).then(function(result){
 		if(result){
 			req.session.authenticated = req.body.teamName;
-			//req.session.sid = req.sessionID;
 		}
 		res.redirect('/');
 	}, function(error){
@@ -96,27 +96,20 @@ appSSL = https.createServer(sslOptions, app).listen(runningPortNumber);
 var socketIO = io.listen(appSSL, { log: true });
 
 socketIO.set('authorization', function (handshakeData, callback) {
-	console.log(handshakeData.headers.cookie);
-	console.log(connect.utils.parseSignedCookies(cookie.parse(handshakeData.headers.cookie)['express.sid'], sessionSecret));
-  if(handshakeData.headers.cookie) {
-    callback(null, false);
+  var auth = false;
+  if(handshakeData.headers.cookie){
+    handshakeData.cookie = cookie.parse(handshakeData.headers.cookie);
+    handshakeData.sessionID = parseSignedCookie(handshakeData.cookie[sessionKey], sessionSecret);
+    if (app.sessionStore.sessions[handshakeData.sessionID]){
+      var session = JSON.parse(app.sessionStore.sessions[handshakeData.sessionID]);
+      if(session.authenticated){
+        handshakeData.teamName = session.authenticated;
+        auth = true;
+      }
+    }
   }
-  else {
-  	console.log(handshakeData.cookie);
-    // handshakeData.cookie = cookie.parse(handshakeData.headers.cookie);
-    // handshakeData.sessionID = connect.utils.parseSignedCookie(handshakeData.cookie[sessionKey], sessionSecret);
-    // if (appSSL.sessionStore.sessions[handshakeData.sessionID]){
-    //   var mySession = JSON.parse(app.sessionStore.sessions[handshakeData.sessionID]);
-    //   if(typeof mySession.logged != 'undefined'){
-    //     handshakeData.team_name = mySession.logged.login;
-         callback(null,true);
-    //   }
-    //   else
-    //     callback(null,false);
-    // }
-  }
+  callback(null, auth);
 });
-
 
 socketIO.on('connection', function (socket) {
 
