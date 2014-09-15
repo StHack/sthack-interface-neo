@@ -3,5 +3,8 @@
   "version": "0.0.0",
   "dependencies": {
     "bootstrap.css": "~2.3.2"
+  },
+  "devDependencies": {
+    "jquery": "~2.1.1"
   }
 }
