@@ -21,10 +21,11 @@ var Team = require('./src/Team').Team;
 var DB = require('./src/DB').DB;
 
 var runningPortNumber = process.env.PORT;
-var adminName = process.env.ADMIN_NAME;
 var DBConnectionString = process.env.DB_CONNECTION_STRING;
+var adminName = process.env.ADMIN_NAME;
 var sessionSecret = process.env.SESSION_SECRET;
 var sessionKey = process.env.SESSION_KEY;
+var adminPath = process.env.ADMIN_PATH;
 
 var sslOptions = {
   key: fs.readFileSync(process.env.KEY_PATH),
@@ -78,6 +79,15 @@ app.use(function(req, res, next){
 
 app.get("/", function(req, res){
 	res.render('index',{});
+});
+
+app.get(adminPath, function(req, res){
+  if(team.isAdmin(req.session, adminName)){
+    res.render('admin',{});
+  }
+  else{
+    res.render('index',{});
+  }
 });
 
 app.post("/", function(req, res){

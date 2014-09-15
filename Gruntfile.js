@@ -10,7 +10,7 @@ var RUNNING_ADMIN_NAME = 'admin';
 var RUNNING_SESSION_SECRET = 'change_me';
 var RUNNING_DB_CONNECTION_STRING = 'mongodb://login:password@127.0.0.1:27017/sthack';
 var RUNNING_SESSION_KEY = 'sthackSession';
-var RUNNING_ADMIN_PATH = 'admin_poney';
+var RUNNING_ADMIN_PATH = '/admin_poney';
 var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
 var mountFolder = function (connect, dir) {
   return connect.static(require('path').resolve(dir));

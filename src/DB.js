@@ -12,11 +12,11 @@ var DB = function(connectionString) {
   };
 };
 
-DB.prototype.find = function(collection, request){
+DB.prototype.find = function(collection, request, fields){
   return new Promise(function(fulfill, reject){
     connect(function(db, callback){
-      var teams = db.collection(collection);
-      teams.find(request).toArray(function(err, results){
+      var coll = db.collection(collection);
+      coll.find(request, fields).toArray(function(err, results){
         callback();
         fulfill(results);
       });

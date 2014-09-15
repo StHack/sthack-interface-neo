@@ -4,7 +4,7 @@ var DB = require('./DB').DB;
 var _ = require('lodash');
 
 var Team = function(db) {
-  this.db = db || new DB();
+  this.db = db || new DB('mongodb://login:password@127.0.0.1:27017/sthack');
 };
 
 Team.prototype.isAuthenticated = function(session){
@@ -15,7 +15,7 @@ Team.prototype.areLoginsValid = function(teamName, password){
   db = this.db;
   return new Promise(function(fulfill, reject){
     hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-    db.find('teams', {'teamName' : teamName, 'password' : hashedPassword}).then(function(result){
+    db.find('teams', {'teamName' : teamName, 'password' : hashedPassword}, {}).then(function(result){
       if(result.length==0){
         fulfill(false);
       }
@@ -23,13 +23,13 @@ Team.prototype.areLoginsValid = function(teamName, password){
         fulfill(true);
       }
     }, function(result){
-      fulfill(false);
+      reject(false);
     });
   });
 }
 
-Team.prototype.isAdmin = function(session){
-  return (this.isAuthenticated(session) && session.authenticated.teamName == adminName);
+Team.prototype.isAdmin = function(session, adminName){
+  return (this.isAuthenticated(session) && session.authenticated == adminName);
 }
 
 exports.Team = Team;
