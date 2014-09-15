@@ -38,7 +38,7 @@ describe("Tasks", function() {
              'type': 'Stegano',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : (new Date()).getTime() + 1000 * 60 * 5},
                         {'teamName' : 'exists', 'timestamp' : 1410792224000}]},
-          ]
+          ];
           var results = [];
           if(_.size(request)){
             content = _.where(content, request);

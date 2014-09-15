@@ -67,7 +67,7 @@ app.use(function(req, res, next){
   	next();
 	}
   else{
-  	db.find('teams').then(function(result){
+    team.list().then(function(result){
       res.render('not_logged', {
       	teams_list: result
   		});

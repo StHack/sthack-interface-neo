@@ -17,14 +17,44 @@ describe("Not authenticated team", function() {
                 } 
               }
     DB = {
-      find: function(collection, request){
+      find: function(collection, request, fields){
         return new Promise(function(fulfill, reject){
-          fulfill(_.where([{'teamName' : 'exists',
-                            'password' : crypto.createHash('sha256').update('exists').digest('hex')
-                          }], request));
+          var content = [{'teamName' : 'exists',
+                          'password' : crypto.createHash('sha256').update('exists').digest('hex')
+                          }];
+          var results = [];
+          if(_.size(request)){
+            content = _.where(content, request);
+          }
+          if(_.size(fields)){
+            _.filter(content, function(value){
+              results.push({});
+              _.forEach(Object.keys(fields), function(key){
+                if(fields[key] == 1 && value[key]){
+                  results.pop();
+                  var result = {};
+                  result[key] = value[key];
+                  results.push(result);
+                }
+              });
+            });
+          }
+          else{
+            results = content;
+          }
+          fulfill(results);
         });
       }
     }
+  });
+
+  it("could list other teams", function(done){
+    var promise = new Team(DB).list();
+    promise.then(function(result){
+      expect(result).toEqual([{'teamName' : 'exists'}]);
+    },function(error){
+      expect(true).toBe(false);
+    }).finally(done);
   });
 
   it("is not authenticated", function(){

@@ -7,6 +7,17 @@ var Team = function(db) {
   this.db = db || new DB('mongodb://login:password@127.0.0.1:27017/sthack');
 };
 
+Team.prototype.list = function(){
+  db = this.db;
+  return new Promise(function(fulfill, reject){
+    db.find('teams', {}, {'teamName' : 1, '_id' : 0}).then(function(result){
+      fulfill(result);
+    }, function(error){
+      reject(false);
+    });
+  });
+}
+
 Team.prototype.isAuthenticated = function(session){
   return session.authenticated;
 }
