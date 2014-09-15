@@ -15,7 +15,7 @@ Team.prototype.areLoginsValid = function(teamName, password){
   db = this.db;
   return new Promise(function(fulfill, reject){
     hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-    db.find({'teamName' : teamName, 'password' : hashedPassword}).then(function(result){
+    db.find('teams', {'teamName' : teamName, 'password' : hashedPassword}).then(function(result){
       if(result.length==0){
         fulfill(false);
       }

@@ -10,11 +10,18 @@ var app = express();
 var https = require('https');
 var server = require('http').createServer(app)
 var io = require('socket.io');
-var device  = require('express-device');
+var device = require('express-device');
 var fs = require('fs');
+
+// Sthack prototypes
+var Team = require('./src/Team').Team;
+var DB = require('./src/DB').DB;
 
 var runningPortNumber = process.env.PORT;
 var adminName = process.env.ADMIN_NAME;
+var DBConnectionString = process.env.DB_CONNECTION_STRING;
+var sessionSecret = process.env.SESSION_SECRET;
+var sessionKey = process.env.SESSION_KEY;
 
 var sslOptions = {
   key: fs.readFileSync(process.env.KEY_PATH),
@@ -37,29 +44,79 @@ app.configure(function(){
 	//Prepare session
 	app.sessionStore = new express.session.MemoryStore({reapInterval: 60000 * 10 });
 	app.use(express.session({
-	  'secret': process.env.SESSION_SECRET,
-  	'store':  app.sessionStore
+	  'secret': sessionSecret,
+	  'key'   : sessionKey,
+  	'store' : app.sessionStore
 		})
 	);
 });
 
 
-// logs every request
-app.use(function(req, res, next){
-	// output every request in the array
-	console.log({method:req.method, url: req.url, device: req.device});
+var db = new DB(DBConnectionString);
+var team = new Team(db);
 
-	// goes onto the next function in line
-	next();
+// Test authentication
+app.use(function(req, res, next){
+	if (team.isAuthenticated(req.session) || (req.method == 'POST' && 
+																						req.body.teamName && 
+																						req.body.password)){
+  	next();
+	}
+  else{
+  	db.find('teams').then(function(result){
+      res.render('not_logged', {
+      	teams_list: result
+  		});
+    },function(error){
+      console.log(error);
+    });
+  }
 });
 
 app.get("/", function(req, res){
-	res.render('index', {});
+	res.render('index',{});
+});
+
+
+
+app.post("/", function(req, res){
+	team.areLoginsValid(req.body.teamName, req.body.password).then(function(result){
+		if(result){
+			req.session.authenticated = req.body.teamName;
+			//req.session.sid = req.sessionID;
+		}
+		res.redirect('/');
+	}, function(error){
+		console.log(error);
+	});
 });
 
 appSSL = https.createServer(sslOptions, app).listen(runningPortNumber);
 
-var socketIO = io.listen(appSSL, { log: false });
+var socketIO = io.listen(appSSL, { log: true });
+
+socketIO.set('authorization', function (handshakeData, callback) {
+	console.log(handshakeData.headers.cookie);
+	console.log(connect.utils.parseSignedCookies(cookie.parse(handshakeData.headers.cookie)['express.sid'], sessionSecret));
+  if(handshakeData.headers.cookie) {
+    callback(null, false);
+  }
+  else {
+  	console.log(handshakeData.cookie);
+    // handshakeData.cookie = cookie.parse(handshakeData.headers.cookie);
+    // handshakeData.sessionID = connect.utils.parseSignedCookie(handshakeData.cookie[sessionKey], sessionSecret);
+    // if (appSSL.sessionStore.sessions[handshakeData.sessionID]){
+    //   var mySession = JSON.parse(app.sessionStore.sessions[handshakeData.sessionID]);
+    //   if(typeof mySession.logged != 'undefined'){
+    //     handshakeData.team_name = mySession.logged.login;
+         callback(null,true);
+    //   }
+    //   else
+    //     callback(null,false);
+    // }
+  }
+});
+
 
 socketIO.on('connection', function (socket) {
 

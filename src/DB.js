@@ -1,9 +1,9 @@
 var Promise = require('bluebird');
 var MongoClient = require('mongodb').MongoClient;
 
-var DB = function() {
+var DB = function(connectionString) {
   connect = function(requestFctn){
-    MongoClient.connect('mongodb://login:password@127.0.0.1:27017/sthack', function(err, db) {
+    MongoClient.connect(connectionString, function(err, db) {
       if(err) throw err;
       requestFctn(db,function(){
         db.close();
@@ -12,10 +12,10 @@ var DB = function() {
   };
 };
 
-DB.prototype.find = function(request){
+DB.prototype.find = function(collection, request){
   return new Promise(function(fulfill, reject){
     connect(function(db, callback){
-      var teams = db.collection('teams');
+      var teams = db.collection(collection);
       teams.find(request).toArray(function(err, results){
         callback();
         fulfill(results);

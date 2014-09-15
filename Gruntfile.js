@@ -8,6 +8,9 @@ var RUNNING_CERT_PATH = 'server.crt';
 var RUNNING_KEY_PATH = 'server.key';
 var RUNNING_ADMIN_NAME = 'admin';
 var RUNNING_SESSION_SECRET = 'change_me';
+var RUNNING_DB_CONNECTION_STRING = 'mongodb://login:password@127.0.0.1:27017/sthack';
+var RUNNING_SESSION_KEY = 'sthackSession';
+var RUNNING_ADMIN_PATH = 'admin_poney';
 var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
 var mountFolder = function (connect, dir) {
   return connect.static(require('path').resolve(dir));
@@ -183,11 +186,14 @@ module.exports = function (grunt) {
           //delayTime: 1,
           legacyWatch: true,
           env: {
-            PORT: RUNNING_PORT,
-            CERT_PATH: RUNNING_CERT_PATH,
-            KEY_PATH: RUNNING_KEY_PATH,
-            ADMIN_NAME: RUNNING_ADMIN_NAME,
-            SESSION_SECRET: RUNNING_SESSION_SECRET
+            PORT                : RUNNING_PORT,
+            CERT_PATH           : RUNNING_CERT_PATH,
+            KEY_PATH            : RUNNING_KEY_PATH,
+            ADMIN_NAME          : RUNNING_ADMIN_NAME,
+            SESSION_SECRET      : RUNNING_SESSION_SECRET,
+            DB_CONNECTION_STRING: RUNNING_DB_CONNECTION_STRING,
+            SESSION_KEY         : RUNNING_SESSION_KEY,
+            ADMIN_PATH          : RUNNING_ADMIN_PATH
           },
           cwd: __dirname
         }

@@ -19,7 +19,7 @@ describe("Not authenticated team", function() {
                 } 
               }
     DB = {
-      find: function(request){
+      find: function(collection, request){
         return new Promise(function(fulfill, reject){
           fulfill(_.where([{'teamName' : 'exists',
                             'password' : crypto.createHash('sha256').update('exists').digest('hex')
@@ -38,7 +38,7 @@ describe("Not authenticated team", function() {
     promise.then(function(result){
       expect(result).toBeFalsy();
     },function(error){
-      expect("Error: " + error).toBe(false);
+      expect(true).toBe(false);
     }).finally(done);
   });
 
@@ -47,7 +47,7 @@ describe("Not authenticated team", function() {
     promise.then(function(result){
       expect(result).toBeTruthy();
     },function(error){
-      expect("Error: " + error).toBe(false);
+      expect(true).toBe(false);
     }).finally(done);
   });
 });

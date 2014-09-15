@@ -1,83 +1,59 @@
 <!DOCTYPE html>
-<html class="no-js">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Sthack Interface</title>
-        <meta name="description" content="The NodeJS interface for St'Hack CTF game. More information on the event : https://www.sthack.fr/">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>St'hack</title>
+  <link href="/css/reset.css" rel="stylesheet">
+  <link href="/css/style_interface.css" rel="stylesheet"/>
+  <link href="/css/style_box.css" rel="stylesheet"/>
+  <link href="/icone.ico" type="image/x-icon" rel="shortcut icon">
+  <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="/js/sthack.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+      <div id="bandeau_haut">
+          <img id="logo_sthack" src="/img/logo_sthack.png" />
+          <ul>
+              <li id="liste"><a href="/"><div style="height:30px; width:110%;"><p style="padding:8px 11px;">Control Interface</p></div></a></li>
+              <li id="liste1"><a href="scoreboard.html"><div style="height:30px; width:102%;"><p style="padding:8px 11px;">Scoreboard</p></div></a></li>
+              <li id="logo_team"></li>
+              <li id="nom_team"></li>
+              <li id="score_team"></li>
+              <li id="bt_team"></li>
+          </ul>
+      </div>  
+          <div id="div_console">
+          </div>
+          <div id="div_bouton">
+              <div id="bandeau_bouton">
+                  <p id="title_bandeau">Control Interface</p>
+              </div>
+              <div id="challenges">
+                    
+                    <div id="final_bouton"></div>
+              </div>
+          </div>
+      
 
-        <link rel="stylesheet" href="css/core.css">
+<div id="popup" class="popup_block">
+  <div id="bandeau_epreuve">
+    <img src="/img/logo_sthack.png" id="image_bandeau_epreuve" />
+      <p id="title_bandeau_epreuve"></p><p id="type_bandeau_epreuve"></p>
+      <p id="pts_bandeau_epreuve"></p>
+  </div>
+  <div id="conteneur_epreuve">
+  <div id="texte_conteneur_epreuve">
+  </div>
+  <div id="right_pop">
+    <span id="title_popup">Flag</span><span id="bad_flag" style="display:none">Wrong Flag</span>
+    <input type="hidden" value="" id="input_save_id">
+    <input type="password" id="input_conteneur_epreuve">
+    <button id="bouton_submit_flag" class="enfonce">PWN!</button><br/>
+    <button id="bouton_cancel_flag" class="enfonce">Cancel</button>
+  </div>
+  </div>
+</div>
 
-        <style>
-
-        	input:focus,
-			select:focus,
-			textarea:focus,
-			button:focus {
-			    outline: none !important;
-			}
-
-        	#allPosts {
-			    resize: none;
-			    font-size: 12px;
-			    border-radius: 5px;
-			    border: #ccc solid 1px;
-			    line-height: 14px;
-			    height:100px;
-			    overflow: scroll;
-			}
-
-			p{
-		    	margin:0;
-		    	padding:0;
-		    }
-
-		</style>
-    </head>
-    <body>
-
-	<!--[if lt IE 8]>
-		<p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-	<![endif]-->
-
-    <div class="container">
-    	<div class="jumbotron">
-        	<h1>sthack-interface-neo</h1>
-       		<p>The NodeJS interface for St'Hack CTF game. More information on the event : https://www.sthack.fr/</p>
-       		<div class="row">
-       			<div class="col-md-4 col-sm-6 col-xs-6">
-       				<h3>All Chatter<button id="clearAllPosts" type="button" class="btn btn-danger btn-xs pull-right">clear</button></h3>
-       				<div id="allPosts" class="form-control"></div>
-				    <div class="input-group">
-						<input id="blast" type="text" class="form-control" placeholder="send something to everyone">
-						<span class="input-group-btn">
-							<button id="send" class="btn btn-success" type="button">Send</button>
-						</span>
-				    </div><!-- /input-group -->
-       			</div>
-       		</div>
-		</div>
-	</div>
-    
-    <!-- jQuery --> 
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-	<script>window.jQuery || document.write('<script src="public/bower_components/jQuery/jquery.min.js"><\/script>')</script>
-
-    <!-- socket.io -->
-    <script src="/socket.io/socket.io.js"></script>
-
-	<!-- APP CODE -->
-	<script src="js/app.min.js"></script>
-
-	<!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
-    <script>
-        (function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=
-        function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;
-        e=o.createElement(i);r=o.getElementsByTagName(i)[0];
-        e.src='//www.google-analytics.com/analytics.js';
-        r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));
-        ga('create','UA-XXXXX-X');ga('send','pageview');
-    </script>
-    </body>
+</body>
 </html>
