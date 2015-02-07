@@ -24,4 +24,28 @@ DB.prototype.find = function(collection, request, fields){
   });
 };
 
+DB.prototype.insert = function(collection, object){
+  return new Promise(function(fulfill, reject){
+    connect(function(db, callback){
+      var coll = db.collection(collection);
+      coll.insert(object, function(err, results){
+        callback();
+        fulfill(results);
+      });
+    });
+  });
+};
+
+DB.prototype.update = function(collection, object, update){
+  return new Promise(function(fulfill, reject){
+    connect(function(db, callback){
+      var coll = db.collection(collection);
+      coll.update(object, {'$set': update}, function(err, results){
+        callback();
+        fulfill(results);
+      });
+    });
+  });
+};
+
 exports.DB = DB;

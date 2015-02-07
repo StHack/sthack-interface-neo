@@ -1,12 +1,13 @@
 // Generated on 2014-09-10 using generator-socketio 0.0.3
 'use strict';
 var moment = require('moment');
- 
+
 var LIVERELOAD_PORT = 35729;
 var RUNNING_PORT = 4443; // <- if you change this, you need to change in public/js/app.js and recompile
 var RUNNING_CERT_PATH = 'server.crt';
 var RUNNING_KEY_PATH = 'server.key';
 var RUNNING_ADMIN_NAME = 'admin';
+var RUNNING_CLOSED_TASK_DELAY = 1000 * 60 * 10;
 var RUNNING_SESSION_SECRET = 'change_me';
 var RUNNING_DB_CONNECTION_STRING = 'mongodb://login:password@127.0.0.1:27017/sthack';
 var RUNNING_SESSION_KEY = 'sthackSession';
@@ -15,7 +16,7 @@ var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
 var mountFolder = function (connect, dir) {
   return connect.static(require('path').resolve(dir));
 };
- 
+
 module.exports = function (grunt) {
   // load all grunt tasks
   require('matchdep').filterDev('grunt-*').forEach(grunt.loadNpmTasks);
@@ -43,7 +44,7 @@ module.exports = function (grunt) {
         }
       }
     },
-    
+
     sass: {
       dist: {
         options: {
@@ -77,7 +78,7 @@ module.exports = function (grunt) {
       },
     },
 
-    //this is currently turned off, since jquery KILLS it 
+    //this is currently turned off, since jquery KILLS it
     jshint: {
       options: {
         curly: true,
@@ -90,7 +91,7 @@ module.exports = function (grunt) {
       },
       files:{
         src:['public/js/concat.js']
-      } 
+      }
     },
 
     uglify: {
@@ -190,6 +191,7 @@ module.exports = function (grunt) {
             CERT_PATH           : RUNNING_CERT_PATH,
             KEY_PATH            : RUNNING_KEY_PATH,
             ADMIN_NAME          : RUNNING_ADMIN_NAME,
+            CLOSED_TASK_DELAY   : RUNNING_CLOSED_TASK_DELAY,
             SESSION_SECRET      : RUNNING_SESSION_SECRET,
             DB_CONNECTION_STRING: RUNNING_DB_CONNECTION_STRING,
             SESSION_KEY         : RUNNING_SESSION_KEY,
@@ -234,9 +236,9 @@ module.exports = function (grunt) {
     }
 
   });
- 
+
   //grunt.registerTask('server', ['build', 'connect:livereload', 'open', 'watch']);
- 
+
   grunt.registerTask('build', ['cssmin', 'concat', 'uglify']);
 
   grunt.registerTask('test', ['jasmine_node']);
