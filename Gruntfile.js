@@ -7,7 +7,7 @@ var RUNNING_PORT = 4443; // <- if you change this, you need to change in public/
 var RUNNING_CERT_PATH = 'server.crt';
 var RUNNING_KEY_PATH = 'server.key';
 var RUNNING_ADMIN_NAME = 'admin';
-var RUNNING_CLOSED_TASK_DELAY = 1000 * 60 * 10;
+var RUNNING_CLOSED_TASK_DELAY = 0;
 var RUNNING_SESSION_SECRET = 'change_me';
 var RUNNING_DB_CONNECTION_STRING = 'mongodb://login:password@127.0.0.1:27017/sthack';
 var RUNNING_SESSION_KEY = 'sthackSession';
@@ -137,7 +137,7 @@ module.exports = function (grunt) {
             files: [
                 'public/js/**/*.js'
             ],
-            tasks:['build']
+            //tasks:['build']
         },
         css: {
             files: [
@@ -146,7 +146,7 @@ module.exports = function (grunt) {
         },
         less: {
             files: ['public/bower_components/bootstrap/less/**/*.less'],
-            tasks: ['build']
+            //tasks: ['build']
         },
         express: {
             files:  [ 'server.js', '!**/node_modules/**', '!Gruntfile.js', 'src/**/*.js' ],
@@ -243,8 +243,8 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test', ['jasmine_node']);
 
-  grunt.registerTask('launch', ['wait', 'open']);
+  grunt.registerTask('launch', ['wait']);
 
-  grunt.registerTask('default', ['build', 'concurrent']);
+  grunt.registerTask('default', ['concurrent']);
 
 };

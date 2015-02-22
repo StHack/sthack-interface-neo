@@ -1,5 +1,3 @@
-url_to_connect = 'https://127.0.0.1:4443';
-
 $(document).ready(function () {
 
 /* CANVAS STUFF */
@@ -389,7 +387,7 @@ $.fn.teletype = function(opts){
     });
     if(typeof settings.prepend_text != "undefined"){
     setTimeout(function(){
-          $("#div_console").prepend(settings.prepend_text);
+          $("#console").prepend(settings.prepend_text);
           setTimeout(function(){
             $('.new_line').first().append('<span id="blink_cursor">&nbsp;</span>');
             $("#blink_cursor").trigger("blinking_event");
@@ -401,16 +399,16 @@ $.fn.teletype = function(opts){
 
 };
 setTimeout(function(){
-$("#div_console").prepend('<p class="new_line">$ </p>');
+$("#console").prepend('<p class="new_line">$ </p>');
 $('.new_line').first().teletype({animDelay: 50, text: 'spc PouneyTeam@st\'hack'});
 setTimeout(function(){
-  $("#div_console").prepend('<p class="new_line">PouneyTeam@st\'hack\'s password:</p>');
+  $("#console").prepend('<p class="new_line">PouneyTeam@st\'hack\'s password:</p>');
   setTimeout(function(){
     $('.new_line').first().teletype({animDelay: 100, text: '**********'});
     setTimeout(function(){
-      $("#div_console").prepend('<p class="new_line">Welcome on Sup3r Pouney Communicator</p>');
+      $("#console").prepend('<p class="new_line">Welcome on Sup3r Pouney Communicator</p>');
         setTimeout(function(){
-          $("#div_console").prepend('<p class="new_line">PouneyTeam@st\'hack$ </p>');
+          $("#console").prepend('<p class="new_line">PouneyTeam@st\'hack$ </p>');
           setTimeout(function(){
                 $('.new_line').first().append('<span id="blink_cursor">&nbsp;</span>');
                 $("#blink_cursor").trigger("blinking_event");
@@ -428,8 +426,8 @@ setTimeout(function(){
 
 /*SOCKET IO STUFF*/
 
-      sock = io.connect(url_to_connect);
-      sock.on('userchange', function (data) {
+var sock = io.connect(socketIOUrl);
+sock.on('userchange', function (data) {
       	if(data.nbConnecte>1)
         	$("#nbConnecte").html(data.nbConnecte+" connectés");
     	else

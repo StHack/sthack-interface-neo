@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sthack</title>
+  <link href="/css/reset.css" rel="stylesheet">
+  <link href="/icone.ico" type="image/x-icon" rel="shortcut icon">
+  <link href="/css/style.css" rel="stylesheet">
+  <script src="/bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="/bower_components/jquery-ui/jquery-ui.min.js"></script>
+  <%if (typeof auth !== 'undefined'){ %>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      var socketIOUrl = '<%= socketIOUrl %>';
+      var sock = io.connect(socketIOUrl);
+    </script>
+    <script src="/js/console.js"></script>
+    <% if (typeof admin !== 'undefined'){ %>
+      <script src="/js/admin.js"></script>
+    <% } else {%>
+      <script src="/js/button.js"></script>
+      <script src="/js/client.js"></script>
+    <% } %>
+  <% } %>
+
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+
+</head>
+
+<body>
+<div id="navbar">
+  <div class="menu"><img src="/img/logo_sthack.png" /></div>
+  <% if(current === 'index'){ %>
+    <a class="menu btn selected" href="/">Control interface</a>
+  <% } else { %>
+    <a class="menu btn" href="/">Control interface</a>
+  <% } %>
+  <% if(current === 'scoreboard'){ %>
+    <a class="menu btn selected" href="/scoreboard">Scoreboard</a>
+  <% } else { %>
+    <a class="menu btn" href="/scoreboard">Scoreboard</a>
+  <% } %>
+  <% if(typeof auth === 'undefined'){ %>
+    <% if(registrationOpen) { %>
+      <% if(current === 'register'){ %>
+        <a class="menu btn selected" href="/register">Register</a>
+      <% } else { %>
+        <a class="menu btn" href="/register">Register</a>
+      <% } %>
+    <% } %>
+</div>
+  <% } else { %>
+<div class="menu right"><span id="team"></span> - <span id="score"></span></div>
+</div>
+<div id="console">
+</div>
+<% } %>

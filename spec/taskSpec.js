@@ -11,28 +11,33 @@ var DB = {
             {'title': 'First task',
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
-             'type': 'Stegano'},
+             'type': 'Stegano',
+             'difficulty': 'easy'},
             {'title': 'Second task',
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
              'type': 'Stegano',
+             'difficulty': 'medium',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792226000}]},
             {'title': 'Third task',
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
              'type': 'Stegano',
+             'difficulty': 'hard',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792225833},
                         {'teamName' : 'myTeam', 'timestamp' : 1410792226000}]},
             {'title': 'Fourth task',
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
              'type': 'Stegano',
+             'difficulty': 'medium',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792225833},
                         {'teamName' : 'myTeam', 'timestamp' : 1410792224000}]},
             {'title': 'Fifth task',
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
              'type': 'Stegano',
+             'difficulty': 'medium',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : (new Date()).getTime() + 1000 * 60 * 5},
                         {'teamName' : 'myTeam', 'timestamp' : 1410792224000}]},
           ];
@@ -40,11 +45,12 @@ var DB = {
           if(_.size(request)){
             content = _.where(content, request);
           }
+          delete fields._id;
           if(_.size(fields)){
             _.filter(content, function(value){
               results.push({});
               _.forEach(Object.keys(fields), function(key){
-                if(fields[key] == 1 && value[key]){
+                if(fields[key] === 1 && value[key]){
                   results.pop();
                   var result = {};
                   result[key] = value[key];
@@ -83,7 +89,7 @@ describe("Tasks", function() {
     config = {delay: 1000 * 60 * 10};
   });
 
-  it("could be listed", function(done){
+  it("can be listed", function(done){
     var promise = new Task(DB, config).list();
     promise.then(function(result){
       expect(result).toEqual([{'title': 'First task'},
@@ -97,7 +103,41 @@ describe("Tasks", function() {
     }).finally(done);
   });
 
-  it("could be created if doesn't exist", function(done){
+  it("can be get", function(done){
+    var promise = new Task(DB, config).getTasks('myTeam', 3);
+    promise.then(function(tasks){
+      expect(tasks).toEqual([ { title: 'First task',
+                                type: 'Stegano',
+                                difficulty: 'easy',
+                                score: 150,
+                                state: 0 },
+                              { title: 'Second task',
+                                type: 'Stegano',
+                                difficulty: 'medium',
+                                score: 200,
+                                state: 1 },
+                              { title: 'Third task',
+                                type: 'Stegano',
+                                difficulty: 'hard',
+                                score: 150,
+                                state: 2 },
+                              { title: 'Fourth task',
+                                type: 'Stegano',
+                                difficulty: 'medium',
+                                score: 100,
+                                state: 3 },
+                              { title: 'Fifth task',
+                                type: 'Stegano',
+                                difficulty: 'medium',
+                                score: 100,
+                                state: 3 }
+                            ]);
+    }, function(error){
+      expect(true).toBe(false);
+    }).finally(done);
+  });
+
+  it("can be created if doesn't exist", function(done){
     var promise = new Task(DB, config).addTask('Title', '<u>Description</u>', 'flag', 'stegano', 1, 'agix');
     promise.then(function(result){
       expect(result).toBeTruthy();
@@ -115,7 +155,7 @@ describe("Tasks", function() {
     }).finally(done);
   });
 
-  it("could be edited if it exists", function(done){
+  it("can be edited if it exists", function(done){
     var promise = new Task(DB, config).editTask('First task', '<u>Description</u>', 'flag', 'stegano', 1, 'agix');
     promise.then(function(result){
       expect(result).toBeTruthy();
@@ -142,45 +182,50 @@ describe("Tasks never solved", function() {
   });
 
   it("is 'never solved by anybody'", function(done){
-    var promise = new Task(DB, config).nobodySolved('First task');
-    promise.then(function(result){
-      expect(result).toBe(true);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('First task');
+    promise.then(function(task){
+      expect(taskDB.nobodySolved(task)).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is not 'solved by someone'", function(done){
-    var promise = new Task(DB, config).someoneSolved('First task');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('First task');
+    promise.then(function(task){
+      expect(taskDB.someoneSolved(task)).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is not 'solved by your team'", function(done){
-    var promise = new Task(DB, config).teamSolved('First task', 'myTeam');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('First task');
+    promise.then(function(task){
+      expect(taskDB.teamSolved(task, 'myTeam')).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is not 'solved by your team in first'", function(done){
-    var promise = new Task(DB, config).teamSolvedFirst('First task', 'myTeam');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('First task');
+    promise.then(function(task){
+      expect(taskDB.teamSolvedFirst(task, 'myTeam')).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is 'opened'", function(done){
-    var promise = new Task(DB, config).isOpen('First task');
-    promise.then(function(result){
-      expect(result).toBe(true);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('First task');
+    promise.then(function(task){
+      expect(taskDB.isOpen(task)).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -214,45 +259,50 @@ describe("Tasks solved by other team", function() {
   });
 
   it("is not 'never solved by anybody'", function(done){
-    var promise = new Task(DB, config).nobodySolved('Second task');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Second task');
+    promise.then(function(task){
+      expect(taskDB.nobodySolved(task)).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is 'solved by someone'", function(done){
-    var promise = new Task(DB, config).someoneSolved('Second task');
-    promise.then(function(result){
-      expect(result).toBe(true);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Second task');
+    promise.then(function(task){
+      expect(taskDB.someoneSolved(task)).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is not 'solved by your team'", function(done){
-    var promise = new Task(DB, config).teamSolved('Second task', 'myTeam');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Second task');
+    promise.then(function(task){
+      expect(taskDB.teamSolved(task, 'myTeam')).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is not 'solved by your team in first'", function(done){
-    var promise = new Task(DB, config).teamSolvedFirst('Second task', 'myTeam');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Second task');
+    promise.then(function(task){
+      expect(taskDB.teamSolvedFirst(task, 'myTeam')).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is 'opened'", function(done){
-    var promise = new Task(DB, config).isOpen('Second task');
-    promise.then(function(result){
-      expect(result).toBe(true);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Second task');
+    promise.then(function(task){
+      expect(taskDB.isOpen(task)).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -287,45 +337,50 @@ describe("Tasks solved by my team", function() {
   });
 
   it("is not 'never solved by anybody'", function(done){
-    var promise = new Task(DB, config).nobodySolved('Third task');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Third task');
+    promise.then(function(task){
+      expect(taskDB.nobodySolved(task)).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is 'solved by someone'", function(done){
-    var promise = new Task(DB, config).someoneSolved('Third task');
-    promise.then(function(result){
-      expect(result).toBe(true);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Third task');
+    promise.then(function(task){
+      expect(taskDB.someoneSolved(task)).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
-  it("is not 'solved by your team'", function(done){
-    var promise = new Task(DB, config).teamSolved('Third task', 'myTeam');
-    promise.then(function(result){
-      expect(result).toBe(true);
+  it("is 'solved by your team'", function(done){
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Third task');
+    promise.then(function(task){
+      expect(taskDB.teamSolved(task, 'myTeam')).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is not 'solved by your team in first'", function(done){
-    var promise = new Task(DB, config).teamSolvedFirst('Third task', 'myTeam');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Third task');
+    promise.then(function(task){
+      expect(taskDB.teamSolvedFirst(task, 'myTeam')).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is 'opened'", function(done){
-    var promise = new Task(DB, config).isOpen('Third task');
-    promise.then(function(result){
-      expect(result).toBe(true);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Third task');
+    promise.then(function(task){
+      expect(taskDB.isOpen(task)).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -359,45 +414,50 @@ describe("Tasks solved by my team first", function() {
   });
 
   it("is not 'never solved by anybody'", function(done){
-    var promise = new Task(DB, config).nobodySolved('Fourth task');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Fourth task');
+    promise.then(function(task){
+      expect(taskDB.nobodySolved(task)).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is 'solved by someone'", function(done){
-    var promise = new Task(DB, config).someoneSolved('Fourth task');
-    promise.then(function(result){
-      expect(result).toBe(true);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Fourth task');
+    promise.then(function(task){
+      expect(taskDB.someoneSolved(task)).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
-  it("is not 'solved by your team'", function(done){
-    var promise = new Task(DB, config).teamSolved('Fourth task', 'myTeam');
-    promise.then(function(result){
-      expect(result).toBe(true);
+  it("is 'solved by your team'", function(done){
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Fourth task');
+    promise.then(function(task){
+      expect(taskDB.teamSolved(task, 'myTeam')).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
-  it("is not 'solved by your team in first'", function(done){
-    var promise = new Task(DB, config).teamSolvedFirst('Fourth task', 'myTeam');
-    promise.then(function(result){
-      expect(result).toBe(true);
+  it("is 'solved by your team in first'", function(done){
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Fourth task');
+    promise.then(function(task){
+      expect(taskDB.teamSolvedFirst(task, 'myTeam')).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
   });
 
   it("is 'opened'", function(done){
-    var promise = new Task(DB, config).isOpen('Fourth task');
-    promise.then(function(result){
-      expect(result).toBe(true);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Fourth task');
+    promise.then(function(task){
+      expect(taskDB.isOpen(task)).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -431,9 +491,10 @@ describe("Tasks closed", function() {
   });
 
   it("is not 'opened'", function(done){
-    var promise = new Task(DB, config).isOpen('Fifth task');
-    promise.then(function(result){
-      expect(result).toBe(false);
+    var taskDB = new Task(DB, config);
+    var promise = taskDB.getTask('Fifth task');
+    promise.then(function(task){
+      expect(taskDB.isOpen(task)).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);

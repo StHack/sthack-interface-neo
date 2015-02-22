@@ -1,0 +1,158 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Sthack</title>
+  <!-- <link href="/css/reset.css" rel="stylesheet">
+  <link href="/icone.ico" type="image/x-icon" rel="shortcut icon">
+  <link href="/css/style.css" rel="stylesheet"> -->
+  <script src="public/bower_components/jquery/dist/jquery.min.js"></script>
+  <style>
+        canvas {
+            width: 200px;
+            height: 128px;
+        }
+        .buttonTask{
+    cursor: pointer;
+    display: inline-block;
+
+  -webkit-box-shadow:
+    0 4px 0 grey,
+    0 7px 10px rgba(0,0,0,.35);
+  -moz-box-shadow:
+    0 4px 0 grey,
+    0 7px 10px rgba(0,0,0,.35);
+  box-shadow:
+    0 4px 0 grey,
+    0 7px 10px rgba(0,0,0,.35);
+}
+
+.buttonTask:active {
+  -webkit-box-shadow:
+    0 0px 0 grey,
+    0 0px 0px rgba(0,0,0,.3);
+  -moz-box-shadow:
+    0 0px 0 grey,
+    0 0px 0px rgba(0,0,0,.3);
+  box-shadow:
+    0 0px 0 grey,
+    0 0px 0px rgba(0,0,0,.3);
+
+  -webkit-transform: translate(0, 4px);
+  -moz-transform: translate(0, 4px);
+  -o-transform: translate(0, 4px);
+  transform: translate(0, 4px);
+
+}
+    </style>
+</head>
+<body>
+<div id="challenges">
+</div>
+</body>
+</html>
+
+<script>
+String.prototype.checksum = function() {
+  var hash = 0, i, chr, len;
+  if (this.length == 0) return hash;
+  for (i = 0, len = this.length; i < len; i++) {
+    chr   = this.charCodeAt(i);
+    hash  = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  return hash.toString();
+};
+
+images = {};
+
+function loadImages(sources, callback) {
+  var loadedImages = 0;
+  var numImages = 0;
+  for(var src in sources) {
+    numImages++;
+  }
+  for(var src in sources) {
+    images[src] = new Image();
+    images[src].onload = function() {
+      if(++loadedImages >= numImages) {
+        callback();
+      }
+    };
+  images[src].src = 'img/'+sources[src];
+  }
+}
+
+$('body').delegate('#challenges', 'loadData', function(e, task){
+    var idTask = task.title.checksum();
+    var canvasTask = document.getElementById(idTask);
+    var ctx = canvasTask.getContext("2d");
+    ctx.save();
+    //ctx.fillRect(0,0,canvasTask.width,canvasTask.height);
+    ctx.drawImage(images.swordfish,0,0,canvasTask.width,canvasTask.height)
+    ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height)
+
+    ctx.textAlign = 'center';
+    ctx.font = '2em Verdana';
+    ctx.shadowColor = '#fff';
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+    ctx.fillText(task.title, canvasTask.width/2, canvasTask.height/2-30);
+
+    ctx.font = '1.5em Verdana';
+    ctx.fillText(task.type, canvasTask.width/2, canvasTask.height/2+40);
+
+    ctx.font = '2em Verdana';
+    ctx.fillText(task.score+' pts', canvasTask.width/2, canvasTask.height/2+5);
+    ctx.restore();
+});
+
+$('body').delegate('#challenges', 'click', function(e){
+    var canvasTask = e.target;
+    var ctx = canvasTask.getContext("2d");
+    var radius = 2;
+    ctx.save();
+    var shutdown = setInterval(function(){
+        ctx.arc(canvasTask.width/2, canvasTask.height/2, radius, 0, 2 * Math.PI, false);
+        ctx.fillStyle = '#fff';
+        ctx.fill();
+        ctx.drawImage(images.tv, 0, 0, canvasTask.width, canvasTask.height);
+        radius += 70
+        if(radius>canvasTask.width/2+50){
+            clearInterval(shutdown);
+            var shutdown2 = setInterval(function(){
+                ctx.fillStyle = '#000';
+                ctx.fillRect(0,0,canvasTask.width,canvasTask.height);
+
+                ctx.beginPath();
+                ctx.fillStyle = '#fff';
+                ctx.arc(canvasTask.width/2, canvasTask.height/2, radius, 0, 2 * Math.PI, false);
+                ctx.fill();
+                ctx.stroke();
+                ctx.drawImage(images.tv, 0, 0, canvasTask.width, canvasTask.height);
+                radius -= 70;
+                if(radius < 0){
+                    clearInterval(shutdown2);
+                }
+            }, 50);
+        }
+    }, 50);
+    ctx.restore();
+});
+
+    var imgs = {
+        tv: 'tv.png',
+        swordfish: 'swordfish.jpg',
+    };
+
+    loadImages(imgs, function(){
+        var task = {'title': 'Mofo challenge', 'state': 0, 'difficulty': 'easy', 'type': 'Stegano', 'score': 100};
+        $('#challenges').html('');
+        var canvas = $('<canvas></canvas>')
+        canvas.attr('id', task.title.checksum())
+        canvas.addClass('buttonTask');
+        $('#challenges').append(canvas);
+        $('#challenges').trigger('loadData', task);
+    });
+</script>

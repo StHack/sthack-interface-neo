@@ -48,4 +48,16 @@ DB.prototype.update = function(collection, object, update){
   });
 };
 
+DB.prototype.remove = function(collection, object){
+  return new Promise(function(fulfill, reject){
+    connect(function(db, callback){
+      var coll = db.collection(collection);
+      coll.remove(object, {}, function(err, results){
+        callback();
+        fulfill(results);
+      });
+    });
+  });
+};
+
 exports.DB = DB;
