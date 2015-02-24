@@ -33,3 +33,6 @@ bower_components
 
 # Private test
 test.js
+
+#Config
+*.sh
