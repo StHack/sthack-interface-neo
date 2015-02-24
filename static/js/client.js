@@ -10,7 +10,7 @@ loadImages(function(){
     sock.on('giveTasks', function(tasks){
         $('#challenges').html('');
         tasks.forEach(function(task){
-            var canvas = $('<canvas></canvas>')
+            var canvas = $('<canvas></canvas>');
             canvas.text(task.title);
             canvas.attr('id', task.title.checksum());
             canvas.addClass('buttonTask');

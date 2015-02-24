@@ -4,18 +4,33 @@
 //
 **************************************/
 
-// express magic
 var express           = require('express');
-var app               = express();
+var session           = require('express-session');
 var https             = require('https');
-var server            = require('http').createServer(app)
+var http              = require('http');
 var io                = require('socket.io');
 var device            = require('express-device');
 var fs                = require('fs');
-var cookie            = require('cookie');
+var cookieParse       = require('cookie');
 var connect           = require('express/node_modules/connect')
-var parseSignedCookie = connect.utils.parseSignedCookie
+var morgan            = require('morgan');
+if(process.env.NODE_ENV==='production'){
+  var cluster           = require('cluster');
+  var numCPUs           = require('os').cpus().length
+  var redis             = require('redis');
+  var RedisStore        = require('connect-redis')(session);
+  var IoRedisStore      = require('socket.io/lib/stores/redis');
+  var redisClient       = redis.createClient();
+  var redisPub          = redis.createClient();
+  var redisSub          = redis.createClient();
+  if (cluster.isMaster) {
+    for (var i = 0; i < numCPUs; i++) {
+      cluster.fork();
+    }
+  }
+}
 
+if(typeof cluster === 'undefined' || cluster.isWorker){
 // Sthack prototypes
 var Team = require('./src/Team').Team;
 var Task = require('./src/Task').Task;
@@ -28,17 +43,42 @@ var closedTaskDelay    = process.env.CLOSED_TASK_DELAY;
 var sessionSecret      = process.env.SESSION_SECRET;
 var sessionKey         = process.env.SESSION_KEY;
 var adminPath          = process.env.ADMIN_PATH;
+var logPath            = process.env.LOG_PATH;
+
+if(process.env.NODE_ENV==='production'){
+  var ctfOpen = true;
+  var registrationOpen = true;
+}
+else{
+  var ctfOpen = true;
+  var registrationOpen = true;
+}
 
 var sslOptions = {
   key: fs.readFileSync(process.env.KEY_PATH),
   cert: fs.readFileSync(process.env.CERT_PATH)
 };
 
+var app               = express();
+var server            = http.createServer(app)
+var parseSignedCookie = connect.utils.parseSignedCookie;
+
+app.configure('production', function(){
+  var access = fs.createWriteStream(logPath + '/node.access.log', { flags: 'a' });
+  app.use(morgan('combined', {stream: access}));
+  app.sessionStore = new RedisStore({
+    client: redisClient
+  });
+});
+
+app.configure('development', function(){
+  app.use(morgan('dev'));
+  app.sessionStore = new express.session.MemoryStore({reapInterval: 60000 * 10 });
+});
+
 app.configure(function(){
-  // I need to access everything in '/public' directly
   app.use(express.static(__dirname + '/public'));
 
-  //set the view engine
   app.set('view engine', 'ejs');
   app.set('views', __dirname +'/views');
 
@@ -47,18 +87,15 @@ app.configure(function(){
   app.use(express.urlencoded());
   app.use(device.capture());
 
-  //Prepare session
-  app.sessionStore = new express.session.MemoryStore({reapInterval: 60000 * 10 });
-  app.use(express.session({
+  app.use(session({
     'secret': sessionSecret,
     'key'   : sessionKey,
-    'store' : app.sessionStore
+    'store' : app.sessionStore,
+    'saveUninitialized': true,
+    'resave' : true
     })
   );
 });
-
-var ctfOpen = true;
-var registrationOpen = true;
 
 var db = new DB(DBConnectionString);
 var teamDB = new Team(db);
@@ -88,9 +125,38 @@ app.use(function(req, res, next){
 });
 /* -------- */
 
-appSSL = https.createServer(sslOptions, app).listen(runningPortNumber);
+var appSSL = https.createServer(sslOptions, app).listen(runningPortNumber);
+var socketIO;
 
-var socketIO = io.listen(appSSL, { log: true });
+if(process.env.NODE_ENV==='production'){
+  socketIO = io.listen(appSSL, { log: false });
+  socketIO.set('store',
+    new IoRedisStore({
+      redisPub: redisPub,
+      redisSub: redisSub,
+      redisClient: redisClient
+    })
+  );
+  redisSub.subscribe('adminAction')
+  redisSub.on('message', function(channel, message){
+    if(message === 'openCTF'){
+      ctfOpen = true;
+    }
+    else if(message === 'closeCTF'){
+      ctfOpen = false;
+    }
+    else if(message === 'closeRegistration'){
+      registrationOpen = false;
+    }
+    else if(message === 'openRegistration'){
+      registrationOpen = true;
+    }
+  });
+}
+else{
+  socketIO = io.listen(appSSL, { log: true });
+}
+
 
 app.get("/", function(req, res){
   if(req.session.authenticated){
@@ -178,21 +244,59 @@ app.post("/", function(req, res){
   }
 });
 
+app.configure('production', function(){
+  app.use(function(err, req, res, next){
+    res.status(500);
+    res.render('error', {current: 'error', registrationOpen: registrationOpen});
+  });
+});
 
-socketIO.set('authorization', function (handshakeData, callback) {
-  var auth = false;
-  if(handshakeData.headers.cookie){
-    handshakeData.cookie = cookie.parse(handshakeData.headers.cookie);
-    handshakeData.sessionID = parseSignedCookie(handshakeData.cookie[sessionKey], sessionSecret);
-    if (app.sessionStore.sessions[handshakeData.sessionID]){
-      var session = JSON.parse(app.sessionStore.sessions[handshakeData.sessionID]);
-      if(session.authenticated){
-        handshakeData.authenticated = session.authenticated;
-        auth = true;
+app.configure('development', function(){
+  app.use(express.errorHandler());
+});
+
+function sessionAuthenticated(handshake, callback){
+  if(handshake.headers.cookie){
+    var cookie = cookieParse.parse(handshake.headers.cookie);
+    var sessionID = parseSignedCookie(cookie[sessionKey], sessionSecret);
+    if(process.env.NODE_ENV==='production'){
+      redisClient.get(app.sessionStore.prefix+sessionID, function(err, content){
+        var session = JSON.parse(content);
+        if(session.authenticated){
+          callback(session.authenticated);
+        }
+        else{
+          callback(null);
+        }
+      });
+    }
+    else{
+      if(app.sessionStore.sessions[sessionID]){
+        var session = JSON.parse(app.sessionStore.sessions[sessionID]);
+        if(session.authenticated){
+          callback(session.authenticated);
+        }
+        else{
+          callback(null);
+        }
       }
     }
   }
-  callback(null, auth);
+  else{
+    callback(null);
+  }
+}
+
+socketIO.set('authorization', function (handshakeData, callback) {
+  sessionAuthenticated(handshakeData, function(auth){
+    if(auth){
+      handshakeData.authenticated = auth;
+      callback(null, true);
+    }
+    else{
+      callback(null, false);
+    }
+  });
 });
 
 
@@ -211,7 +315,7 @@ socketIO.on('connection', function (socket) {
         socket.emit('giveScore', {name: socket.handshake.authenticated, score: score});
       }, function(error){
         socket.emit('error', error);
-      })
+      });
     }, function(error){
       socket.emit('error', error);
     });
@@ -273,18 +377,30 @@ socketIO.on('connection', function (socket) {
   });
 
   socket.on('adminCloseRegistration', function(data){
+    if(process.env.NODE_ENV==='production'){
+      redisPub.publish('adminAction', 'closeRegistration');
+    }
     registrationOpen = false;
   });
 
   socket.on('adminOpenRegistration', function(data){
+    if(process.env.NODE_ENV==='production'){
+      redisPub.publish('adminAction', 'openRegistration');
+    }
     registrationOpen = true;
   });
 
   socket.on('adminCloseCTF', function(data){
+    if(process.env.NODE_ENV==='production'){
+      redisPub.publish('adminAction', 'closeCTF');
+    }
     ctfOpen = false;
   });
 
   socket.on('adminOpenCTF', function(data){
+    if(process.env.NODE_ENV==='production'){
+      redisPub.publish('adminAction', 'openCTF');
+    }
     ctfOpen = true;
   });
 
@@ -382,3 +498,4 @@ socketIO.on('connection', function (socket) {
 
 });
 
+}

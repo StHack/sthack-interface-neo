@@ -1,20 +1,7 @@
 $(document).ready(function () {
     var sock = io.connect(socketIOUrl);
-//     $("#message").keyup(function(){
-//         sock.emit('admin_message',{message:$("#message").val(),submit:0});
-//     });
-
-//     $("#send").submit(function(){
-//         sock.emit('admin_message',{message:$("#message").val(),submit:1});
-//         $("#message").val('');
-//         return false;
-//     });
-
-// $("#btn_off").click(function(){
-// 	sock.emit('admin_off');
-// });
     $("#closeCTF").click(function(){
-    	sock.emit('adminCloseCTF');
+        sock.emit('adminCloseCTF');
     });
 
     $("#openCTF").click(function(){
@@ -29,9 +16,6 @@ $(document).ready(function () {
         sock.emit('adminOpenRegistration');
     });
 
-// $("#btn_refresh").click(function(){
-// 	sock.emit('admin_refresh');
-// });
     $('#teams').change(function(){
         if($(this).val()===''){
             $('#addTeam').css('display', 'inline');

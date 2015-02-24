@@ -12,6 +12,7 @@ var RUNNING_SESSION_SECRET = 'change_me';
 var RUNNING_DB_CONNECTION_STRING = 'mongodb://login:password@127.0.0.1:27017/sthack';
 var RUNNING_SESSION_KEY = 'sthackSession';
 var RUNNING_ADMIN_PATH = '/admin_poney';
+var RUNNING_LOG_PATH = '/tmp/';
 var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
 var mountFolder = function (connect, dir) {
   return connect.static(require('path').resolve(dir));
@@ -24,58 +25,12 @@ module.exports = function (grunt) {
   grunt.initConfig({
 
     cssmin: {
-      combine: {
+      target: {
         files: {
-          'public/css/core.css': 'public/bower_components/bootstrap.css/css/bootstrap.css'
+          'public/css/style.min.css': 'static/css/style.css',
+          'public/css/reset.min.css': 'static/css/reset.css'
         }
       }
-    },
-
-    less: {
-      options: {
-        //report:'gzip'
-      },
-      production: {
-        options: {
-          cleancss: true
-        },
-        files: {
-          "public/css/core.css": "public/bower_components/bootstrap/less/bootstrap.less"
-        }
-      }
-    },
-
-    sass: {
-      dist: {
-        options: {
-          style: 'compressed'
-        },
-        files: {
-          'public/css/core.css': 'public/bower_components/sass-bootstrap/lib/bootstrap.scss',
-        }
-      }
-    },
-
-    stylus: {
-      compile: {
-        options: {
-          compress:true
-        },
-        files: {
-          'public/css/core.css': 'public/bower_components/bootstrap-stylus/stylus/bootstrap.styl'
-        }
-      }
-    },
-
-    concat: {
-      options: {
-        separator: ';',
-        stripBanners:true
-      },
-      dist: {
-        src: ['public/js/app.js'],
-        dest: 'public/js/concat.js',
-      },
     },
 
     //this is currently turned off, since jquery KILLS it
@@ -90,7 +45,7 @@ module.exports = function (grunt) {
         }
       },
       files:{
-        src:['public/js/concat.js']
+        src:['static/js/*.js']
       }
     },
 
@@ -100,21 +55,11 @@ module.exports = function (grunt) {
       },
       my_target: {
         files: {
-          'public/js/app.min.js': ['public/js/concat.js']
+          'public/js/client.min.js': ['static/js/button.js', 'static/js/console.js', 'static/js/client.js'],
+          'public/js/admin.min.js': ['static/js/console.js', 'static/js/admin.js']
         }
       }
     },
-
-    // //Jasmine Config
-    // jasmine: {
-    //   pivotal: {
-    //     src: ['server.js', 'src/**/*.js'],
-    //     options: {
-    //       specs: 'spec/*Spec.js',
-    //       helpers: 'spec/*Helper.js'
-    //     }
-    //   }
-    // },
 
     jasmine_node: {
       options: {
@@ -129,51 +74,44 @@ module.exports = function (grunt) {
 
     // Watch Config
     watch: {
-        files: ['views/**/*'],
-        options: {
+        src:{
+          files: ['views/**/*'],
+          options: {
             livereload: true
+          },
         },
         scripts: {
             files: [
-                'public/js/**/*.js'
+                'public/js/**/*.js',
+                '!public/js/**/*.min.js'
             ],
-            //tasks:['build']
+            tasks:['uglify']
         },
         css: {
             files: [
                 'public/css/**/*.css',
             ],
-        },
-        less: {
-            files: ['public/bower_components/bootstrap/less/**/*.less'],
-            //tasks: ['build']
-        },
-        express: {
-            files:  [ 'server.js', '!**/node_modules/**', '!Gruntfile.js', 'src/**/*.js' ],
-            tasks:  [ 'watch' ],
-            options: {
-                nospawn: true // Without this option specified express won't be reloaded
-            }
+            tasks:['cssmin']
         },
     },
 
-    connect: {
-      options: {
-        port: RUNNING_PORT,//variable at top of this file
-        // change this to '0.0.0.0' to access the server from outside
-        hostname: 'localhost'
-      },
-      livereload: {
-        options: {
-          middleware: function (connect) {
-            return [
-              lrSnippet,
-              mountFolder(connect, '.')
-            ];
-          }
-        }
-      }
-    },
+    // connect: {
+    //   options: {
+    //     port: RUNNING_PORT,//variable at top of this file
+    //     // change this to '0.0.0.0' to access the server from outside
+    //     hostname: 'localhost'
+    //   },
+    //   livereload: {
+    //     options: {
+    //       middleware: function (connect) {
+    //         return [
+    //           lrSnippet,
+    //           mountFolder(connect, '.')
+    //         ];
+    //       }
+    //     }
+    //   }
+    // },
 
     nodemon:{
       dev: {
@@ -183,7 +121,7 @@ module.exports = function (grunt) {
           //nodeArgs: ['--debug'],
           ignoredFiles: ['node_modules/**'],
           //watchedExtensions: ['js'],
-          watchedFolders: ['views', 'routes'],
+          watchedFolders: ['src'],
           //delayTime: 1,
           legacyWatch: true,
           env: {
@@ -195,7 +133,9 @@ module.exports = function (grunt) {
             SESSION_SECRET      : RUNNING_SESSION_SECRET,
             DB_CONNECTION_STRING: RUNNING_DB_CONNECTION_STRING,
             SESSION_KEY         : RUNNING_SESSION_KEY,
-            ADMIN_PATH          : RUNNING_ADMIN_PATH
+            ADMIN_PATH          : RUNNING_ADMIN_PATH,
+            LOG_PATH            : RUNNING_LOG_PATH,
+            NODE_ENV            : 'production'
           },
           cwd: __dirname
         }
@@ -206,7 +146,7 @@ module.exports = function (grunt) {
     // 'launch' will just kick it off, and won't stay running
     concurrent: {
         target: {
-            tasks: ['nodemon', 'watch', 'launch'],
+            tasks: ['nodemon', 'watch', 'wait'],
             options: {
                 logConcurrentOutput: true
             }
@@ -229,21 +169,15 @@ module.exports = function (grunt) {
       }
     },
 
-    open: {
-      server: {
-        path: 'https://localhost:' + RUNNING_PORT
-      }
-    }
-
   });
 
   //grunt.registerTask('server', ['build', 'connect:livereload', 'open', 'watch']);
 
-  grunt.registerTask('build', ['cssmin', 'concat', 'uglify']);
+  grunt.registerTask('build', ['cssmin', 'uglify']);
+
+  grunt.registerTask('validate', ['jshint']);
 
   grunt.registerTask('test', ['jasmine_node']);
-
-  grunt.registerTask('launch', ['wait']);
 
   grunt.registerTask('default', ['concurrent']);
 

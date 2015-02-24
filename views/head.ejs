@@ -3,23 +3,21 @@
 <head>
   <meta charset="utf-8">
   <title>Sthack</title>
-  <link href="/css/reset.css" rel="stylesheet">
   <link href="/icone.ico" type="image/x-icon" rel="shortcut icon">
-  <link href="/css/style.css" rel="stylesheet">
-  <script src="/bower_components/jquery/dist/jquery.min.js"></script>
-  <script src="/bower_components/jquery-ui/jquery-ui.min.js"></script>
+  <link href="/css/reset.min.css" rel="stylesheet">
+  <link href="/css/style.min.css" rel="stylesheet">
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/jquery-ui.min.js"></script>
   <%if (typeof auth !== 'undefined'){ %>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socketIOUrl = '<%= socketIOUrl %>';
       var sock = io.connect(socketIOUrl);
     </script>
-    <script src="/js/console.js"></script>
     <% if (typeof admin !== 'undefined'){ %>
-      <script src="/js/admin.js"></script>
+      <script src="/js/admin.min.js"></script>
     <% } else {%>
-      <script src="/js/button.js"></script>
-      <script src="/js/client.js"></script>
+      <script src="/js/client.min.js"></script>
     <% } %>
   <% } %>
 

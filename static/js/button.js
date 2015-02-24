@@ -1,12 +1,14 @@
 String.prototype.checksum = function() {
-  var hash = 0, i, chr, len;
-  if (this.length == 0) return hash;
-  for (i = 0, len = this.length; i < len; i++) {
-    chr   = this.charCodeAt(i);
-    hash  = ((hash << 5) - hash) + chr;
-    hash |= 0;
-  }
-  return hash.toString();
+    var hash = 0, i, chr, len;
+    if (this.length === 0){
+        return hash;
+    }
+    for (i = 0, len = this.length; i < len; i++) {
+        chr   = this.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0;
+    }
+    return hash.toString();
 };
 
 images = {};
@@ -18,10 +20,11 @@ function loadImages(callback) {
     };
     var loadedImages = 0;
     var numImages = 0;
-    for(var src in sources) {
+    var src;
+    for(src in sources) {
         numImages++;
     }
-    for(var src in sources) {
+    for(src in sources) {
         images[src] = new Image();
         images[src].onload = function() {
             if(++loadedImages >= numImages) {
@@ -47,10 +50,10 @@ function loadTask(task){
         ctx.stroke();
     }
     else{
-        ctx.drawImage(images.swordfish,0,0,canvasTask.width,canvasTask.height)
+        ctx.drawImage(images.swordfish,0,0,canvasTask.width,canvasTask.height);
     }
 
-    ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height)
+    ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
 
     ctx.textAlign = 'center';
     ctx.font = '2em Verdana';
@@ -80,7 +83,7 @@ function validateTask(title, callback){
         ctx.fillStyle = '#fff';
         ctx.fill();
         ctx.drawImage(images.tv, 0, 0, canvasTask.width, canvasTask.height);
-        radius += 70
+        radius += 70;
         if(radius>canvasTask.width/2+50){
             clearInterval(shutdown);
             var shutdown2 = setInterval(function(){
