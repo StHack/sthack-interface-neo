@@ -12,6 +12,7 @@ var io                = require('socket.io');
 var device            = require('express-device');
 var fs                = require('fs');
 var cookieParse       = require('cookie');
+var cookieParser      = require('cookie-parser')
 var connect           = require('express/node_modules/connect')
 var morgan            = require('morgan');
 if(process.env.NODE_ENV==='production'){
@@ -63,39 +64,38 @@ var app               = express();
 var server            = http.createServer(app)
 var parseSignedCookie = connect.utils.parseSignedCookie;
 
-app.configure('production', function(){
+if(app.get('env') === 'production'){
   var access = fs.createWriteStream(logPath + '/node.access.log', { flags: 'a' });
   app.use(morgan('combined', {stream: access}));
   app.sessionStore = new RedisStore({
     client: redisClient
   });
-});
+}
 
-app.configure('development', function(){
+if(app.get('env') === 'development'){
   app.use(morgan('dev'));
   app.sessionStore = new express.session.MemoryStore({reapInterval: 60000 * 10 });
-});
+};
 
-app.configure(function(){
-  app.use(express.static(__dirname + '/public'));
 
-  app.set('view engine', 'ejs');
-  app.set('views', __dirname +'/views');
+app.use(express.static(__dirname + '/public'));
 
-  app.use(express.cookieParser());
-  app.use(express.json());
-  app.use(express.urlencoded());
-  app.use(device.capture());
+app.set('view engine', 'ejs');
+app.set('views', __dirname +'/views');
 
-  app.use(session({
-    'secret': sessionSecret,
-    'key'   : sessionKey,
-    'store' : app.sessionStore,
-    'saveUninitialized': true,
-    'resave' : true
-    })
-  );
-});
+app.use(express.cookieParser());
+app.use(express.json());
+app.use(express.urlencoded());
+app.use(device.capture());
+
+app.use(session({
+  'secret': sessionSecret,
+  'key'   : sessionKey,
+  'store' : app.sessionStore,
+  'saveUninitialized': true,
+  'resave' : true
+  })
+);
 
 var db = new DB(DBConnectionString);
 var teamDB = new Team(db);
@@ -244,21 +244,21 @@ app.post("/", function(req, res){
   }
 });
 
-app.configure('production', function(){
+if(app.get('env') === 'production'){
   app.use(function(err, req, res, next){
     res.status(500);
     res.render('error', {current: 'error', registrationOpen: registrationOpen});
   });
-});
+};
 
-app.configure('development', function(){
+if(app.get('env') === 'development'){
   app.use(express.errorHandler());
-});
+};
 
 function sessionAuthenticated(handshake, callback){
   if(handshake.headers.cookie){
     var cookie = cookieParse.parse(handshake.headers.cookie);
-    var sessionID = parseSignedCookie(cookie[sessionKey], sessionSecret);
+    var sessionID = cookieParser.signedCookie(cookie[sessionKey], sessionSecret);
     if(process.env.NODE_ENV==='production'){
       redisClient.get(app.sessionStore.prefix+sessionID, function(err, content){
         var session = JSON.parse(content);
@@ -408,7 +408,7 @@ socketIO.on('connection', function (socket) {
     if(socket.handshake.authenticated === adminName) {
       taskDB.addTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author).then(function(){
         list(taskDB, function(tasks){
-          socketIO.sockets.emit('updateTasks', teams);
+          socketIO.sockets.emit('updateTasks', tasks);
         });
       }, function(error){
         socket.emit('log', error);
@@ -420,7 +420,7 @@ socketIO.on('connection', function (socket) {
     if(socket.handshake.authenticated === adminName) {
       taskDB.editTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author).then(function(){
         list(taskDB, function(tasks){
-          socketIO.sockets.emit('updateTasks', teams);
+          socketIO.sockets.emit('updateTasks', tasks);
         });
       }, function(error){
         socket.emit('log', error);
@@ -432,7 +432,7 @@ socketIO.on('connection', function (socket) {
     if(socket.handshake.authenticated === adminName) {
       taskDB.deleteTask(data.title).then(function(){
         list(taskDB, function(tasks){
-          socketIO.sockets.emit('updateTasks', teams);
+          socketIO.sockets.emit('updateTasks', tasks);
         });
       }, function(error){
         socket.emit('log', error);

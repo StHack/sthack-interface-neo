@@ -135,7 +135,7 @@ module.exports = function (grunt) {
             SESSION_KEY         : RUNNING_SESSION_KEY,
             ADMIN_PATH          : RUNNING_ADMIN_PATH,
             LOG_PATH            : RUNNING_LOG_PATH,
-            NODE_ENV            : 'production'
+            NODE_ENV            : 'development'
           },
           cwd: __dirname
         }
@@ -169,6 +169,46 @@ module.exports = function (grunt) {
       }
     },
 
+    compress: {
+      main: {
+        options: {
+          mode: 'tgz',
+          archive: 'dist/sthack-interface-neo.tar.gz'
+        },
+        files: [
+          {src: ['public/**', 'server.js', 'src/**', 'views/**', 'package.json']}
+        ]
+      }
+    },
+
+    secret: grunt.file.readJSON('sshProduction.json'),
+    sshexec: {
+      extract: {
+        command: 'tar xvzf /home/insuser/sthack-interface-neo.tar.gz -C /var/www/ && cd /var/www && npm update --production',
+        options: {
+          host: '<%= secret.host %>',
+          username: '<%= secret.username %>',
+          password: '<%= secret.password %>'
+        }
+      }
+    },
+
+    sftp: {
+      upload: {
+        files: {
+          "./": "dist/**"
+        },
+        options: {
+          path: '<%= secret.path %>',
+          host: '<%= secret.host %>',
+          username: '<%= secret.username %>',
+          password: '<%= secret.password %>',
+          showProgress: true,
+          srcBasePath: "dist/"
+        }
+      }
+    }
+
   });
 
   //grunt.registerTask('server', ['build', 'connect:livereload', 'open', 'watch']);
@@ -177,7 +217,9 @@ module.exports = function (grunt) {
 
   grunt.registerTask('validate', ['jshint']);
 
-  grunt.registerTask('test', ['jasmine_node']);
+  grunt.registerTask('test', ['jasmine_node'])
+
+  grunt.registerTask('deploy', ['compress', 'sftp:upload', 'sshexec:extract']);
 
   grunt.registerTask('default', ['concurrent']);
 
