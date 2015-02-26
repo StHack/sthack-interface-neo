@@ -45,7 +45,7 @@ module.exports = function (grunt) {
         }
       },
       files:{
-        src:['static/js/*.js']
+        src:['static/js/*.js', 'server.js', 'src/**/*.js']
       }
     },
 
@@ -82,14 +82,13 @@ module.exports = function (grunt) {
         },
         scripts: {
             files: [
-                'public/js/**/*.js',
-                '!public/js/**/*.min.js'
+                'static/js/**/*.js',
             ],
             tasks:['uglify']
         },
         css: {
             files: [
-                'public/css/**/*.css',
+                'static/css/**/*.css',
             ],
             tasks:['cssmin']
         },
@@ -184,7 +183,23 @@ module.exports = function (grunt) {
     secret: grunt.file.readJSON('sshProduction.json'),
     sshexec: {
       extract: {
-        command: 'tar xvzf /home/insuser/sthack-interface-neo.tar.gz -C /var/www/ && cd /var/www && npm update --production',
+        command: '<%= secret.extractcmd %>',
+        options: {
+          host: '<%= secret.host %>',
+          username: '<%= secret.username %>',
+          password: '<%= secret.password %>'
+        }
+      },
+      restart: {
+        command: '<%= secret.restartcmd %>',
+        options: {
+          host: '<%= secret.host %>',
+          username: '<%= secret.username %>',
+          password: '<%= secret.password %>'
+        }
+      },
+      start: {
+        command: '<%= secret.startcmd %>',
         options: {
           host: '<%= secret.host %>',
           username: '<%= secret.username %>',
@@ -219,7 +234,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('test', ['jasmine_node'])
 
-  grunt.registerTask('deploy', ['compress', 'sftp:upload', 'sshexec:extract']);
+  grunt.registerTask('deploy', ['build', 'compress', 'sftp:upload', 'sshexec:extract', 'sshexec:restart']);
 
   grunt.registerTask('default', ['concurrent']);
 

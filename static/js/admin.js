@@ -1,11 +1,15 @@
 $(document).ready(function () {
-    var sock = io.connect(socketIOUrl);
+
     $("#closeCTF").click(function(){
         sock.emit('adminCloseCTF');
     });
 
     $("#openCTF").click(function(){
         sock.emit('adminOpenCTF');
+    });
+
+    $("#refresh").click(function(){
+        sock.emit('adminRefresh');
     });
 
     $("#closeRegistration").click(function(){
@@ -52,6 +56,19 @@ $(document).ready(function () {
         }
     });
 
+    var oldVal = '';
+    $('#message').keyup(function(){
+        if(oldVal !== $(this).val()){
+            oldVal = $(this).val();
+            sock.emit('adminMessage', {message:$("#message").val(), submit:0});
+        }
+    });
+
+    $('#sendMessage').click(function(){
+        sock.emit('adminMessage', {message:$("#message").val(), submit:1});
+        $("#message").val('');
+    });
+
     sock.on('giveTask', function(task){
         $('#taskTitle').val(task.title);
         $('#taskTitle').attr('disabled', true);
@@ -73,12 +90,15 @@ $(document).ready(function () {
 
     sock.emit('adminListTeams');
     sock.on('updateTeams', function(teams){
-        console.log(teams);
         $('#teams').html('');
         $('#teams').append($('<option></option>').val('').text('---- Teams ----'));
         teams.forEach(function(team){
             $('#teams').append($('<option></option>').val(team.name).text(team.name));
         });
+    });
+
+    sock.on('adminInfo', function(info){
+        console.log(info);
     });
 
     $('#addTeam').click(function(){
@@ -148,6 +168,14 @@ $(document).ready(function () {
         $('#taskType').val('');
         $('#taskAuthor').val('');
         $('#taskDescription').val('');
+    });
+
+    $(document).keypress(function(e) {
+        if(e.which == 13) {
+            if($('#message').is(":focus")){
+                $('#sendMessage').click();
+            }
+        }
     });
 
 });

@@ -2,11 +2,7 @@
   <div id="login">
     <img src="/img/logo_login.png" alt="Sthack"><br />
     <form method="POST" action="/">
-      <select name="name">
-        <% teams_list.forEach(function(team){ %>
-          <option value="<%= team.name %>"><%= team.name %></option>
-        <% }) %>
-      </select>
+      <input type="text" name="name" placeholder="Team name"/>
       <input type="password" name="password" placeholder="Password"/>
       <input type="submit" id="submit" value="LOGIN">
     </form>

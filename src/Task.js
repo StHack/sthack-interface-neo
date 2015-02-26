@@ -17,12 +17,12 @@ Task.prototype.list = function(){
       reject(error);
     });
   });
-}
+};
 
 Task.prototype.getTasks = function(teamName, countTeam){
   var db = this.db;
   var self = this;
-  var infosTasks = []
+  var infosTasks = [];
 
   return new Promise(function(fulfill, reject){
     db.find('tasks', {}, {'_id': 0}).then(function(result){
@@ -36,22 +36,22 @@ Task.prototype.getTasks = function(teamName, countTeam){
       reject(error);
     });
   });
-}
+};
 
 Task.prototype.getInfos = function(task, teamName, countTeam, description){
   var self = this;
   var infos = {};
-  infos['title'] = task.title;
-  infos['type'] = task.type;
-  infos['difficulty'] = task.difficulty;
-  infos['score'] = self.getScore(task, countTeam);
-  infos['state'] = self.getSolvedState(task, teamName);
-  infos['author'] = task.author;
+  infos.title = task.title;
+  infos.type = task.type;
+  infos.difficulty = task.difficulty;
+  infos.score = self.getScore(task, countTeam);
+  infos.state = self.getSolvedState(task, teamName);
+  infos.author = task.author;
   if(description){
-    infos['description'] = task.description;
+    infos.description = task.description;
   }
   return infos;
-}
+};
 
 Task.prototype.getTaskInfos = function(title, teamName, countTeam, description){
   var db = this.db;
@@ -69,7 +69,7 @@ Task.prototype.getTaskInfos = function(title, teamName, countTeam, description){
       reject(error);
     });
   });
-}
+};
 
 Task.prototype.exists = function(title){
   var db = this.db;
@@ -80,7 +80,7 @@ Task.prototype.exists = function(title){
       reject(error);
     });
   });
-}
+};
 
 Task.prototype.getScore = function(task, countTeam){
   var self = this;
@@ -94,7 +94,7 @@ Task.prototype.getScore = function(task, countTeam){
   else{
     return 150*(countTeam-solved.length);
   }
-}
+};
 
 Task.prototype.getSolvedState = function(task, teamName){
   var self = this;
@@ -114,7 +114,7 @@ Task.prototype.getSolvedState = function(task, teamName){
     }
   }
   return solvedState;
-}
+};
 
 Task.prototype.expectedState = function(task, teamName, state){
   var self = this;
@@ -124,23 +124,23 @@ Task.prototype.expectedState = function(task, teamName, state){
   else{
     return (self.getSolvedState(task, teamName) >=  state);
   }
-}
+};
 
 Task.prototype.nobodySolved = function(task){
   return this.expectedState(task, '', 0);
-}
+};
 
 Task.prototype.someoneSolved = function(task){
   return this.expectedState(task, '', 1);
-}
+};
 
 Task.prototype.teamSolved = function(task, teamName){
   return this.expectedState(task, teamName, 2);
-}
+};
 
 Task.prototype.teamSolvedFirst = function(task, teamName){
   return this.expectedState(task, teamName, 3);
-}
+};
 
 Task.prototype.isSolvableByTeam = function(task, teamName){
   var self = this;
@@ -155,7 +155,7 @@ Task.prototype.isSolvableByTeam = function(task, teamName){
       return false;
     }
   }
-}
+};
 
 Task.prototype.isOpen = function(task){
   var self = this;
@@ -166,17 +166,17 @@ Task.prototype.isOpen = function(task){
   else{
     return  true;
   }
-}
+};
 
 Task.prototype.getSolved = function(task){
   return _.sortBy(task.solved,['timestamp']);
-}
+};
 
 Task.prototype.isFlag = function(task, flag){
   var self = this;
   var hashedFlag = crypto.createHash('sha256').update(flag).digest('hex');
   return (task.flag === hashedFlag);
-}
+};
 
 Task.prototype.solveTask = function(title, flag, teamName){
   var db = this.db;
@@ -204,7 +204,7 @@ Task.prototype.solveTask = function(title, flag, teamName){
       reject(error);
     });
   });
-}
+};
 
 Task.prototype.getTask = function(title){
   var db = this.db;
@@ -221,7 +221,7 @@ Task.prototype.getTask = function(title){
       reject(error);
     });
   });
-}
+};
 
 Task.prototype.addTask = function(title, description, flag, type, difficulty, author){
   var db = this.db;
@@ -249,7 +249,7 @@ Task.prototype.addTask = function(title, description, flag, type, difficulty, au
       }
     });
   });
-}
+};
 
 Task.prototype.editTask = function(title, description, flag, type, difficulty, author){
   var db = this.db;
@@ -274,7 +274,7 @@ Task.prototype.editTask = function(title, description, flag, type, difficulty, a
       reject(error);
     });
   });
-}
+};
 
 Task.prototype.deleteTask = function(title){
   var db = this.db;
@@ -291,6 +291,24 @@ Task.prototype.deleteTask = function(title){
       reject(error);
     });
   });
-}
+};
+
+Task.prototype.cleanSolved = function(teamName, countTeam){
+  var db = this.db;
+  var self = this;
+  self.getTasks(teamName, countTeam).then(function(tasks){
+    tasks.raw.forEach(function(task){
+      if(typeof task.solved !== 'undefined'){
+        var countSolved = task.solved.length;
+        var newSolved = _.filter(task.solved, function(elem){
+          return teamName !== elem.teamName;
+        });
+        if(newSolved.length !== countSolved){
+          db.update('tasks', {'title': task.title}, {'solved': newSolved});
+        }
+      }
+    });
+  });
+};
 
 exports.Task = Task;

@@ -16,7 +16,7 @@ Team.prototype.list = function(){
       reject(error);
     });
   });
-}
+};
 
 Team.prototype.areLoginsValid = function(name, password){
   var db = this.db;
@@ -34,7 +34,7 @@ Team.prototype.areLoginsValid = function(name, password){
       reject(error);
     });
   });
-}
+};
 
 Team.prototype.addTeam = function(name, password){
   var db = this.db;
@@ -54,7 +54,7 @@ Team.prototype.addTeam = function(name, password){
       }
     });
   });
-}
+};
 
 Team.prototype.editTeam = function(name, password){
   var db = this.db;
@@ -72,7 +72,7 @@ Team.prototype.editTeam = function(name, password){
       reject(error);
     });
   });
-}
+};
 
 Team.prototype.deleteTeam = function(name){
   var db = this.db;
@@ -89,6 +89,6 @@ Team.prototype.deleteTeam = function(name){
       reject(error);
     });
   });
-}
+};
 
 exports.Team = Team;

@@ -12,12 +12,12 @@ var io                = require('socket.io');
 var device            = require('express-device');
 var fs                = require('fs');
 var cookieParse       = require('cookie');
-var cookieParser      = require('cookie-parser')
-var connect           = require('express/node_modules/connect')
+var cookieParser      = require('cookie-parser');
+var connect           = require('express/node_modules/connect');
 var morgan            = require('morgan');
 if(process.env.NODE_ENV==='production'){
   var cluster           = require('cluster');
-  var numCPUs           = require('os').cpus().length
+  var numCPUs           = require('os').cpus().length;
   var redis             = require('redis');
   var RedisStore        = require('connect-redis')(session);
   var IoRedisStore      = require('socket.io/lib/stores/redis');
@@ -31,11 +31,22 @@ if(process.env.NODE_ENV==='production'){
   }
 }
 
+
+function list(object, callback, callbackError){
+  object.list().then(function(objects){
+    callback(objects);
+  }, function(error){
+    callbackError(error);
+  });
+}
+
+
 if(typeof cluster === 'undefined' || cluster.isWorker){
 // Sthack prototypes
-var Team = require('./src/Team').Team;
-var Task = require('./src/Task').Task;
-var DB   = require('./src/DB').DB;
+var Team    = require('./src/Team').Team;
+var Task    = require('./src/Task').Task;
+var Message = require('./src/Message').Message;
+var DB      = require('./src/DB').DB;
 
 var runningPortNumber  = process.env.PORT;
 var DBConnectionString = process.env.DB_CONNECTION_STRING;
@@ -61,7 +72,7 @@ var sslOptions = {
 };
 
 var app               = express();
-var server            = http.createServer(app)
+var server            = http.createServer(app);
 var parseSignedCookie = connect.utils.parseSignedCookie;
 
 if(app.get('env') === 'production'){
@@ -75,7 +86,7 @@ if(app.get('env') === 'production'){
 if(app.get('env') === 'development'){
   app.use(morgan('dev'));
   app.sessionStore = new express.session.MemoryStore({reapInterval: 60000 * 10 });
-};
+}
 
 
 app.use(express.static(__dirname + '/public'));
@@ -97,26 +108,17 @@ app.use(session({
   })
 );
 
-var db = new DB(DBConnectionString);
-var teamDB = new Team(db);
-var taskDB = new Task(db, {delay: closedTaskDelay});
+var db        = new DB(DBConnectionString);
+var teamDB    = new Team(db);
+var taskDB    = new Task(db, {delay: closedTaskDelay});
+var messageDB = new Message(db);
 
-var unAuthRoute = ['/scoreboard', '/register', '/', '']
-var authRoute = ['/scoreboard', '/', '', adminPath]
-
-
-function list(object, callback, callbackError){
-  object.list().then(function(objects){
-    callback(objects);
-  }, function(error){
-    callbackError(error);
-  });
-}
-
+var unAuthRoute = ['/scoreboard', '/register', '/', ''];
+var authRoute = ['/scoreboard', '/', '', adminPath];
 
 /* à revoir en mode authentificationMiddleware */
 app.use(function(req, res, next){
-  if((req.session.authenticated && authRoute.indexOf(req.url)!==-1) || unAuthRoute.indexOf(req.url)!==-1){
+  if((typeof req.session.authenticated !== 'undefined' && authRoute.indexOf(req.url)!==-1) || (typeof req.session.authenticated === 'undefined' && unAuthRoute.indexOf(req.url)!==-1 ) ){
     next();
   }
   else{
@@ -137,7 +139,7 @@ if(process.env.NODE_ENV==='production'){
       redisClient: redisClient
     })
   );
-  redisSub.subscribe('adminAction')
+  redisSub.subscribe('adminAction');
   redisSub.on('message', function(channel, message){
     if(message === 'openCTF'){
       ctfOpen = true;
@@ -249,13 +251,13 @@ if(app.get('env') === 'production'){
     res.status(500);
     res.render('error', {current: 'error', registrationOpen: registrationOpen});
   });
-};
+}
 
 if(app.get('env') === 'development'){
   app.use(express.errorHandler());
-};
+}
 
-function sessionAuthenticated(handshake, callback){
+socketIO.set('authorization', function (handshake, callback) {
   if(handshake.headers.cookie){
     var cookie = cookieParse.parse(handshake.headers.cookie);
     var sessionID = cookieParser.signedCookie(cookie[sessionKey], sessionSecret);
@@ -263,10 +265,11 @@ function sessionAuthenticated(handshake, callback){
       redisClient.get(app.sessionStore.prefix+sessionID, function(err, content){
         var session = JSON.parse(content);
         if(session.authenticated){
-          callback(session.authenticated);
+          handshake.authenticated = session.authenticated;
+          callback(null, true);
         }
         else{
-          callback(null);
+          callback(null, false);
         }
       });
     }
@@ -274,29 +277,18 @@ function sessionAuthenticated(handshake, callback){
       if(app.sessionStore.sessions[sessionID]){
         var session = JSON.parse(app.sessionStore.sessions[sessionID]);
         if(session.authenticated){
-          callback(session.authenticated);
+          handshake.authenticated = session.authenticated;
+          callback(null, true);
         }
         else{
-          callback(null);
+          callback(null, false);
         }
       }
     }
   }
   else{
-    callback(null);
+    callback(null, false);
   }
-}
-
-socketIO.set('authorization', function (handshakeData, callback) {
-  sessionAuthenticated(handshakeData, function(auth){
-    if(auth){
-      handshakeData.authenticated = auth;
-      callback(null, true);
-    }
-    else{
-      callback(null, false);
-    }
-  });
 });
 
 
@@ -376,11 +368,20 @@ socketIO.on('connection', function (socket) {
     }
   });
 
+  socket.on('getMessages', function(){
+    messageDB.getMessages().then(function(messages){
+      socket.emit('giveMessages', messages);
+    }, function(error){
+      socket.emit('error', error);
+    });
+  });
+
   socket.on('adminCloseRegistration', function(data){
     if(process.env.NODE_ENV==='production'){
       redisPub.publish('adminAction', 'closeRegistration');
     }
     registrationOpen = false;
+    socket.emit('adminInfo', registrationOpen);
   });
 
   socket.on('adminOpenRegistration', function(data){
@@ -388,6 +389,7 @@ socketIO.on('connection', function (socket) {
       redisPub.publish('adminAction', 'openRegistration');
     }
     registrationOpen = true;
+    socket.emit('adminInfo', registrationOpen);
   });
 
   socket.on('adminCloseCTF', function(data){
@@ -395,6 +397,7 @@ socketIO.on('connection', function (socket) {
       redisPub.publish('adminAction', 'closeCTF');
     }
     ctfOpen = false;
+    socket.emit('adminInfo', ctfOpen);
   });
 
   socket.on('adminOpenCTF', function(data){
@@ -402,6 +405,11 @@ socketIO.on('connection', function (socket) {
       redisPub.publish('adminAction', 'openCTF');
     }
     ctfOpen = true;
+    socket.emit('adminInfo', ctfOpen);
+  });
+
+  socket.on('adminRefresh', function(data){
+    socketIO.sockets.emit('refresh');
   });
 
   socket.on('adminAddTask', function(data){
@@ -411,7 +419,7 @@ socketIO.on('connection', function (socket) {
           socketIO.sockets.emit('updateTasks', tasks);
         });
       }, function(error){
-        socket.emit('log', error);
+        socket.emit('adminInfo', error);
       });
     }
   });
@@ -423,7 +431,7 @@ socketIO.on('connection', function (socket) {
           socketIO.sockets.emit('updateTasks', tasks);
         });
       }, function(error){
-        socket.emit('log', error);
+        socket.emit('adminInfo', error);
       });
     }
   });
@@ -435,7 +443,7 @@ socketIO.on('connection', function (socket) {
           socketIO.sockets.emit('updateTasks', tasks);
         });
       }, function(error){
-        socket.emit('log', error);
+        socket.emit('adminInfo', error);
       });
     }
   });
@@ -447,7 +455,7 @@ socketIO.on('connection', function (socket) {
           socketIO.sockets.emit('updateTeams', teams);
         });
       }, function(error){
-        socket.emit('log', error);
+        socket.emit('adminInfo', error);
       });
     }
   });
@@ -459,7 +467,7 @@ socketIO.on('connection', function (socket) {
           socketIO.sockets.emit('updateTeams', teams);
         });
       }, function(error){
-        socket.emit('log', error);
+        socket.emit('adminInfo', error);
       });
     }
   });
@@ -469,9 +477,40 @@ socketIO.on('connection', function (socket) {
       teamDB.deleteTeam(data.name).then(function(){
         list(teamDB, function(teams){
           socketIO.sockets.emit('updateTeams', teams);
+          taskDB.cleanSolved(data.name, teams.length);
+          var handshakes = socketIO.sockets.manager.handshaken;
+          for(var key in handshakes){
+            if(handshakes[key].authenticated === data.name){
+              socketIO.sockets.sockets[key].disconnect();
+            }
+          }
+
+          if(process.env.NODE_ENV === 'production'){
+            redisClient.keys(app.sessionStore.prefix+'*', function(err, sessions){
+              sessions.forEach(function(session){
+                redisClient.get(session, function(err, content){
+                  var sessionContent = JSON.parse(content);
+                  if(sessionContent.authenticated === data.name){
+                    redisClient.del(session);
+                  }
+                });
+              });
+            });
+          }
+          else{
+            var sessions = app.sessionStore.sessions;
+            for(key in sessions){
+              var session = JSON.parse(sessions[key]);
+              if(session.authenticated === data.name){
+                delete app.sessionStore.sessions[key];
+              }
+            }
+          }
+        }, function(error){
+          socket.emit('adminInfo', error);
         });
       }, function(error){
-        socket.emit('log', error);
+        socket.emit('adminInfo', error);
       });
     }
   });
@@ -481,7 +520,7 @@ socketIO.on('connection', function (socket) {
       list(taskDB, function(tasks){
         socket.emit('updateTasks', tasks);
       }, function(error){
-        socket.emit('error', error);
+        socket.emit('adminInfo', error);
       });
     }
   });
@@ -491,8 +530,21 @@ socketIO.on('connection', function (socket) {
       list(teamDB, function(teams){
         socket.emit('updateTeams', teams);
       }, function(error){
-        socket.emit('error', error);
+        socket.emit('adminInfo', error);
       });
+    }
+  });
+
+  socket.on('adminMessage', function(data){
+    if(socket.handshake.authenticated === adminName) {
+      if(data.submit === 1){
+        messageDB.addMessage(data.message).then(function(){
+          socket.emit('adminInfo', 'Message added');
+        }, function(error){
+          socket.emit('adminInfo', error);
+        });
+      }
+      socketIO.sockets.emit('message', data);
     }
   });
 

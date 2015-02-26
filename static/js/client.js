@@ -84,6 +84,10 @@ loadImages(function(){
         $('#popup').css('display', 'none');
     });
 
+    sock.on('refresh', function(){
+        location.reload();
+    });
+
     sock.on('error', function(error){
         alert(error+' please contact administrator');
     });
