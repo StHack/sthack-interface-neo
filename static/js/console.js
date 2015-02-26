@@ -39,6 +39,8 @@ sock.on('message', function(data){
     $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
     $('#console').trigger('blink');
   }
+  var h = $("#console")[0].scrollHeight;
+  $("#console").scrollTop(h);
 });
 
 $.fn.teletype = function(opts){
@@ -76,6 +78,8 @@ sock.on('giveMessages', function(messages){
   $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
   $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
   $('#console').trigger('blink');
+  var h = $("#console")[0].scrollHeight;
+  $("#console").scrollTop(h);
 });
 
 setTimeout(function(){
