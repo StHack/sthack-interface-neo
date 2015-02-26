@@ -1,4 +1,16 @@
 $(document).ready(function () {
+    $('#pad').draggable({cursor: 'crosshair', handle: '.titleBar', drag: function(event, ui){
+            if(ui.position.top < $('#navbar').height()){
+                ui.position.top = $('#navbar').height();
+            }
+        }
+    });
+    $('#console').draggable({cursor: 'crosshair', drag: function(event, ui){
+            if(ui.position.top < $('#navbar').height()){
+                ui.position.top = $('#navbar').height();
+            }
+        }
+    });
 
     $("#closeCTF").click(function(){
         sock.emit('adminCloseCTF');

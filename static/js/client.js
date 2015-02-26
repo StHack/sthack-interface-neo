@@ -1,5 +1,17 @@
 loadImages(function(){
-    $('#popup').draggable({cursor: 'crosshair', handle: '.titleBar'});
+    $('#popup').draggable({cursor: 'crosshair', handle: '.popupTitleBar'});
+    $('#pad').draggable({cursor: 'crosshair', handle: '.titleBar', drag: function(event, ui){
+            if(ui.position.top < $('#navbar').height()){
+                ui.position.top = $('#navbar').height();
+            }
+        }
+    });
+    $('#console').draggable({cursor: 'crosshair', drag: function(event, ui){
+            if(ui.position.top < $('#navbar').height()){
+                ui.position.top = $('#navbar').height();
+            }
+        }
+    });
 
     sock.on('giveScore', function(team){
         $('#team').text(team.name);
