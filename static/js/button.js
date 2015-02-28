@@ -16,6 +16,8 @@ images = {};
 function loadImages(callback) {
     var sources = {
         tv: 'tv.png',
+        folder: 'folder.png',
+        folder_open: 'folder_open.png',
         swordfish: 'swordfish.jpg',
     };
     var loadedImages = 0;
@@ -35,11 +37,70 @@ function loadImages(callback) {
     }
 }
 
+function closeDir(canvasDir, type){
+    var ctx = canvasDir.getContext('2d');
+    ctx.save();
+    ctx.clearRect(0, 0, canvasDir.width,canvasDir.height);
+    ctx.drawImage(images.folder, 0, 0, canvasDir.width,canvasDir.height);
+
+    ctx.textAlign = 'center';
+    ctx.font = '2em Verdana';
+    ctx.shadowColor = '#fff';
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+    ctx.fillText(type, canvasDir.width/2, canvasDir.height/2);
+
+    ctx.restore();
+}
+
+function openDir(canvasDir, type, callback){
+    var ctx = canvasDir.getContext('2d');
+    ctx.save();
+    ctx.clearRect(0, 0, canvasDir.width,canvasDir.height);
+    ctx.drawImage(images.folder_open, 0, 0, canvasDir.width,canvasDir.height);
+
+    ctx.textAlign = 'center';
+    ctx.font = '2em Verdana';
+    ctx.shadowColor = '#fff';
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+    ctx.fillText(type, canvasDir.width/2, canvasDir.height/2);
+
+    ctx.restore();
+
+    callback();
+}
+
+function loadDir(type){
+    var idDir = type.checksum();
+    var canvasDir = document.getElementById(idDir);
+    var ctx = canvasDir.getContext('2d');
+    ctx.save();
+    ctx.clearRect(0, 0, canvasDir.width,canvasDir.height);
+    ctx.drawImage(images.folder,0,0,canvasDir.width,canvasDir.height);
+
+    ctx.textAlign = 'center';
+    ctx.font = '2em Verdana';
+    ctx.shadowColor = '#fff';
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = 'rgba(0, 0, 0, 1)';
+    ctx.fillText(type, canvasDir.width/2, canvasDir.height/2);
+
+    ctx.restore();
+}
+
 function loadTask(task){
     var idTask = task.title.checksum();
-    var canvasTask = document.getElementById(idTask);
+    var canvasTask = document.getElementById('task-'+idTask);
     var ctx = canvasTask.getContext('2d');
     ctx.save();
+    ctx.clearRect(0, 0, canvasTask.width,canvasTask.height);
     if(task.state>1){
         ctx.fillStyle = '#000';
         ctx.fillRect(0,0,canvasTask.width,canvasTask.height);
@@ -62,19 +123,16 @@ function loadTask(task){
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 5;
     ctx.fillStyle = 'rgba(0, 0, 0, 1)';
-    ctx.fillText(task.title, canvasTask.width/2, canvasTask.height/2-30);
-
-    ctx.font = '1.5em Verdana';
-    ctx.fillText(task.type, canvasTask.width/2, canvasTask.height/2+40);
+    ctx.fillText(task.title, canvasTask.width/2, canvasTask.height/2-20);
 
     ctx.font = '2em Verdana';
-    ctx.fillText(task.score+' pts', canvasTask.width/2, canvasTask.height/2+5);
+    ctx.fillText(task.score+' pts', canvasTask.width/2, canvasTask.height/2+20);
     ctx.restore();
 }
 
 function validateTask(title, callback){
     var idTask = title.checksum();
-    var canvasTask = document.getElementById(idTask);
+    var canvasTask = document.getElementById('task-'+idTask);
     var ctx = canvasTask.getContext('2d');
     var radius = 2;
     ctx.save();

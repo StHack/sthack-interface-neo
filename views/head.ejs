@@ -6,6 +6,7 @@
   <link href="/icone.ico" type="image/x-icon" rel="shortcut icon">
   <link href="/css/reset.min.css" rel="stylesheet">
   <link href="/css/style.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/css/jquery-ui.min.css">
   <script src="/js/jquery.min.js"></script>
   <script src="/js/jquery-ui.min.js"></script>
   <script src="/js/jquery.ui.touch-punch.dk.js"></script>
@@ -18,7 +19,11 @@
     <% if (typeof admin !== 'undefined'){ %>
       <script src="/js/admin.min.js"></script>
     <% } else {%>
-      <script src="/js/client.min.js"></script>
+      <% if(current === 'scoreboard'){ %>
+        <script src="/js/scoreboard.min.js"></script>
+      <% } else {%>
+        <script src="/js/client.min.js"></script>
+      <% } %>
     <% } %>
   <% } %>
 
@@ -33,27 +38,27 @@
 
 <body>
 <div id="navbar">
-  <div class="menu"><img src="/img/logo_sthack.png" /></div>
+  <div class="menu left"><img src="/img/logo_sthack.png" /></div>
   <% if(current === 'index'){ %>
-    <a class="menu btn selected" href="/">Control interface</a>
+    <a class="menu left btn selected" href="/">Control interface</a>
   <% } else { %>
-    <a class="menu btn" href="/">Control interface</a>
-  <% } %>
-  <% if(current === 'scoreboard'){ %>
-    <a class="menu btn selected" href="/scoreboard">Scoreboard</a>
-  <% } else { %>
-    <a class="menu btn" href="/scoreboard">Scoreboard</a>
+    <a class="menu left btn" href="/">Control interface</a>
   <% } %>
   <% if(typeof auth === 'undefined'){ %>
     <% if(registrationOpen) { %>
       <% if(current === 'register'){ %>
-        <a class="menu btn selected" href="/register">Register</a>
+        <a class="menu left btn selected" href="/register">Register</a>
       <% } else { %>
-        <a class="menu btn" href="/register">Register</a>
+        <a class="menu left btn" href="/register">Register</a>
       <% } %>
     <% } %>
 </div>
   <% } else { %>
+    <% if(current === 'scoreboard'){ %>
+      <a class="menu left btn selected" href="/scoreboard">Scoreboard</a>
+    <% } else { %>
+      <a class="menu left btn" href="/scoreboard">Scoreboard</a>
+    <% } %>
 <div class="menu right"><span id="team"></span> - <span id="score"></span></div>
 </div>
 <div id="console">

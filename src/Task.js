@@ -45,7 +45,7 @@ Task.prototype.getInfos = function(task, teamName, countTeam, description){
   infos.type = task.type;
   infos.difficulty = task.difficulty;
   infos.score = self.getScore(task, countTeam);
-  infos.state = self.getSolvedState(task, teamName);
+  infos.state = self.getSolvedState(task, teamName).state;
   infos.author = task.author;
   if(description){
     infos.description = task.description;
@@ -101,10 +101,12 @@ Task.prototype.getSolvedState = function(task, teamName){
   var solved = self.getSolved(task);
   //nobody solved
   var solvedState = 0;
+  var solvedTime = 0;
   if(solved.length > 0){
     //someone solved
     solvedState++;
-    if(_.some(solved, {'teamName': teamName})){
+    solvedTime = _.result(_.find(solved, {'teamName': teamName}), 'timestamp');
+    if(typeof solvedTime !== 'undefined'){
       //your team solved
       solvedState++;
       if(solved[0].teamName === teamName){
@@ -113,16 +115,17 @@ Task.prototype.getSolvedState = function(task, teamName){
       }
     }
   }
-  return solvedState;
+  return {state: solvedState, time: solvedTime};
 };
 
 Task.prototype.expectedState = function(task, teamName, state){
   var self = this;
+  var solved = self.getSolvedState(task, teamName);
   if(state === 0){
-    return (self.getSolvedState(task, teamName) === state);
+    return (solved.state === state);
   }
   else{
-    return (self.getSolvedState(task, teamName) >=  state);
+    return {ok: (solved.state >=  state), time: solved.time};
   }
 };
 
@@ -131,7 +134,7 @@ Task.prototype.nobodySolved = function(task){
 };
 
 Task.prototype.someoneSolved = function(task){
-  return this.expectedState(task, '', 1);
+  return this.expectedState(task, '', 1).ok;
 };
 
 Task.prototype.teamSolved = function(task, teamName){
@@ -144,7 +147,7 @@ Task.prototype.teamSolvedFirst = function(task, teamName){
 
 Task.prototype.isSolvableByTeam = function(task, teamName){
   var self = this;
-  if(self.teamSolved(task, teamName)){
+  if(self.teamSolved(task, teamName).ok){
     return false;
   }
   else{

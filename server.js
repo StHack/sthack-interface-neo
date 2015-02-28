@@ -15,6 +15,7 @@ var cookieParse       = require('cookie');
 var cookieParser      = require('cookie-parser');
 var connect           = require('express/node_modules/connect');
 var morgan            = require('morgan');
+var _                 = require('lodash');
 if(process.env.NODE_ENV==='production'){
   var cluster           = require('cluster');
   var numCPUs           = require('os').cpus().length;
@@ -113,7 +114,7 @@ var teamDB    = new Team(db);
 var taskDB    = new Task(db, {delay: closedTaskDelay});
 var messageDB = new Message(db);
 
-var unAuthRoute = ['/scoreboard', '/register', '/', ''];
+var unAuthRoute = ['/register', '/', ''];
 var authRoute = ['/scoreboard', '/', '', adminPath];
 
 /* à revoir en mode authentificationMiddleware */
@@ -212,7 +213,9 @@ app.all("/register", function(req, res){
 app.get("/scoreboard", function(req, res){
   res.render('scoreboard',{
     current: 'scoreboard',
-    registrationOpen: registrationOpen
+    auth: 1,
+    registrationOpen: registrationOpen,
+    socketIOUrl: 'https://'+req.headers.host
   });
 });
 
@@ -300,7 +303,8 @@ socketIO.on('connection', function (socket) {
         socket.emit('giveTasks', tasks.infos);
         var score = 0;
         tasks.raw.forEach(function(task){
-          if(taskDB.teamSolved(task, socket.handshake.authenticated)){
+          var solved = taskDB.teamSolved(task, socket.handshake.authenticated);
+          if(solved.ok){
             score += task.score;
           }
         });
@@ -337,12 +341,43 @@ socketIO.on('connection', function (socket) {
     });
   });
 
+  socket.on('getScoreboard', function(){
+    teamDB.list().then(function(teams){
+      taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
+        var scoreboard = [];
+        teams.forEach(function(team){
+          var score = 0;
+          var last = 0;
+          var lastTask = '';
+          tasks.raw.forEach(function(task){
+            var solved = taskDB.teamSolved(task, team.name);
+            if(solved.ok){
+              score += task.score;
+              if(last < solved.time){
+                last = solved.time;
+                lastTask = task.title;
+              }
+            }
+          });
+          scoreboard.push({team: team.name, score: score, lastTask: lastTask, time: -last});
+        });
+        var orderedScoreboard = _.sortBy(scoreboard, ['score', 'time']).reverse();
+        socket.emit('giveScoreboard', orderedScoreboard);
+      }, function(error){
+        socket.emit('error', error);
+      });
+    }, function(error){
+      socket.emit('error', error);
+    });
+  });
+
   socket.on('getScore', function(){
     teamDB.list().then(function(teams){
       taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
         var score = 0;
         tasks.raw.forEach(function(task){
-          if(taskDB.teamSolved(task, socket.handshake.authenticated)){
+          var solved = taskDB.teamSolved(task, socket.handshake.authenticated);
+          if(solved.ok){
             score += task.score;
           }
         });
@@ -359,6 +394,9 @@ socketIO.on('connection', function (socket) {
     if(ctfOpen){
       taskDB.solveTask(datas.title, datas.flag, socket.handshake.authenticated).then(function(result){
         socketIO.sockets.emit('validation', {title: datas.title, team: socket.handshake.authenticated});
+        var message = socket.handshake.authenticated+' solved '+datas.title;
+        socketIO.sockets.emit('message', {submit: 2, message: message});
+        messageDB.addMessage(message);
       }, function(error){
         socket.emit('nope', error);
       });
@@ -416,7 +454,8 @@ socketIO.on('connection', function (socket) {
     if(socket.handshake.authenticated === adminName) {
       taskDB.addTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author).then(function(){
         list(taskDB, function(tasks){
-          socketIO.sockets.emit('updateTasks', tasks);
+          socketIO.sockets.emit('refresh');
+          socket.emit('updateTasks', tasks);
         });
       }, function(error){
         socket.emit('adminInfo', error);
@@ -428,7 +467,8 @@ socketIO.on('connection', function (socket) {
     if(socket.handshake.authenticated === adminName) {
       taskDB.editTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author).then(function(){
         list(taskDB, function(tasks){
-          socketIO.sockets.emit('updateTasks', tasks);
+          socketIO.sockets.emit('refresh');
+          socket.emit('updateTasks', tasks);
         });
       }, function(error){
         socket.emit('adminInfo', error);
@@ -440,7 +480,8 @@ socketIO.on('connection', function (socket) {
     if(socket.handshake.authenticated === adminName) {
       taskDB.deleteTask(data.title).then(function(){
         list(taskDB, function(tasks){
-          socketIO.sockets.emit('updateTasks', tasks);
+          socketIO.sockets.emit('refresh');
+          socket.emit('updateTasks', tasks);
         });
       }, function(error){
         socket.emit('adminInfo', error);
@@ -452,7 +493,8 @@ socketIO.on('connection', function (socket) {
     if(socket.handshake.authenticated === adminName) {
       teamDB.addTeam(data.name, data.password).then(function(){
         list(teamDB, function(teams){
-          socketIO.sockets.emit('updateTeams', teams);
+          socketIO.sockets.emit('refresh');
+          socket.emit('updateTeams', teams);
         });
       }, function(error){
         socket.emit('adminInfo', error);
@@ -464,7 +506,7 @@ socketIO.on('connection', function (socket) {
     if(socket.handshake.authenticated === adminName) {
       teamDB.editTeam(data.name, data.password).then(function(){
         list(teamDB, function(teams){
-          socketIO.sockets.emit('updateTeams', teams);
+          socket.emit('updateTeams', teams);
         });
       }, function(error){
         socket.emit('adminInfo', error);
@@ -476,7 +518,6 @@ socketIO.on('connection', function (socket) {
     if(socket.handshake.authenticated === adminName && data.name !== adminName) {
       teamDB.deleteTeam(data.name).then(function(){
         list(teamDB, function(teams){
-          socketIO.sockets.emit('updateTeams', teams);
           taskDB.cleanSolved(data.name, teams.length);
           var handshakes = socketIO.sockets.manager.handshaken;
           for(var key in handshakes){
@@ -506,6 +547,8 @@ socketIO.on('connection', function (socket) {
               }
             }
           }
+          socketIO.sockets.emit('refresh');
+          socket.emit('updateTeams', teams);
         }, function(error){
           socket.emit('adminInfo', error);
         });

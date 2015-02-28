@@ -1,26 +1,58 @@
 $(document).ready(function () {
-sock = io.connect('https://127.0.0.1:4443');
+  $('#pad').draggable({cursor: 'crosshair', handle: '.titleBar', drag: function(event, ui){
+            if(ui.position.top < $('#navbar').height()){
+                ui.position.top = $('#navbar').height();
+            }
+            if(ui.position.left < 0){
+                ui.position.left = 0;
+            }
+        }
+    });
 
-sock.emit('give_me_scoreboard');
+  $('#pad').resizable();
 
-function resetScoreboard(){
-	$("#scoreboard").html("");
-	var my_head="<th>#</th><th></th><th>&Eacute;quipe</th><th>Score</th><th>BreakThrough</th>";
-	$("#scoreboard").append("<tbody>");
-    $("#scoreboard").append("<tr>");
-    $("#scoreboard tr").append(my_head);
-}
+  sock.on('validation', function(){
+    sock.emit('getScoreboard');
+  });
 
-resetScoreboard();
+  sock.on('refresh', function(){
+    sock.emit('getScoreboard');
+  });
 
-sock.on('scoreboard',function(data){
-	resetScoreboard();
-for(var i=0;i<data.length;i++){
-	var breakthrough=""
-	for(var j=0;j<data[i].bt;j++)
-		breakthrough=breakthrough+'<img src="/static/img/coeur.png" />';
-$("#scoreboard tbody").append('<tr id="'+data[i].name+'"><td>'+(i+1)+'</td><td><img src="/static/img/team_logos/'+data[i].name+'.png"</td><td>'+data[i].name+'</td><td>'+data[i].score+'</td><td>'+breakthrough+'</td></tr>');
-}
-});
 
+  sock.emit('getScoreboard');
+  sock.on('giveScoreboard', function(scoreboard){
+    $('#scoreboard').html('');
+    var lineDiv;
+    var posDiv;
+    var teamDiv;
+    var scoreDiv;
+    var lastDiv;
+    var pos = 1;
+    var time;
+    scoreboard.forEach(function(line){
+      lineDiv = $('<div></div>');
+      lineDiv.addClass('line');
+      posDiv = $('<div></div>');
+      posDiv.addClass('column');
+      posDiv.text(pos);
+      pos += 1;
+      teamDiv = $('<div></div>');
+      teamDiv.addClass('column');
+      teamDiv.text(line.team);
+      scoreDiv = $('<div></div>');
+      scoreDiv.addClass('column');
+      scoreDiv.text(line.score);
+      lastDiv = $('<div></div>');
+      lastDiv.addClass('column');
+      time = new Date(-line.time);
+      lastDiv.text(line.lastTask+' '+time.getHours()+':'+time.getMinutes()+':'+time.getSeconds());
+      lineDiv.append(posDiv);
+      lineDiv.append(teamDiv);
+      lineDiv.append(scoreDiv);
+      lineDiv.append(lastDiv);
+      $('#scoreboard').append(lineDiv);
+    });
+
+  });
 });

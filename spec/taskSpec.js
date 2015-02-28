@@ -205,7 +205,7 @@ describe("Tasks never solved", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('First task');
     promise.then(function(task){
-      expect(taskDB.teamSolved(task, 'myTeam')).toBe(false);
+      expect(taskDB.teamSolved(task, 'myTeam').ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -215,7 +215,7 @@ describe("Tasks never solved", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('First task');
     promise.then(function(task){
-      expect(taskDB.teamSolvedFirst(task, 'myTeam')).toBe(false);
+      expect(taskDB.teamSolvedFirst(task, 'myTeam').ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -282,7 +282,7 @@ describe("Tasks solved by other team", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Second task');
     promise.then(function(task){
-      expect(taskDB.teamSolved(task, 'myTeam')).toBe(false);
+      expect(taskDB.teamSolved(task, 'myTeam').ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -292,7 +292,7 @@ describe("Tasks solved by other team", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Second task');
     promise.then(function(task){
-      expect(taskDB.teamSolvedFirst(task, 'myTeam')).toBe(false);
+      expect(taskDB.teamSolvedFirst(task, 'myTeam').ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -360,7 +360,7 @@ describe("Tasks solved by my team", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Third task');
     promise.then(function(task){
-      expect(taskDB.teamSolved(task, 'myTeam')).toBe(true);
+      expect(taskDB.teamSolved(task, 'myTeam').ok).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -370,7 +370,7 @@ describe("Tasks solved by my team", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Third task');
     promise.then(function(task){
-      expect(taskDB.teamSolvedFirst(task, 'myTeam')).toBe(false);
+      expect(taskDB.teamSolvedFirst(task, 'myTeam').ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -437,7 +437,7 @@ describe("Tasks solved by my team first", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Fourth task');
     promise.then(function(task){
-      expect(taskDB.teamSolved(task, 'myTeam')).toBe(true);
+      expect(taskDB.teamSolved(task, 'myTeam').ok).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -447,7 +447,7 @@ describe("Tasks solved by my team first", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Fourth task');
     promise.then(function(task){
-      expect(taskDB.teamSolvedFirst(task, 'myTeam')).toBe(true);
+      expect(taskDB.teamSolvedFirst(task, 'myTeam').ok).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);

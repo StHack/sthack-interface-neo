@@ -1,12 +1,12 @@
 body{
-    min-width: 1400px;
+    /*min-width: 1400px;*/
     background: url(/img/bg.jpg);
 }
 
 #navbar{
     width: 100%;
-    height: 1%;
     background: #e3e3e3;
+    position: fixed;
 }
 
 .menu{
@@ -20,11 +20,15 @@ body{
     font-size: 1vw;
 }
 
-@media screen and (max-width: 1400px){
+.menu img{
+    width: 10%;
+}
+
+/*@media screen and (max-width: 1400px){
     .menu{
         font-size: 1em;
     }
-}
+}*/
 
 .selected{
     font-weight: bold;
@@ -38,13 +42,19 @@ body{
     float:right;
 }
 
+.left{
+    float:left;
+}
+
 #login{
     padding: 1%;
-    min-width: 350px;
-    min-height: 267px;
+    /*min-width: 350px;
+    min-height: 267px;*/
     width: 36%;
-    height: 50%;
-    margin: 12% auto;
+    height: 40%;
+    position: absolute;
+    top:30%;
+    left:30%;
     text-align:center;
     background: #1e5799; /* Old browsers */
     background: -moz-linear-gradient(top,  #1e5799 0%, #ffffff 0%, #e3e3e3 100%); /* FF3.6+ */
@@ -54,6 +64,10 @@ body{
     background: -ms-linear-gradient(top,  #1e5799 0%,#ffffff 0%,#e3e3e3 100%); /* IE10+ */
     background: linear-gradient(to bottom,  #1e5799 0%,#ffffff 0%,#e3e3e3 100%); /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#e3e3e3',GradientType=0 ); /* IE6-9 */
+}
+
+#login img{
+    width: 50%;
 }
 
 #login select{
@@ -76,20 +90,21 @@ body{
 }
 
 #console{
-    z-index: -1;
+    z-index: 101;
+    top:8%;
+    direction:rtl;
     position:absolute;
-    min-width: 400px;
-    min-height: 350px;
+    /*min-width: 400px;
+    min-height: 350px;*/
     width: 30%;
-    height: 50%;
+    height: 88%;
     opacity:0.7;
-    padding: 10px;
+    padding: 1%;
     overflow-y: auto;
     overflow-x: hidden;
     font-family: consolas, monospace;
     color: #00ed0b;
     background-color: #000;
-    line-height: 20px;
 }
 
 #console a{
@@ -101,16 +116,7 @@ body{
     text-decoration:underline;
 }
 
-
-#pad{
-    z-index: -2;
-    left:33%;
-    top:10%;
-    position:absolute;
-    min-width: 925px;
-    min-height: 680px;
-    width:60%;
-    height: 85%;
+.window{
     background: #1e5799; /* Old browsers */
     background: -moz-linear-gradient(top,  #1e5799 0%, #ffffff 0%, #e3e3e3 100%); /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#1e5799), color-stop(0%,#ffffff), color-stop(100%,#e3e3e3)); /* Chrome,Safari4+ */
@@ -122,27 +128,41 @@ body{
     box-shadow: 1px 1px 1em #555;
 }
 
+#pad{
+    z-index: -2;
+    left:33%;
+    top:10%;
+    position:absolute;
+    /*min-width: 925px;
+    min-height: 680px;*/
+    width:60%;
+    height: 85%;
+}
+
 .titleBar{
     width: 100%;
     height: 4%;
     background-color: #616161;
     padding-top: 1%;
     padding-bottom: 1%;
-    line-height: 200%;
-}
-
-.titleBar h2{
     font-size: 1vw;
-    margin-left: 1%;
     color:#F7F7F7;
     font-family: consolas, monospace;
 }
 
-@media screen and (max-width: 1400px){
-    .titleBar h2{
+.titleBar img{
+    width: 3%;
+    margin-right: 1%;
+    margin-top: -0.5%;
+    float: right;
+    cursor: pointer;
+}
+
+/*@media screen and (max-width: 1400px){
+    .titleBar {
         font-size: 0.8em;
     }
-}
+}*/
 
 .popupTitleBar{
     width: 100%;
@@ -150,21 +170,20 @@ body{
     background-color: #616161;
     padding-top: 1%;
     padding-bottom: 1%;
-    line-height: 200%;
-}
-
-.popupTitleBar h2{
     font-size: 1vw;
-    margin-left: 1%;
     color:#F7F7F7;
     font-family: consolas, monospace;
 }
 
-@media screen and (max-width: 1400px){
+/*.popupTitleBar h2{
+
+}*/
+
+/*@media screen and (max-width: 1400px){
     .popupTitleBar h2{
         font-size: 0.8em;
     }
-}
+}*/
 
 .content{
     overflow-y: auto;
@@ -177,23 +196,34 @@ body{
     font-size: 1vw;
 }
 
-@media screen and (max-width: 1400px){
+/*@media screen and (max-width: 1400px){
     .content div{
         font-size: 1em;
     }
-}
+}*/
 
 .content h3{
-    margin:5px;
+    margin:1%;
     font-weight: bold;
 }
 
 .content div{
-    margin:20px;
+    margin:2%;
 }
 
 .center{
     text-align: center;
+}
+
+#admin select{
+    width:20%;
+    height:2em;
+    font-size: 1vw;
+}
+
+#admin input{
+    width:50%;
+    font-size: 1vw;
 }
 
 .f-left{
@@ -202,39 +232,79 @@ body{
 }
 
 .f-left p{
-    margin-bottom: 10px;
+    margin-bottom: 1%;
+    width:30%;
+}
+
+.f-left input{
+    width:30%;
 }
 
 .f-left h4{
     display: inline-block;
-    width:150px;
+    width:30%;
+}
+
+
+
+#addTeam, #editTeam, #addTask, #editTask{
+    width:40%;
+    height:2em;
+    font-size: 1vw;
+}
+
+#deleteTeam, #deleteTask{
+    width:50%;
+    height:2em;
+    font-size: 1vw;
+}
+
+#sendMessage, #openCTF, #closeCTF, #openRegistration, #closeRegistration{
+    width:10%;
+    height:2em;
+    font-size: 1vw;
+}
+
+#refresh{
+    width:20%;
+    height:2em;
+    font-size: 1vw;
 }
 
 canvas {
-    width: 22%;
+    width: 30%;
     height: initial;
 }
 
-.buttonTask{
+.buttonTask, .buttonDir{
     cursor: pointer;
     margin-left: 1%;
     margin-top: 1%;
 }
 
+.directory{
+    display: none;
+    z-index: 1;
+    display: block;
+    /*min-width: 510px;
+    min-height: 330px;*/
+    width: 66%;
+    height: 70%;
+    position: absolute;
+    top: 20%;
+    left: 30%;
+}
+
 #popup{
     display: none;
-    min-width: 510px;
-    min-height: 330px;
+    z-index: 100;
+    /*min-width: 510px;
+    min-height: 330px;*/
     width: 36%;
     height: 50%;
     position: absolute;
     top: 30%;
     left: 50%;
-    background-color: #fff;
-
-    -webkit-box-shadow: 0px 0px 0.5em #000;
-    -moz-box-shadow: 0px 0px 0.5em #000;
-    box-shadow: 0px 0px 0.5em #000;
 }
 
 #contentPopup{
@@ -245,11 +315,11 @@ canvas {
     font-size: 1vw;
 }
 
-@media screen and (max-width: 1400px){
+/*@media screen and (max-width: 1400px){
     #contentPopup{
         font-size: 1em;
     }
-}
+}*/
 
 #submit{
     text-align:center;
@@ -329,10 +399,28 @@ canvas {
 .new_line{
     font-size: 1vw;
     line-height: 120%;
+    direction:ltr;
 }
 
-@media screen and (max-width: 1400px){
+/*@media screen and (max-width: 1400px){
     .new_line{
         font-size: 0.8em;
     }
+}*/
+
+.line{
+    margin: auto;
+}
+
+.line .column{
+    width:24%;
+    margin:0px;
+    float:left;
+    text-align: center;
+    margin-bottom: 1%;
+}
+
+#scoreboardTitle .column{
+    font-weight: bold;
+    margin-bottom: 3%;
 }
