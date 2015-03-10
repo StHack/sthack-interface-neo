@@ -6,7 +6,7 @@ var blink_val = 0;
 var blink;
 
 $(document).ready(function () {
-  $('#console').draggable({cursor: 'crosshair', axis: 'x', drag: function(event, ui){
+  $('#console').draggable({cursor: 'crosshair', drag: function(event, ui){
             if(ui.position.top < $('#navbar').height()){
                 ui.position.top = $('#navbar').height();
             }

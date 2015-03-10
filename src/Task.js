@@ -29,6 +29,7 @@ Task.prototype.getTasks = function(teamName, countTeam){
       result.forEach(function(task){
         var infos = self.getInfos(task, teamName, countTeam);
         task.score = infos.score;
+        task.state = infos.state;
         infosTasks.push(infos);
       });
       fulfill({infos: infosTasks, raw: result});

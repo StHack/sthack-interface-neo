@@ -5,18 +5,18 @@ body{
 
 #navbar{
     width: 100%;
-    background: #e3e3e3;
+    background: #000;
     position: fixed;
 }
 
 .menu{
-    line-height: 400%;
+    line-height: 200%;
     display: inline-block;
     width: 12%;
     text-align: center;
-    font-family: verdana;
+    font-family: consolas, monospace;
     text-decoration: none;
-    color: black;
+    color: #c72127;
     font-size: 1vw;
 }
 
@@ -35,11 +35,12 @@ body{
 }
 
 .btn:hover{
-    background-color: #2968D8;
+    background-color: #4d0d0f;
 }
 
 .right{
     float:right;
+    width:30%;
 }
 
 .left{
@@ -56,18 +57,11 @@ body{
     top:30%;
     left:30%;
     text-align:center;
-    background: #1e5799; /* Old browsers */
-    background: -moz-linear-gradient(top,  #1e5799 0%, #ffffff 0%, #e3e3e3 100%); /* FF3.6+ */
-    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#1e5799), color-stop(0%,#ffffff), color-stop(100%,#e3e3e3)); /* Chrome,Safari4+ */
-    background: -webkit-linear-gradient(top,  #1e5799 0%,#ffffff 0%,#e3e3e3 100%); /* Chrome10+,Safari5.1+ */
-    background: -o-linear-gradient(top,  #1e5799 0%,#ffffff 0%,#e3e3e3 100%); /* Opera 11.10+ */
-    background: -ms-linear-gradient(top,  #1e5799 0%,#ffffff 0%,#e3e3e3 100%); /* IE10+ */
-    background: linear-gradient(to bottom,  #1e5799 0%,#ffffff 0%,#e3e3e3 100%); /* W3C */
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#1e5799', endColorstr='#e3e3e3',GradientType=0 ); /* IE6-9 */
+    background: #000; /* Old browsers */
 }
 
 #login img{
-    width: 50%;
+    width: 30%;
 }
 
 #login select{
@@ -82,7 +76,7 @@ body{
 #login input{
     padding: 1%;
     border: solid 1px #c5c5c5;
-    font: normal 2vw Verdana, Tahoma, sans-serif;
+    font: normal 1vw Verdana, Tahoma, sans-serif;
     width: 72%;
     margin-top: 5%;
     background: #FFFFFF;
@@ -91,19 +85,19 @@ body{
 
 #console{
     z-index: 101;
-    top:8%;
+    top:5%;
     direction:rtl;
     position:absolute;
     /*min-width: 400px;
     min-height: 350px;*/
     width: 30%;
-    height: 88%;
+    height: 85%;
     opacity:0.7;
     padding: 1%;
     overflow-y: auto;
     overflow-x: hidden;
     font-family: consolas, monospace;
-    color: #00ed0b;
+    color: #c72127;
     background-color: #000;
 }
 
@@ -131,7 +125,7 @@ body{
 #pad{
     z-index: -2;
     left:33%;
-    top:10%;
+    top:5%;
     position:absolute;
     /*min-width: 925px;
     min-height: 680px;*/
@@ -186,6 +180,7 @@ body{
 }*/
 
 .content{
+    font-family: consolas, monospace;
     overflow-y: auto;
     overflow-x: hidden;
     margin: 1%;
@@ -288,11 +283,11 @@ canvas {
     display: block;
     /*min-width: 510px;
     min-height: 330px;*/
-    width: 66%;
-    height: 70%;
+    width: 50%;
+    height: 65%;
     position: absolute;
     top: 20%;
-    left: 30%;
+    left: 40%;
 }
 
 #popup{
@@ -408,19 +403,41 @@ canvas {
     }
 }*/
 
+#scoreboard {
+    display: table;
+    width:100%;
+}
+
 .line{
     margin: auto;
+    display: table-row;
 }
 
 .line .column{
-    width:24%;
+    overflow: hidden;
     margin:0px;
     float:left;
     text-align: center;
     margin-bottom: 1%;
 }
 
-#scoreboardTitle .column{
+.head .column{
     font-weight: bold;
     margin-bottom: 3%;
+}
+
+.pos{
+    width: 10%;
+}
+
+.team{
+    width: 50%;
+}
+
+.score{
+    width:15%;
+}
+
+.last{
+    width:24%;
 }

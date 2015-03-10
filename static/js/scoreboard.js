@@ -15,14 +15,14 @@ $(document).ready(function () {
     sock.emit('getScoreboard');
   });
 
-  sock.on('refresh', function(){
+  sock.on('updateTeams', function(){
     sock.emit('getScoreboard');
   });
 
 
   sock.emit('getScoreboard');
   sock.on('giveScoreboard', function(scoreboard){
-    $('#scoreboard').html('');
+    $('#scoreboard').html('<div class="line head"><div class="column pos">Pos</div><div class="column team">Team</div><div class="column score">Score</div><div class="column last">Last Solved</div></div>');
     var lineDiv;
     var posDiv;
     var teamDiv;
@@ -35,16 +35,20 @@ $(document).ready(function () {
       lineDiv.addClass('line');
       posDiv = $('<div></div>');
       posDiv.addClass('column');
+      posDiv.addClass('pos');
       posDiv.text(pos);
       pos += 1;
       teamDiv = $('<div></div>');
       teamDiv.addClass('column');
+      teamDiv.addClass('team');
       teamDiv.text(line.team);
       scoreDiv = $('<div></div>');
       scoreDiv.addClass('column');
+      scoreDiv.addClass('score');
       scoreDiv.text(line.score);
       lastDiv = $('<div></div>');
       lastDiv.addClass('column');
+      lastDiv.addClass('last');
       time = new Date(-line.time);
       lastDiv.text(line.lastTask+' '+time.getHours()+':'+time.getMinutes()+':'+time.getSeconds());
       lineDiv.append(posDiv);

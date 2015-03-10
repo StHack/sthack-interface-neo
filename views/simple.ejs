@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Insomni'hack 2015</title>
+  <link href="/icone.ico" type="image/x-icon" rel="shortcut icon">
+  </head>
+<body>
+<div>Score : <%= score %></div>
+<ul>
+<% for(var i=0; i<tasks.length; i++) {%>
+   <li><b><%= tasks[i].title %></b> <%= tasks[i].description %><br />
+   <%= tasks[i].type+' - '+tasks[i].difficulty+' - Author : '+ tasks[i].author %><br />
+   <%= tasks[i].score+' pts' %>
+   <% if(tasks[i].state <= 1) { %>
+   <form method="POST" action="/submitFlag">
+    <input type="hidden" name="title" value="<%= tasks[i].title %>">
+    <input type="text" name="flag">
+    <input type="submit">
+   </form>
+   <% } %>
+   </li>
+<% } %>
+</ul>
+</body>
+</html>

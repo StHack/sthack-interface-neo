@@ -24,9 +24,10 @@ loadImages(function(){
         var types = [];
         tasks.forEach(function(task){
             var canvas = $('<canvas></canvas>');
-            canvas.text(task.title);
+            canvas.text(JSON.stringify(task));
             canvas.attr('id', 'task-'+task.title.checksum());
             canvas.addClass('buttonTask');
+            canvas.addClass('');
             canvases.push({canvas: canvas, task: task});
             if(types.indexOf(task.type) === -1){
                 types.push(task.type);
@@ -89,6 +90,18 @@ loadImages(function(){
         closeDir(document.getElementById(id), $(this).parent().text());
     });
 
+    $('body').on('mouseenter', '.buttonTask', function(e){
+        enter(e.target, function(){
+
+        });
+    });
+
+     $('body').on('mouseleave', '.buttonTask', function(e){
+        leave(e.target, function(){
+
+        });
+    });
+
     $('body').on('click', 'canvas', function(e){
         if($(e.target).attr('class') === 'buttonDir'){
             openDir(e.target, $(e.target).text(),  function(){
@@ -100,7 +113,7 @@ loadImages(function(){
         }
         else{
             clickTask(e.target, function(){
-                var title = $(e.target).text();
+                var title = JSON.parse($(e.target).text()).title;
                 sock.emit('getTask', title);
             });
         }
@@ -128,9 +141,11 @@ loadImages(function(){
     });
 
     sock.on('updateTask', function(task){
-        if($('#popup').css('display')==='block'){
+        if($('#popup').css('display')==='block' && $('#titlePopup').text()===task.title){
             sock.emit('getTask', task.title);
+
         }
+        $('#task-'+task.title.checksum()).text(JSON.stringify(task));
         loadTask(task);
     });
 
@@ -162,6 +177,20 @@ loadImages(function(){
     $('#cancel').click(function(){
         $('#flag').val('');
         $('#popup').css('display', 'none');
+    });
+
+    sock.on('updateTaskScores', function(tasks){
+        tasks.forEach(function(task){
+            if($('#popup').css('display')==='block' && $('#titlePopup').text()===task.title){
+                sock.emit('getTask', task.title);
+            }
+            loadTask(task);
+        });
+    });
+
+    sock.on('newTeam', function(){
+        console.log('new team');
+        sock.emit('updateTaskScores');
     });
 
     sock.on('refresh', function(){
