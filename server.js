@@ -253,6 +253,11 @@ app.post('/submitFlag', function(req, res){
         var message = req.session.authenticated+' solved '+req.body.title;
         socketIO.sockets.emit('message', {submit: 2, message: message});
         messageDB.addMessage(message);
+        if(closedTaskDelay > 0){
+          setTimeout(function(){
+            socketIO.sockets.emit('reopenTask', req.body.title);
+          }, closedTaskDelay);
+        }
         res.redirect(301, '/simple');
       }, function(error){
         console.log('"'+d+'" "'+req.connection.remoteAddress+'" "'+req.session.authenticated.replace(/"/g,'\\"')+'" "submitFlag" "'+req.body.title.replace(/"/g,'\\"')+'" "ko"' );
@@ -413,6 +418,7 @@ socketIO.on('connection', function (socket) {
   socket.on('updateTask', function(title){
     teamDB.list().then(function(teams){
       taskDB.getTaskInfos(title, socket.handshake.authenticated, teams.length, false).then(function(task){
+        console.log(task);
         socket.emit('updateTask', task);
       }, function(error){
         socket.emit('error', error);
@@ -462,6 +468,11 @@ socketIO.on('connection', function (socket) {
         var message = socket.handshake.authenticated+' solved '+datas.title;
         socketIO.sockets.emit('message', {submit: 2, message: message});
         messageDB.addMessage(message);
+        if(closedTaskDelay > 0){
+          setTimeout(function(){
+            socketIO.sockets.emit('reopenTask', datas.title);
+          }, closedTaskDelay);
+        }
       }, function(error){
         console.log('"'+d+'" "'+socket.handshake.address.address+'" "'+socket.handshake.authenticated.replace(/"/g,'\\"')+'" "submitFlag" "'+datas.title+'" "ko"' );
         socket.emit('nope', error);

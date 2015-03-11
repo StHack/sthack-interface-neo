@@ -160,9 +160,8 @@ function printText(ctx, canvasTask, task){
     ctx.restore();
 }
 
-function loadTask(task){
-    var idTask = task.title.checksum();
-    var canvasTask = document.getElementById('task-'+idTask);
+function loadTask(canvasTask){
+    var task = JSON.parse($(canvasTask).text());
     var ctx = canvasTask.getContext('2d');
     ctx.clearRect(0, 0, canvasTask.width,canvasTask.height);
     if(task.state>1){
@@ -183,9 +182,8 @@ function loadTask(task){
     printText(ctx, canvasTask, task);
 }
 
-function validateTask(title, callback){
-    var idTask = title.checksum();
-    var canvasTask = document.getElementById('task-'+idTask);
+function validateTask(canvasTask, callback){
+    var task = JSON.parse($(canvasTask).text());
     var ctx = canvasTask.getContext('2d');
     var radius = 2;
     ctx.save();
@@ -220,4 +218,11 @@ function validateTask(title, callback){
 
 function clickTask(canvasTask, callback){
     callback();
+}
+
+function reopenTask(canvasTask){
+
+}
+
+function closeTask(canvasTask){
 }

@@ -30,6 +30,7 @@ Task.prototype.getTasks = function(teamName, countTeam){
         var infos = self.getInfos(task, teamName, countTeam);
         task.score = infos.score;
         task.state = infos.state;
+        task.open  = infos.open;
         infosTasks.push(infos);
       });
       fulfill({infos: infosTasks, raw: result});
@@ -47,6 +48,7 @@ Task.prototype.getInfos = function(task, teamName, countTeam, description){
   infos.difficulty = task.difficulty;
   infos.score = self.getScore(task, countTeam);
   infos.state = self.getSolvedState(task, teamName).state;
+  infos.open =  self.isOpen(task);
   infos.author = task.author;
   if(description){
     infos.description = task.description;

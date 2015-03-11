@@ -78,7 +78,7 @@ loadImages(function(){
         });
         canvases.forEach(function(canvas){
             $('#content-'+canvas.task.type.checksum()).append(canvas.canvas);
-            loadTask(canvas.task);
+            loadTask(canvas.canvas[0]);
         });
     });
 
@@ -145,17 +145,20 @@ loadImages(function(){
     });
 
     sock.on('updateTask', function(task){
-        if($('#popup').css('display')==='block' && $('#titlePopup').text()===task.title){
+        console.log(task);
+        if($('#popup').css('display') === 'block' && $('#titlePopup').text()===task.title){
             sock.emit('getTask', task.title);
-
         }
-        $('#task-'+task.title.checksum()).text(JSON.stringify(task));
-        loadTask(task);
+        var canvasTask = document.getElementById('task-'+task.title.checksum());
+        canvasTask.textContent = JSON.stringify(task);
+        closeTask(canvasTask);
+        loadTask(canvasTask);
     });
 
     sock.on('validation', function(infos){
         if($('#team').text()===infos.team){
-            validateTask(infos.title, function(){
+            var canvasTask = document.getElementById('task-'+infos.title.checksum());
+            validateTask(canvasTask, function(){
                 sock.emit('updateTask', infos.title);
             });
         }
@@ -163,6 +166,14 @@ loadImages(function(){
             sock.emit('updateTask', infos.title);
         }
         sock.emit('getScore');
+    });
+
+    sock.on('reopenTask', function(title){
+        var canvasTask = document.getElementById('task-'+title.checksum());
+        var task = JSON.parse(canvasTask.textContent);
+        task.open = true;
+        canvasTask.textContent = JSON.stringify(task);
+        reopenTask(canvasTask);
     });
 
     sock.on('nope', function(error){
@@ -188,12 +199,13 @@ loadImages(function(){
             if($('#popup').css('display')==='block' && $('#titlePopup').text()===task.title){
                 sock.emit('getTask', task.title);
             }
-            loadTask(task);
+            var canvasTask = document.getElementById('task-'+task.title.checksum());
+            canvasTask.textContent = JSON.stringify(task);
+            loadTask(canvasTask);
         });
     });
 
     sock.on('newTeam', function(){
-        console.log('new team');
         sock.emit('updateTaskScores');
     });
 
