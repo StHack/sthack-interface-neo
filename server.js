@@ -172,7 +172,7 @@ app.get("/", function(req, res){
   }
   else{
     list(teamDB, function(teams){
-      res.render('not_logged', {
+      res.render('login', {
         current: 'index',
         teams_list: teams,
         registrationOpen: registrationOpen
