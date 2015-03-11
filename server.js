@@ -344,6 +344,27 @@ socketIO.set('authorization', function (handshake, callback) {
   }
 });
 
+function getScoreInfos(tasks, team){
+  var score = 0;
+  var bt = 0;
+  var last = 0;
+  var lastTask = '';
+  tasks.forEach(function(task){
+    var solved = taskDB.teamSolved(task, team);
+    if(solved.ok){
+      if(taskDB.teamSolvedFirst(task, team).ok){
+        bt+=1;
+      }
+      score += task.score;
+      if(last < solved.time){
+        last = solved.time;
+        lastTask = task.title;
+      }
+    }
+  });
+
+  return {value: score, breakthrough: bt, lastTask: lastTask, last:last};
+}
 
 socketIO.on('connection', function (socket) {
 
@@ -351,14 +372,8 @@ socketIO.on('connection', function (socket) {
     teamDB.list().then(function(teams){
       taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
         socket.emit('giveTasks', tasks.infos);
-        var score = 0;
-        tasks.raw.forEach(function(task){
-          var solved = taskDB.teamSolved(task, socket.handshake.authenticated);
-          if(solved.ok){
-            score += task.score;
-          }
-        });
-        socket.emit('giveScore', {name: socket.handshake.authenticated, score: score});
+        var score = getScoreInfos(tasks.raw, socket.handshake.authenticated);
+        socket.emit('giveScore', {name: socket.handshake.authenticated, score: score.value, breakthrough: score.breakthrough});
       }, function(error){
         socket.emit('error', error);
       });
@@ -371,14 +386,8 @@ socketIO.on('connection', function (socket) {
     teamDB.list().then(function(teams){
       taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
         socket.emit('updateTaskScores', tasks.infos);
-        var score = 0;
-        tasks.raw.forEach(function(task){
-          var solved = taskDB.teamSolved(task, socket.handshake.authenticated);
-          if(solved.ok){
-            score += task.score;
-          }
-        });
-        socket.emit('giveScore', {name: socket.handshake.authenticated, score: score});
+        var score = getScoreInfos(tasks.raw, socket.handshake.authenticated);
+        socket.emit('giveScore', {name: socket.handshake.authenticated, score: score.value, breakthrough: score.breakthrough});
       }, function(error){
         socket.emit('error', error);
       });
@@ -418,20 +427,8 @@ socketIO.on('connection', function (socket) {
       taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
         var scoreboard = [];
         teams.forEach(function(team){
-          var score = 0;
-          var last = 0;
-          var lastTask = '';
-          tasks.raw.forEach(function(task){
-            var solved = taskDB.teamSolved(task, team.name);
-            if(solved.ok){
-              score += task.score;
-              if(last < solved.time){
-                last = solved.time;
-                lastTask = task.title;
-              }
-            }
-          });
-          scoreboard.push({team: team.name, score: score, lastTask: lastTask, time: -last});
+          var score = getScoreInfos(tasks.raw, team.name);
+          scoreboard.push({team: team.name, score: score.value, lastTask: score.lastTask, time: -score.last, breakthrough: score.breakthrough});
         });
         var orderedScoreboard = _.sortBy(scoreboard, ['score', 'time']).reverse();
         socket.emit('giveScoreboard', orderedScoreboard);
@@ -446,14 +443,8 @@ socketIO.on('connection', function (socket) {
   socket.on('getScore', function(){
     teamDB.list().then(function(teams){
       taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
-        var score = 0;
-        tasks.raw.forEach(function(task){
-          var solved = taskDB.teamSolved(task, socket.handshake.authenticated);
-          if(solved.ok){
-            score += task.score;
-          }
-        });
-        socket.emit('giveScore', {name: socket.handshake.authenticated, score: score});
+        var score = getScoreInfos(tasks.raw, socket.handshake.authenticated);
+        socket.emit('giveScore', {name: socket.handshake.authenticated, score: score.value, breakthrough: score.breakthrough});
       }, function(error){
         socket.emit('error', error);
       });

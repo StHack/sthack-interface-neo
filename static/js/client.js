@@ -15,6 +15,10 @@ loadImages(function(){
     sock.on('giveScore', function(team){
         $('#team').text(team.name);
         $('#score').text(team.score);
+        for(var i = 0; i < team.breakthrough; i++){
+            $('#breakthrough').append('<img src="/img/coeur.png" />');
+        }
+
     });
 
     sock.emit('getTasks');

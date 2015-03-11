@@ -22,7 +22,7 @@ $(document).ready(function () {
 
   sock.emit('getScoreboard');
   sock.on('giveScoreboard', function(scoreboard){
-    $('#scoreboard').html('<div class="line head"><div class="column pos">Pos</div><div class="column team">Team</div><div class="column score">Score</div><div class="column last">Last Solved</div></div>');
+    $('#scoreboard').html('<div class="line head"><div class="column pos">Pos</div><div class="column team">Team</div><div class="column score">Score</div><div class="column bt">Breakthrough</div></div>');
     var lineDiv;
     var posDiv;
     var teamDiv;
@@ -48,9 +48,12 @@ $(document).ready(function () {
       scoreDiv.text(line.score);
       lastDiv = $('<div></div>');
       lastDiv.addClass('column');
-      lastDiv.addClass('last');
+      lastDiv.addClass('bt');
       time = new Date(-line.time);
-      lastDiv.text(line.lastTask+' '+time.getHours()+':'+time.getMinutes()+':'+time.getSeconds());
+      for(var i = 0; i < line.breakthrough; i++){
+        lastDiv.append('<img src="/img/coeur.png">');
+      }
+
       lineDiv.append(posDiv);
       lineDiv.append(teamDiv);
       lineDiv.append(scoreDiv);
