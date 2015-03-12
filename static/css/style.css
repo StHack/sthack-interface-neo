@@ -471,13 +471,13 @@ canvas {
     height: 85%;
 }
 
+#rules div.content {
+    margin: 0%;
+}
+
 #rules h2 {
     display: block;
     font-size: 1.5em;
-    -webkit-margin-before: 0.83em;
-    -webkit-margin-after: 0.83em;
-    -webkit-margin-start: 0px;
-    -webkit-margin-end: 0px;
     font-weight: bold;
 }
 
@@ -492,11 +492,6 @@ canvas {
 #rules ul {
     display: block;
     list-style-type: disc;
-    -webkit-margin-before: 1em;
-    -webkit-margin-after: 1em;
-    -webkit-margin-start: 0px;
-    -webkit-margin-end: 0px;
-    -webkit-padding-start: 40px;
 }
 
 #rules li {

@@ -90,8 +90,9 @@ loadImages(function(){
     $('body').on('click', '.imgClose', function(e){
         var directory = $(this).parent().parent();
         var id = directory.attr('id').substring(4);
-        directory.css('display', 'none');
-        closeDir(document.getElementById(id), $(this).parent().text());
+        closeDir(document.getElementById(id), $(this).parent().text(), function(){
+            directory.css('display', 'none');
+        });
     });
 
     $('body').on('mouseenter', '.buttonTask', function(e){
@@ -108,12 +109,19 @@ loadImages(function(){
 
     $('body').on('click', 'canvas', function(e){
         if($(e.target).attr('class') === 'buttonDir'){
-            openDir(e.target, $(e.target).text(),  function(){
-                var id = $(e.target).attr('id');
-                $('#div-'+id).css('display', 'block');
-                $('.directory').css('z-index', '1');
-                $('#div-'+id).css('z-index', '2');
-            });
+            var id = $(e.target).attr('id');
+            if($('#div-'+id).css('display')==='block'){
+                closeDir(e.target, $(e.target).text(), function(){
+                    $('#div-'+id).css('display', 'none');
+                });
+            }
+            else{
+                openDir(e.target, $(e.target).text(),  function(){
+                    $('#div-'+id).css('display', 'block');
+                    $('.directory').css('z-index', '1');
+                    $('#div-'+id).css('z-index', '2');
+                });
+            }
         }
         else{
             clickTask(e.target, function(){
