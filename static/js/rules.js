@@ -1,4 +1,4 @@
-$(document).ready(function () {
+loadImages(function(){
   $('#rules').draggable({cursor: 'crosshair', handle: '.titleBar', drag: function(event, ui){
             if(ui.position.top < $('#navbar').height()){
                 ui.position.top = $('#navbar').height();
