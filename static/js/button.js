@@ -38,7 +38,7 @@ function loadImages(callback) {
     }
 }
 
-function closeDir(canvasDir, type){
+function closeDir(canvasDir, type, callback){
     var ctx = canvasDir.getContext('2d');
     ctx.save();
     ctx.clearRect(0, 0, canvasDir.width,canvasDir.height);
@@ -54,6 +54,8 @@ function closeDir(canvasDir, type){
     ctx.fillText(type, canvasDir.width/2, canvasDir.height/2);
 
     ctx.restore();
+
+    callback();
 }
 
 function openDir(canvasDir, type, callback){
