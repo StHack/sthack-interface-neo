@@ -32,10 +32,6 @@ You need to create a sshProduction.json file to use the deploy procedure (see la
 }
 ```
 
-```
-$ grunt build
-```
-
 Mongodb
 --------------------
 You just need to manually create your first admin user.

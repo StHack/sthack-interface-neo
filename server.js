@@ -51,6 +51,7 @@ var closedTaskDelay    = process.env.CLOSED_TASK_DELAY;
 var sessionSecret      = process.env.SESSION_SECRET;
 var sessionKey         = process.env.SESSION_KEY;
 var adminPath          = process.env.ADMIN_PATH;
+var siteTitle          = process.env.TITLE;
 
 // Sthack prototypes
 var Team    = require('./src/Team').Team;
@@ -165,6 +166,7 @@ else{
 app.get("/", function(req, res){
   if(req.session.authenticated){
     res.render('index', {
+      title: siteTitle,
       current: 'index',
       auth: 1,
       socketIOUrl: 'https://'+req.headers.host,
@@ -173,6 +175,7 @@ app.get("/", function(req, res){
   else{
     list(teamDB, function(teams){
       res.render('login', {
+        title: siteTitle,
         current: 'index',
         teams_list: teams,
         registrationOpen: registrationOpen
@@ -197,6 +200,7 @@ app.all("/register", function(req, res){
         console.log('"'+d+'" "'+req.connection.remoteAddress+'" "-" "register" "'+req.body.name.replace(/"/g,'\\"')+'" "ko"' );
         res.render('register', {
           current: 'register',
+          title: siteTitle,
           error: error,
           registrationOpen: registrationOpen
         });
@@ -205,6 +209,7 @@ app.all("/register", function(req, res){
     else{
       res.render('register',{
         current: 'register',
+        title: siteTitle,
         error: '',
         registrationOpen: registrationOpen
       });
@@ -221,6 +226,7 @@ app.get('/rules', function(req, res){
   }
   res.render('rules',{
     current: 'rules',
+    title: siteTitle,
     auth: auth,
     registrationOpen: registrationOpen,
     socketIOUrl: 'https://'+req.headers.host
@@ -230,6 +236,7 @@ app.get('/rules', function(req, res){
 app.get('/scoreboard', function(req, res){
   res.render('scoreboard',{
     current: 'scoreboard',
+    title: siteTitle,
     auth: 1,
     registrationOpen: registrationOpen,
     socketIOUrl: 'https://'+req.headers.host
@@ -246,12 +253,12 @@ app.get('/simple', function(req, res){
             score += task.score;
           }
         });
-        res.render('simple',{tasks: tasks.raw, score: score});
+        res.render('simple',{tasks: tasks.raw, title: siteTitle, score: score});
       }, function(error){
-        res.render('simple',{tasks: [], score: 0});
+        res.render('simple',{tasks: [], title: siteTitle, score: 0});
       });
     }, function(error){
-      res.render('simple',{tasks: [], score: 0});
+      res.render('simple',{tasks: [], title: siteTitle, score: 0});
     });
 });
 
@@ -289,6 +296,7 @@ app.post('/submitFlag', function(req, res){
 app.get(adminPath, function(req, res){
   if(req.session.authenticated && req.session.authenticated === adminName){
     res.render('admin', {
+      title: siteTitle,
       current: 'index',
       admin: 1,
       auth: 1,
@@ -319,7 +327,7 @@ app.post("/", function(req, res){
 if(app.get('env') === 'production'){
   app.use(function(err, req, res, next){
     res.status(500);
-    res.render('error', {current: 'error', registrationOpen: registrationOpen});
+    res.render('error', {current: 'error', title: siteTitle, registrationOpen: registrationOpen});
   });
 }
 
