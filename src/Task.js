@@ -269,6 +269,9 @@ Task.prototype.editTask = function(title, description, flag, type, difficulty, a
       'difficulty': difficulty,
       'author': author
     };
+    if(flag===''){
+      delete task.flag;
+    }
     db.update('tasks', {'title': title}, task).then(function(result){
       if(result === 1){
         fulfill(true);
