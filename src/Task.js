@@ -33,7 +33,7 @@ Task.prototype.getTasks = function(teamName, countTeam){
         task.open  = infos.open;
         infosTasks.push(infos);
       });
-      fulfill({infos: infosTasks, raw: result});
+      fulfill({infos: _.sortBy(infosTasks, ['title']), raw: _.sortBy(result, ['title'])});
     }, function(error){
       reject(error);
     });
