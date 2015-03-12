@@ -59,6 +59,11 @@ $(document).ready(function () {
             $('#taskTitle').val('');
             $('#taskTitle').attr('disabled', false);
             $('#taskTitle').focus();
+            $('#taskFlag').val('');
+            $('#taskType').val('');
+            $('#taskAuthor').val('');
+            $('#taskDifficulty').val('easy');
+            $('#taskDescription').val('');
         }
         else{
             $('#addTask').css('display', 'none');
@@ -84,11 +89,11 @@ $(document).ready(function () {
     sock.on('giveTask', function(task){
         $('#taskTitle').val(task.title);
         $('#taskTitle').attr('disabled', true);
-        $('#taskFlag').focus();
         $('#taskType').val(task.type);
         $('#taskAuthor').val(task.author);
         $('#taskDescription').val(task.description);
-        $('#taskDifficulty option[value="' + task.difficulty + '"]').attr('selected', 'selected');
+        $('#taskDescription').focus();
+        $('#taskDifficulty').val(task.difficulty);
     });
 
     sock.emit('adminListTasks');
@@ -118,8 +123,8 @@ $(document).ready(function () {
             name:     $('#teamName').val(),
             password: $('#teamPassword').val()
         });
-        $('#teamName').val('');
-        $('#teamPassword').val('');
+        $('#teams').val('');
+        $('#teams').change();
     });
 
     $('#editTeam').click(function(){
@@ -127,16 +132,16 @@ $(document).ready(function () {
             name:     $('#teamName').val(),
             password: $('#teamPassword').val()
         });
-        $('#teamName').val('');
-        $('#teamPassword').val('');
+        $('#teams').val('');
+        $('#teams').change();
     });
 
     $('#deleteTeam').click(function(){
         sock.emit('adminDeleteTeam', {
             name:     $('#teamName').val()
         });
-        $('#teamName').val('');
-        $('#teamPassword').val('');
+        $('#teams').val('');
+        $('#teams').change();
     });
 
     $('#addTask').click(function(){
@@ -148,11 +153,8 @@ $(document).ready(function () {
             difficulty:  $('#taskDifficulty').val(),
             description: $('#taskDescription').val(),
         });
-        $('#taskTitle').val('');
-        $('#taskFlag').val('');
-        $('#taskType').val('');
-        $('#taskAuthor').val('');
-        $('#taskDescription').val('');
+        $('#tasks').val('');
+        $('#tasks').change();
     });
 
     $('#editTask').click(function(){
@@ -164,22 +166,16 @@ $(document).ready(function () {
             difficulty:  $('#taskDifficulty').val(),
             description: $('#taskDescription').val(),
         });
-        $('#taskTitle').val('');
-        $('#taskFlag').val('');
-        $('#taskType').val('');
-        $('#taskAuthor').val('');
-        $('#taskDescription').val('');
+        $('#tasks').val('');
+        $('#tasks').change();
     });
 
     $('#deleteTask').click(function(){
         sock.emit('adminDeleteTask', {
             title:       $('#taskTitle').val(),
         });
-        $('#taskTitle').val('');
-        $('#taskFlag').val('');
-        $('#taskType').val('');
-        $('#taskAuthor').val('');
-        $('#taskDescription').val('');
+        $('#tasks').val('');
+        $('#tasks').change();
     });
 
     $(document).keypress(function(e) {
