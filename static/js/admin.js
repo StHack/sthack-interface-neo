@@ -52,7 +52,6 @@ $(document).ready(function () {
     });
 
     $('#tasks').change(function(){
-        console.log($(this).val());
         if($(this).val()===''){
             $('#addTask').css('display', 'inline');
             $('#editTask').css('display', 'none');
