@@ -21,10 +21,13 @@
     <% } else {%>
       <% if(current === 'scoreboard'){ %>
         <script src="/js/scoreboard.min.js"></script>
-      <% } else {%>
+      <% } else if(current === 'index'){%>
         <script src="/js/client.min.js"></script>
       <% } %>
     <% } %>
+  <% } %>
+  <% if(current === 'rules'){%>
+        <script src="/js/rules.min.js"></script>
   <% } %>
 
 
@@ -40,16 +43,21 @@
 <div id="navbar">
   <div class="menu left"><img src="/img/logo.png" /></div>
   <% if(current === 'index'){ %>
-    <a class="menu left btn selected" href="/">Control interface</a>
+  <a class="menu left btn selected" href="/">Control interface</a>
   <% } else { %>
-    <a class="menu left btn" href="/">Control interface</a>
+  <a class="menu left btn" href="/">Control interface</a>
+  <% } %>
+  <% if(current === 'rules'){ %>
+  <a class="menu left btn selected" href="/rules">Rules</a>
+  <% } else { %>
+  <a class="menu left btn" href="/rules">Rules</a>
   <% } %>
   <% if(typeof auth === 'undefined'){ %>
     <% if(registrationOpen) { %>
       <% if(current === 'register'){ %>
-        <a class="menu left btn selected" href="/register">Register</a>
+  <a class="menu left btn selected" href="/register">Register</a>
       <% } else { %>
-        <a class="menu left btn" href="/register">Register</a>
+  <a class="menu left btn" href="/register">Register</a>
       <% } %>
     <% } %>
 </div>
@@ -59,8 +67,11 @@
     <% } else { %>
       <a class="menu left btn" href="/scoreboard">Scoreboard</a>
     <% } %>
-<div class="menu right"><span id="team"></span> - <span id="score"></span> - <span id="breakthrough"></span></div>
-</div>
-<div id="console">
-</div>
-<% } %>
+  <div class="menu right"><span id="team"></span> - <span id="score"></span> - <span id="breakthrough"></span></div>
+  </div>
+  <% if(current !== 'rules'){%>
+  <div id="console">
+  </div>
+  <% } %>
+
+  <% } %>

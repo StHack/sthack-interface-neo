@@ -459,3 +459,14 @@ canvas {
 #breakthrough img{
     width: 4%;
 }
+
+#rules{
+    z-index: -2;
+    left:5%;
+    top:5%;
+    position:absolute;
+    /*min-width: 925px;
+    min-height: 680px;*/
+    width:85%;
+    height: 85%;
+}

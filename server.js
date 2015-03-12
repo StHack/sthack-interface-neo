@@ -115,8 +115,8 @@ var teamDB    = new Team(db);
 var taskDB    = new Task(db, {delay: closedTaskDelay});
 var messageDB = new Message(db);
 
-var unAuthRoute = ['/register', '/', ''];
-var authRoute = ['/scoreboard', '/', '', adminPath, '/simple', '/submitFlag'];
+var unAuthRoute = ['/register', '/', '', '/rules'];
+var authRoute = ['/scoreboard', '/', '', '/rules', adminPath, '/simple', '/submitFlag'];
 
 /* à revoir en mode authentificationMiddleware */
 app.use(function(req, res, next){
@@ -213,6 +213,18 @@ app.all("/register", function(req, res){
   else{
     res.redirect(301, '/');
   }
+});
+
+app.get('/rules', function(req, res){
+  if(req.session.authenticated){
+    var auth = 1;
+  }
+  res.render('rules',{
+    current: 'rules',
+    auth: auth,
+    registrationOpen: registrationOpen,
+    socketIOUrl: 'https://'+req.headers.host
+  });
 });
 
 app.get('/scoreboard', function(req, res){
