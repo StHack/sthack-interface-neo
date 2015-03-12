@@ -38,7 +38,3 @@ test.js
 *.sh
 sshProduction.json
 dist/
-public/css/*.min.css
-public/js/admin.min.js
-public/js/client.min.js
-public/js/scoreboard.min.js
