@@ -55,6 +55,7 @@ module.exports = function (grunt) {
       my_target: {
         files: {
           'public/js/client.min.js': ['static/js/button.js', 'static/js/console.js', 'static/js/client.js'],
+          'public/js/rules.min.js': ['static/js/button.js', 'static/js/rules.js'],
           'public/js/scoreboard.min.js': ['static/js/console.js', 'static/js/scoreboard.js'],
           'public/js/admin.min.js': ['static/js/console.js', 'static/js/admin.js']
         }

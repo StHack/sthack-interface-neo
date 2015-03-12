@@ -1,0 +1,78 @@
+<% include head.ejs %>
+  <div id="rules" class="window">
+    <div class="titleBar">
+      Rules
+    </div>
+    <div class="content">
+      <h2><u>Flags</u></h2>
+      <br />
+      Unless said otherwise in the task description, the flag format is the following: <br />
+      <div style="padding: 20px 20px 20px 30px;">
+        <code style="padding: 10px; background-color: #b7b7b7; border: 1px solid #4e4c4c;">INS{some random string here}</code>
+      </div>
+      You must submit the whole thing, including the <code>INS{}</code> part.
+      <br /><br /><br />
+      <h2><u>Scoring</u></h2>
+      <br />
+      This year the scoring is dynamic, the formula is the following:<br />
+
+      <div style="padding: 20px 20px 20px 30px;">
+        <code style="padding: 10px; background-color: #b7b7b7; border: 1px solid #4e4c4c;">task_points = (base_score * base_difficulty) * (total_teams - solvers)</code>
+      </div>
+
+      Where:
+      <ul>
+        <li><code>base_score</code> is the constant <strong>5</strong></li>
+        <li><code>base_difficulty</code> is <strong>1</strong> (<em>easy</em>), <strong>2</strong> (<em>medium</em>) or <strong>3</strong> (<em>hard</em>)</li>
+        <li><code>total_teams</code> is the total number of teams playing the CTF</li>
+        <li><code>solvers</code> is the number of teams that solved this task</li>
+      </ul>
+      <br />
+      This means you should expect the task points and your score to:
+      <ul>
+        <li>increase at the beginning of the CTF, when teams are registering</li>
+        <li>decrease while people solve tasks</li>
+      </ul>
+      <br />
+      The animation on the TV screen of each task indicates the <code>base_difficulty</code> as follows:<br />
+
+      <canvas id="easy" class="buttonTask">{"title":"Easy","type":"Exploit","difficulty":"easy","score":500,"state":0,"author":"author"}</canvas>
+      <canvas id="medium" class="buttonTask">{"title":"Medium","type":"Exploit","difficulty":"medium","score":1000,"state":0,"author":"author"}</canvas>
+      <canvas id="hard" class="buttonTask">{"title":"Hard","type":"Exploit","difficulty":"hard","score":1500,"state":0,"author":"author"}</canvas>
+
+      <br />
+      There is no bonus points for breakthrough.<br :>
+      All tasks <em>*should*</em> be unlocked when the CTF starts.
+      <br /><br /><br />
+
+      <h2><u>Help/Questions</u></h2>
+      <br />
+      You can come and ask us your questions directly at the staff desk, or on IRC at <strong>#insomnihack</strong> on <strong>freenode</strong>.<br />
+      Follow us on twitter at <a href="https://twitter.com/1ns0mn1h4ck">https://twitter.com/1ns0mn1h4ck</a>
+      <br /><br /><br />
+      <h2><u>Rules</u></h2>
+      <br />
+      <ul>
+        <li>Team size limit is 8</li>
+        <li>Remote players are not allowed</li>
+        <li>Only one account per team</li>
+        <li>Sharing flags is forbidden</li>
+        <li>Don't attack the scoring system</li>
+        <li>Denial of Service on our infrastructure means expulsion and adding your name to the wall of shame</li>
+      </ul>
+      <br />
+      We reserve the rights to disqualify any cheating team.
+
+    </div>
+  </div>
+</body>
+</html>
+<!--
+
+<html>
+<body>
+
+
+</body>
+</html>
+ -->
