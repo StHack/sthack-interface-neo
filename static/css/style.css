@@ -464,43 +464,43 @@ canvas {
     height: 85%;
 }
 
-#rules div.content {
+#rulesin div.content {
     margin: 0%;
 }
 
-#rules h2 {
+#rulesin h2 {
     display: block;
     font-size: 1.5em;
     font-weight: bold;
 }
 
-#rules div {
+#rulesin div {
     display: block;
 }
 
-#rules code {
+#rulesin code {
     font-family: monospace;
 }
 
-#rules ul {
+#rulesin ul {
     display: block;
     list-style-type: disc;
 }
 
-#rules li {
+#rulesin li {
     display: list-item;
     text-align: -webkit-match-parent;
 }
 
-#rules em {
+#rulesin em {
     font-style: italic;
 }
 
-#rules strong, b {
+#rulesin strong, b {
     font-weight: bold;
 }
 
-#rules a:-webkit-any-link {
+#rulesin a:-webkit-any-link {
     color: -webkit-link;
     text-decoration: underline;
     cursor: auto;
