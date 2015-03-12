@@ -463,3 +463,50 @@ canvas {
     width:85%;
     height: 85%;
 }
+
+#rules h2 {
+    display: block;
+    font-size: 1.5em;
+    -webkit-margin-before: 0.83em;
+    -webkit-margin-after: 0.83em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    font-weight: bold;
+}
+
+#rules div {
+    display: block;
+}
+
+#rules code {
+    font-family: monospace;
+}
+
+#rules ul {
+    display: block;
+    list-style-type: disc;
+    -webkit-margin-before: 1em;
+    -webkit-margin-after: 1em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    -webkit-padding-start: 40px;
+}
+
+#rules li {
+    display: list-item;
+    text-align: -webkit-match-parent;
+}
+
+#rules em {
+    font-style: italic;
+}
+
+#rules strong, b {
+    font-weight: bold;
+}
+
+#rules a:-webkit-any-link {
+    color: -webkit-link;
+    text-decoration: underline;
+    cursor: auto;
+}
