@@ -15,8 +15,11 @@ images = {};
 
 function loadImages(callback) {
     var sources = {
+        tv: 'tv.png',
         folder: 'folder.png',
         folder_open: 'folder_open.png',
+        easy: 'easy.jpg',
+        hard: 'hard.jpg',
     };
     var loadedImages = 0;
     var numImages = 0;
@@ -47,7 +50,7 @@ function closeDir(canvasDir, type){
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 5;
-    ctx.fillStyle = '#00a908';
+    ctx.fillStyle = '#c72127';
     ctx.fillText(type, canvasDir.width/2, canvasDir.height/2);
 
     ctx.restore();
@@ -65,7 +68,7 @@ function openDir(canvasDir, type, callback){
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 5;
-    ctx.fillStyle = '#00a908';
+    ctx.fillStyle = '#c72127';
     ctx.fillText(type, canvasDir.width/2, canvasDir.height/2);
 
     ctx.restore();
@@ -87,7 +90,7 @@ function loadDir(type){
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 5;
-    ctx.fillStyle = '#00a908';
+    ctx.fillStyle = '#c72127';
     ctx.fillText(type, canvasDir.width/2, canvasDir.height/2);
 
     ctx.restore();
@@ -106,7 +109,7 @@ function enter(canvasTask){
             if(index >= max){
                 index=0;
             }
-            //ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
+            ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
             printText(ctx, canvasTask, task);
         }, 100);
     }
@@ -118,25 +121,23 @@ function leave(canvasTask){
         clearInterval(anim);
         var ctx = canvasTask.getContext('2d');
         printImage(ctx, canvasTask, task, 0);
-        //ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
+        ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
         printText(ctx, canvasTask, task);
     }
 }
 
 function printImage(ctx, canvasTask, task, index){
-    var imgWidth = 480;
-    // if(task.difficulty==='easy'){
-    //     var imgWidth = 480;
-    //     var image = images.easy;
-    // }
-    // else{
-    //     var imgWidth = 480;
-    //     var image = images.hard;
-    // }
+    if(task.difficulty==='easy'){
+        var imgWidth = 480;
+        var image = images.easy;
+    }
+    else{
+        var imgWidth = 480;
+        var image = images.hard;
+    }
 
-    //var max = image.width/imgWidth;
-    var max = 480;
-    //ctx.drawImage(image, index*imgWidth, 0, imgWidth, images.easy.height, 0, 0, canvasTask.width, canvasTask.height);
+    var max = image.width/imgWidth;
+    ctx.drawImage(image, index*imgWidth, 0, imgWidth, images.easy.height, 0, 0, canvasTask.width, canvasTask.height);
     return max;
 }
 
@@ -152,7 +153,7 @@ function printText(ctx, canvasTask, task){
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 5;
-    ctx.fillStyle = '#00a908';
+    ctx.fillStyle = '#c72127';
     ctx.fillText(task.title, canvasTask.width/2, canvasTask.height/2-20);
 
     ctx.font = '2em DejaVu Sans';
@@ -177,7 +178,7 @@ function loadTask(canvasTask){
         printImage(ctx, canvasTask, task, 0);
     }
 
-    //ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
+    ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
 
     printText(ctx, canvasTask, task);
 }
@@ -191,7 +192,7 @@ function validateTask(canvasTask, callback){
         ctx.arc(canvasTask.width/2, canvasTask.height/2, radius, 0, 2 * Math.PI, false);
         ctx.fillStyle = '#fff';
         ctx.fill();
-        //ctx.drawImage(images.tv, 0, 0, canvasTask.width, canvasTask.height);
+        ctx.drawImage(images.tv, 0, 0, canvasTask.width, canvasTask.height);
         radius += 70;
         if(radius>canvasTask.width/2+50){
             clearInterval(shutdown);
@@ -204,7 +205,7 @@ function validateTask(canvasTask, callback){
                 ctx.arc(canvasTask.width/2, canvasTask.height/2, radius, 0, 2 * Math.PI, false);
                 ctx.fill();
                 ctx.stroke();
-                //ctx.drawImage(images.tv, 0, 0, canvasTask.width, canvasTask.height);
+                ctx.drawImage(images.tv, 0, 0, canvasTask.width, canvasTask.height);
                 radius -= 70;
                 if(radius < 0){
                     clearInterval(shutdown2);
