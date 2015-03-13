@@ -19,6 +19,7 @@ function loadImages(callback) {
         folder: 'folder.png',
         folder_open: 'folder_open.png',
         easy: 'easy.jpg',
+        medium: 'medium.jpg',
         hard: 'hard.jpg',
     };
     var loadedImages = 0;
@@ -132,6 +133,10 @@ function printImage(ctx, canvasTask, task, index){
     if(task.difficulty==='easy'){
         var imgWidth = 480;
         var image = images.easy;
+    }
+    else if(task.difficulty==='medium'){
+        var imgWidth = 480;
+        var image = images.medium;
     }
     else{
         var imgWidth = 480;
