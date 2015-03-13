@@ -96,8 +96,4 @@ $(document).ready(function () {
     });
   }, 1000);
 
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> master
 });
