@@ -46,6 +46,7 @@ function writeMessage(data){
   else{
     lock = 1;
     if(data.submit === 2){
+      $('.new_line').last().text($('#team').text()+'@inso2k15$ ');
       $('.new_line').last().teletype({animDelay: 100, text: data.message}, function(){
         $('#blinkCursor').remove();
         $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
@@ -99,13 +100,17 @@ $.fn.teletype = function(opts, callback){
   }, settings.animDelay*settings.text.length);
 };
 
+function pad(n) {
+  return (n < 10) ? ("0" + n) : n;
+}
+
 sock.on('giveMessages', function(messages){
   $('#blinkCursor').remove();
   messages.forEach(function(message){
     var date = new Date(message.timestamp);
-    var seconds = date.getSeconds();
-    var minutes = date.getMinutes();
-    var hours   = date.getHours();
+    var seconds = pad(date.getSeconds());
+    var minutes = pad(date.getMinutes());
+    var hours   = pad(date.getHours());
     $('#console').append($('<p class="new_line"></p>').text('<'+hours+':'+minutes+':'+seconds+'> '+message.content));
   });
   $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
