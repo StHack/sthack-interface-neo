@@ -87,6 +87,10 @@ loadImages(function(){
         $(this).css('z-index', '2');
     });
 
+    $('body').on('click', '.imgClosePopup', function(e){
+        $('#cancel').click();
+    });
+
     $('body').on('click', '.imgClose', function(e){
         var directory = $(this).parent().parent();
         var id = directory.attr('id').substring(4);
@@ -135,6 +139,10 @@ loadImages(function(){
         $('#flag').val('');
         $('#description').html(task.description);
         $('#titlePopup').text(task.title);
+        var imgClose = $('<img/>');
+        imgClose.addClass('imgClosePopup');
+        imgClose.attr('src','/img/close-window.png');
+        $('#titlePopup').append(imgClose);
         $('#informations').text('Author : '+task.author+' - Difficulty : '+task.difficulty);
         if(task.state > 1){
             $('#flag').attr('disabled', true);
