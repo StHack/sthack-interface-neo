@@ -19,6 +19,9 @@ $(document).ready(function () {
     sock.emit('getScoreboard');
   });
 
+  function pad(n) {
+    return (n < 10) ? ("0" + n) : n;
+  }
 
   sock.emit('getScoreboard');
   sock.on('giveScoreboard', function(scoreboard){
@@ -54,7 +57,7 @@ $(document).ready(function () {
       timeSpan = $('<span></span>');
       timeSpan.addClass('lastTime');
       timeSpan.text(time);
-      lastDiv.text(line.lastTask+' '+time.getHours()+':'+time.getMinutes()+':'+time.getSeconds());
+      lastDiv.text(line.lastTask+' '+pad(time.getHours())+':'+pad(time.getMinutes())+':'+pad(time.getSeconds()));
       lastDiv.append(timeSpan);
       lineDiv.append(posDiv);
       lineDiv.append(teamDiv);
