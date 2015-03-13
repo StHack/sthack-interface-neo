@@ -9,7 +9,7 @@
 <div>Score : <%= score %></div>
 <ul>
 <% for(var i=0; i<tasks.length; i++) {%>
-   <li><b><%= tasks[i].title %></b> <%= tasks[i].description %><br />
+   <li><b><%= tasks[i].title %></b> <%- tasks[i].description %><br />
    <%= tasks[i].type+' - '+tasks[i].difficulty+' - Author : '+ tasks[i].author %><br />
    <%= tasks[i].score+' pts' %>
    <% if(tasks[i].state <= 1) { %>
