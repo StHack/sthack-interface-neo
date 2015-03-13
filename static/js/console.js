@@ -35,53 +35,68 @@ $(document).ready(function () {
   $('#console').trigger('blink');
 });
 
-sock.on('message', function(data){
-  if(data.submit === 2){
-    $('.new_line').last().teletype({animDelay: 100, text: data.message}, function(){
+var lock = 1;
+
+function writeMessage(data){
+  if(lock === 1){
+    setTimeout(function(){
+      writeMessage(data);
+    }, 1000);
+  }
+  else{
+    lock = 1;
+    if(data.submit === 2){
+      $('.new_line').last().teletype({animDelay: 100, text: data.message}, function(){
+        $('#blinkCursor').remove();
+        $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
+        $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
+        $('#console').trigger('blink');
+        var h = $("#console")[0].scrollHeight;
+        $("#console").scrollTop(h);
+        lock = 0;
+      });
+    }
+    else{
       $('#blinkCursor').remove();
-      $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
+      $('.new_line').last().text($('#team').text()+'@inso2k15$ '+data.message);
+      if(data.submit === 1){
+        $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
+      }
       $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
       $('#console').trigger('blink');
       var h = $("#console")[0].scrollHeight;
       $("#console").scrollTop(h);
-    });
-  }
-  else{
-    $('#blinkCursor').remove();
-    $('.new_line').last().text($('#team').text()+'@inso2k15$ '+data.message);
-    if(data.submit === 1){
-      $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
+      lock = 0;
     }
-    $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
-    $('#console').trigger('blink');
-    var h = $("#console")[0].scrollHeight;
-    $("#console").scrollTop(h);
   }
+}
+
+sock.on('message', function(data){
+  writeMessage(data);
 });
 
 $.fn.teletype = function(opts, callback){
   clearInterval(blink);
   $('#blinkCursor').remove();
-    var $this = this;
-    var defaults = {
-      animDelay: 50
-    };
-    var settings = $.extend(defaults, opts);
+  var $this = this;
+  var defaults = {
+    animDelay: 50
+  };
+  var settings = $.extend(defaults, opts);
 
-    $.each(settings.text.split(''),function(i, letter){
-      setTimeout(function(){
-        $this.html($this.html() + letter);
-      }, settings.animDelay * i);
-    });
-
+  $.each(settings.text.split(''),function(i, letter){
     setTimeout(function(){
-      setTimeout(function(){
-        $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
-        $('#console').trigger('blink');
-        callback();
-      },100);
-    }, settings.animDelay*settings.text.length);
+      $this.html($this.html() + letter);
+    }, settings.animDelay * i);
+  });
 
+  setTimeout(function(){
+    setTimeout(function(){
+      $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
+      $('#console').trigger('blink');
+      callback();
+    },100);
+  }, settings.animDelay*settings.text.length);
 };
 
 sock.on('giveMessages', function(messages){
@@ -98,6 +113,7 @@ sock.on('giveMessages', function(messages){
   $('#console').trigger('blink');
   var h = $("#console")[0].scrollHeight;
   $("#console").scrollTop(h);
+  lock = 0;
 });
 
 $(document).ready(function () {
