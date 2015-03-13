@@ -14,6 +14,7 @@ var RUNNING_SESSION_KEY = 'sthackSession';
 var RUNNING_ADMIN_PATH = '/admin_poney';
 var RUNNING_NODE_ENV = 'development';
 var RUNNING_TITLE = 'Sthack';
+var RUNNING_BASE_SCORE = 50;
 var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
 var mountFolder = function (connect, dir) {
   return connect.static(require('path').resolve(dir));
@@ -137,6 +138,7 @@ module.exports = function (grunt) {
             SESSION_KEY         : RUNNING_SESSION_KEY,
             ADMIN_PATH          : RUNNING_ADMIN_PATH,
             TITLE               : RUNNING_TITLE,
+            BASE_SCORE          : RUNNING_BASE_SCORE,
             NODE_ENV            : RUNNING_NODE_ENV
           },
           cwd: __dirname

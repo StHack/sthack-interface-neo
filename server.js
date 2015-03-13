@@ -52,6 +52,7 @@ var sessionSecret      = process.env.SESSION_SECRET;
 var sessionKey         = process.env.SESSION_KEY;
 var adminPath          = process.env.ADMIN_PATH;
 var siteTitle          = process.env.TITLE;
+var baseScore          = process.env.BASE_SCORE;
 
 // Sthack prototypes
 var Team    = require('./src/Team').Team;
@@ -113,7 +114,7 @@ app.use(session({
 
 var db        = new DB(DBConnectionString);
 var teamDB    = new Team(db);
-var taskDB    = new Task(db, {delay: closedTaskDelay});
+var taskDB    = new Task(db, {delay: closedTaskDelay, baseScore: baseScore});
 var messageDB = new Message(db);
 
 var unAuthRoute = ['/register', '/', '', '/rules'];
@@ -226,6 +227,7 @@ app.get('/rules', function(req, res){
   }
   res.render('rules',{
     current: 'rules',
+    baseScore: baseScore,
     title: siteTitle,
     auth: auth,
     registrationOpen: registrationOpen,
