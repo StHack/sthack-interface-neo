@@ -68,6 +68,16 @@ $(document).ready(function () {
 
   });
 
+  sock.emit('getScore');
+  sock.on('giveScore', function(team){
+    $('#team').text(team.name);
+    $('#score').text(team.score);
+    for(var i = 0; i < team.breakthrough; i++){
+      $('#breakthrough').append('<img src="/img/coeur.png" />');
+    }
+
+  });
+
   setInterval(function(){
     var diffMax = 1000 * 60 * 5;
     var time;
@@ -86,4 +96,8 @@ $(document).ready(function () {
     });
   }, 1000);
 
+<<<<<<< HEAD
+=======
+>>>>>>> Stashed changes
+>>>>>>> master
 });

@@ -178,6 +178,15 @@ $(document).ready(function () {
         $('#tasks').change();
     });
 
+    sock.emit('getScore');
+    sock.on('giveScore', function(team){
+        $('#team').text(team.name);
+        $('#score').text(team.score);
+        for(var i = 0; i < team.breakthrough; i++){
+            $('#breakthrough').append('<img src="/img/coeur.png" />');
+        }
+    });
+
     $(document).keypress(function(e) {
         if(e.which == 13) {
             if($('#message').is(":focus")){
