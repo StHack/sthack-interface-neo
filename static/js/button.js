@@ -116,6 +116,10 @@ function enter(canvasTask){
             printText(ctx, canvasTask, task);
         }, 133);
     }
+    else{
+        clearInterval(anim);
+        loadTask(canvasTask);
+    }
 }
 
 function leave(canvasTask){
@@ -126,6 +130,10 @@ function leave(canvasTask){
         printImage(ctx, canvasTask, task, 0);
         ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
         printText(ctx, canvasTask, task);
+    }
+    else{
+        clearInterval(anim);
+        loadTask(canvasTask);
     }
 }
 
