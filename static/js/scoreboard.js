@@ -62,4 +62,36 @@ $(document).ready(function () {
     });
 
   });
+<<<<<<< Updated upstream
+=======
+
+  sock.emit('getScore');
+  sock.on('giveScore', function(team){
+    $('#team').text(team.name);
+    $('#score').text(team.score);
+    for(var i = 0; i < team.breakthrough; i++){
+      $('#breakthrough').append('<img src="/img/coeur.png" />');
+    }
+
+  });
+
+  setInterval(function(){
+    var diffMax = 1000 * 60 * 5;
+    var time;
+    var diffTime;
+    $('.line').each(function(index, line){
+      time = new Date($(line).children('.last').children('.lastTime').text());
+      diffTime = new Date()-time;
+      if(diffTime <= diffMax){
+        $(line).css('background-color', 'rgba(204,41,47,'+(1-diffTime/diffMax)+')');
+      }
+      else{
+        if($(line).css('background-color')!=='rgba(204,41,47, 0)'){
+          $(line).css('background-color', 'rgba(204,41,47, 0)');
+        }
+      }
+    });
+  }, 1000);
+
+>>>>>>> Stashed changes
 });
