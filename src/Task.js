@@ -88,15 +88,14 @@ Task.prototype.exists = function(title){
 Task.prototype.getScore = function(task, countTeam){
   var self = this;
   var solved = self.getSolved(task);
-  var base = 50;
   if(task.difficulty === 'easy'){
-    return base*(countTeam-solved.length);
+    return self.config.baseScore*(countTeam-solved.length);
   }
   else if(task.difficulty === 'medium'){
-    return base*2*(countTeam-solved.length);
+    return self.config.baseScore*2*(countTeam-solved.length);
   }
   else{
-    return base*3*(countTeam-solved.length);
+    return self.config.baseScore*3*(countTeam-solved.length);
   }
 };
 
