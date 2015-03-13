@@ -46,10 +46,10 @@ function writeMessage(data){
   else{
     lock = 1;
     if(data.submit === 2){
-      $('.new_line').last().text($('#team').text()+'@inso2k15$ ');
+      $('.new_line').last().text('inso2k15$ ');
       $('.new_line').last().teletype({animDelay: 100, text: data.message}, function(){
         $('#blinkCursor').remove();
-        $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
+        $('#console').append($('<p class="new_line"></p>').text('inso2k15$ '));
         $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
         $('#console').trigger('blink');
         var h = $("#console")[0].scrollHeight;
@@ -59,9 +59,9 @@ function writeMessage(data){
     }
     else{
       $('#blinkCursor').remove();
-      $('.new_line').last().text($('#team').text()+'@inso2k15$ '+data.message);
+      $('.new_line').last().text('inso2k15$ '+data.message);
       if(data.submit === 1){
-        $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
+        $('#console').append($('<p class="new_line"></p>').text('inso2k15$ '));
       }
       $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
       $('#console').trigger('blink');
@@ -113,7 +113,7 @@ sock.on('giveMessages', function(messages){
     var hours   = pad(date.getHours());
     $('#console').append($('<p class="new_line"></p>').text('<'+hours+':'+minutes+':'+seconds+'> '+message.content));
   });
-  $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
+  $('#console').append($('<p class="new_line"></p>').text('inso2k15$ '));
   $('.new_line').last().append('<span id="blinkCursor">&nbsp;</span>');
   $('#console').trigger('blink');
   var h = $("#console")[0].scrollHeight;
@@ -121,21 +121,29 @@ sock.on('giveMessages', function(messages){
   lock = 0;
 });
 
+function setup(){
+  if($('#team').text()===''){
+    var text = $('.new_line').last().text();
+    $('.new_line').last().text(text+'.');
+    setTimeout(function(){
+      setup();
+    }, 1000);
+  }
+  else{
+    sock.emit('getMessages');
+  }
+}
+
 $(document).ready(function () {
   $('#console').append('<p class="new_line">$ </p>');
   setTimeout(function(){
-    $('.new_line').last().teletype({animDelay: 50, text: 'ssh '+$('#team').text()+'@inso2k15'}, function(){
-      $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15\'s password:'));
+    $('.new_line').last().teletype({animDelay: 50, text: 'nc inso2k15 31337'}, function(){
       setTimeout(function(){
-        $('.new_line').last().teletype({animDelay: 100, text: '**********'}, function(){
-          $('#console').append('<p class="new_line">Welcome on Insomni\'hack communicator</p>');
-          setTimeout(function(){
-            $('#console').append($('<p class="new_line"></p>').text($('#team').text()+'@inso2k15$ '));
-            $('.new_line').last().teletype({animDelay: 100, text: 'cat /var/log/messages'}, function(){
-              sock.emit('getMessages');
-            });
-          }, 1000);
-        });
+        $('#console').append('<p class="new_line">Welcome on Insomni\'hack communicator</p>');
+        $('#console').append('<p class="new_line">Downloading last messages and tasks...</p>');
+        setTimeout(function(){
+          setup();
+        }, 1000);
       }, 1000);
     });
   }, 1000);
