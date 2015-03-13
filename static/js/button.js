@@ -114,7 +114,7 @@ function enter(canvasTask){
             }
             ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
             printText(ctx, canvasTask, task);
-        }, 100);
+        }, 133);
     }
 }
 
