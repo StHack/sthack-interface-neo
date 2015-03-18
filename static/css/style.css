@@ -522,3 +522,7 @@ canvas {
     text-decoration: underline;
     cursor: auto;
 }
+
+.lastTime{
+    display:none;
+}

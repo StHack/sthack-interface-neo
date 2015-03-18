@@ -50,6 +50,10 @@ $(document).ready(function () {
       lastDiv.addClass('column');
       lastDiv.addClass('bt');
       time = new Date(-line.time);
+      timeSpan = $('<span></span>');
+      timeSpan.addClass('lastTime');
+      timeSpan.text(time);
+      lastDiv.append(timeSpan);
       for(var i = 0; i < line.breakthrough; i++){
         lastDiv.append('<img src="/img/coeur.png">');
       }
@@ -62,8 +66,6 @@ $(document).ready(function () {
     });
 
   });
-<<<<<<< Updated upstream
-=======
 
   sock.emit('getScore');
   sock.on('giveScore', function(team){
@@ -80,7 +82,7 @@ $(document).ready(function () {
     var time;
     var diffTime;
     $('.line').each(function(index, line){
-      time = new Date($(line).children('.last').children('.lastTime').text());
+      time = new Date($(line).children('.bt').children('.lastTime').text());
       diffTime = new Date()-time;
       if(diffTime <= diffMax){
         $(line).css('background-color', 'rgba(204,41,47,'+(1-diffTime/diffMax)+')');
@@ -92,6 +94,4 @@ $(document).ready(function () {
       }
     });
   }, 1000);
-
->>>>>>> Stashed changes
 });
