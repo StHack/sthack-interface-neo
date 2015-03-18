@@ -45,7 +45,19 @@ connecting to: sthack
 To reset scoreboard :
 
 ```
-db.tasks.update({'solved':{'$exists':true}},{'$unset':{'solved':''}},{upsert:false},{multi:true});
+db.tasks.update({'solved':{'$exists':true}},{'$unset':{'solved':''}},{upsert:false, multi:true});
+```
+
+To reset messages :
+
+```
+db.messages.remove();
+```
+
+To reset teams :
+
+```
+db.teams.remove({'name':{$ne:'admin'}});
 ```
 
 Run
