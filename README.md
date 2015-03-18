@@ -115,6 +115,13 @@ respawn
 
 exec /usr/bin/nodejs /var/www/server.js
 ```
+Add `sthackuser` in sudoers.
+
+`/etc/sudoers.d/sthack`
+
+```
+sthackuser ALL = (root) NOPASSWD: /sbin/start sthack, /sbin/stop sthack, /sbin/restart sthack, /sbin/status sthack
+```
 
 sshProduction.json example
 ```
