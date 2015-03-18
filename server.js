@@ -126,7 +126,7 @@ app.use(function(req, res, next){
     next();
   }
   else{
-    res.redirect(301, '/');
+    res.redirect(302, '/');
   }
 });
 /* -------- */
@@ -196,7 +196,7 @@ app.all("/register", function(req, res){
         list(teamDB, function(teams){
           socketIO.sockets.emit('newTeam');
         });
-        res.redirect(301, '/');
+        res.redirect(302, '/');
       }, function(error){
         console.log('"'+d+'" "'+req.connection.remoteAddress+'" "-" "register" "'+req.body.name.replace(/"/g,'\\"')+'" "ko"' );
         res.render('register', {
@@ -217,7 +217,7 @@ app.all("/register", function(req, res){
     }
   }
   else{
-    res.redirect(301, '/');
+    res.redirect(302, '/');
   }
 });
 
@@ -279,19 +279,19 @@ app.post('/submitFlag', function(req, res){
             socketIO.sockets.emit('reopenTask', req.body.title);
           }, closedTaskDelay);
         }
-        res.redirect(301, '/simple');
+        res.redirect(302, '/simple');
       }, function(error){
         console.log('"'+d+'" "'+req.connection.remoteAddress+'" "'+req.session.authenticated.replace(/"/g,'\\"')+'" "submitFlag" "'+req.body.title.replace(/"/g,'\\"')+'" "ko"' );
-        res.redirect(301, '/simple');
+        res.redirect(302, '/simple');
       });
     }
     else{
       console.log('"'+d+'" "'+req.connection.remoteAddress+'" "'+req.session.authenticated.replace(/"/g,'\\"')+'" "submitFlag" "'+req.body.title.replace(/"/g,'\\"')+'" "closed"' );
-      res.redirect(301, '/simple');
+      res.redirect(302, '/simple');
     }
   }
   else{
-    res.redirect(301, '/simple');
+    res.redirect(302, '/simple');
   }
 });
 
@@ -306,7 +306,7 @@ app.get(adminPath, function(req, res){
     });
   }
   else{
-    res.redirect(301, '/');
+    res.redirect(302, '/');
   }
 });
 
@@ -316,13 +316,13 @@ app.post("/", function(req, res){
       if(result){
         req.session.authenticated = req.body.name;
       }
-      res.redirect(301, '/');
+      res.redirect(302, '/');
     }, function(error){
       console.log(error);
     });
   }
   else{
-    res.redirect(301, '/');
+    res.redirect(302, '/');
   }
 });
 
