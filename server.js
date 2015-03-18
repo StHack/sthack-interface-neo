@@ -440,7 +440,6 @@ socketIO.on('connection', function (socket) {
   socket.on('updateTask', function(title){
     teamDB.list().then(function(teams){
       taskDB.getTaskInfos(title, socket.handshake.authenticated, teams.length, false).then(function(task){
-        console.log(task);
         socket.emit('updateTask', task);
       }, function(error){
         socket.emit('error', error);

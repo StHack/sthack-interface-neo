@@ -161,7 +161,6 @@ loadImages(function(){
     });
 
     sock.on('updateTask', function(task){
-        console.log(task);
         if($('#popup').css('display') === 'block' && $('#titlePopup').text()===task.title){
             sock.emit('getTask', task.title);
         }
