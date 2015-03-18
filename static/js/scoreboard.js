@@ -83,7 +83,7 @@ $(document).ready(function () {
     var time;
     var diffTime;
     $('.line').each(function(index, line){
-      time = new Date($(line).children('.last').children('.lastTime').text());
+      time = new Date($(line).children('.bt').children('.lastTime').text());
       diffTime = new Date()-time;
       if(diffTime <= diffMax){
         $(line).css('background-color', 'rgba(204,41,47,'+(1-diffTime/diffMax)+')');
@@ -95,5 +95,4 @@ $(document).ready(function () {
       }
     });
   }, 1000);
-
 });
