@@ -8,7 +8,7 @@ More information on the  event : https://www.sthack.fr/
 
 Installation
 --------------------
-You need nodejs with npm bower and grunt.
+You need nodejs with npm, bower, and grunt.
 
 ```
 $ git clone https://github.com/agix/sthack-interface-neo
@@ -56,3 +56,77 @@ Edit all RUNNING variable from Gruntfile.js.
 $ grunt
 ```
 Enjoy !
+
+
+Deploy procedure
+--------------------
+You just need nodejs a mongodb server obviously and a redis server.
+
+We need 2 simple users :
+
+`sthackuser` with read write access to /var/www
+
+`sthackapp` with read access to /var/www
+
+Create the init script with your config env.
+
+```
+description "Sthack scoreboard"
+
+start on runlevel [2345]
+
+setuid sthackapp
+setgid sthackapp
+
+chdir /var/www/
+
+env PORT=443
+export PORT
+env CERT_PATH="server.crt"
+export CERT_PATH
+env KEY_PATH="server.key"
+export KEY_PATH
+env ADMIN_NAME="admin"
+export ADMIN_NAME
+env CLOSED_TASK_DELAY=0
+export CLOSED_TASK_DELAY
+env SESSION_SECRET="randomstring"
+export SESSION_SECRET
+env DB_CONNECTION_STRING="mongodb://user:pass@ip:port/db"
+export DB_CONNECTION_STRING
+env REDIS_HOST="ip"
+export REDIS_HOST
+env REDIS_PORT=port
+export REDIS_PORT
+env SESSION_KEY="sthackSession"
+export SESSION_KEY
+env ADMIN_PATH="/admin"
+export ADMIN_PATH
+env TITLE="Sthack"
+export TITLE
+env BASE_SCORE=50
+export BASE_SCORE
+env NODE_ENV="production"
+export NODE_ENV
+
+#expect fork
+
+respawn
+
+exec /usr/bin/nodejs /var/www/server.js
+```
+
+sshProduction.json example
+```
+{
+    "host"          : "10.13.37.100",
+    "username"      : "sthackuser",
+    "password"      : "sthackuserpass",
+    "path"          : "/home/sthackuser",
+    "extractcmd"    : "tar xvzf /home/sthackuser/sthack-interface-neo.tar.gz -C /var/www/ && cd /var/www && npm update --production && chmod -R o+r /var/www/",
+    "restartcmd"    : "sudo sthack restart",
+    "startcmd"      : "sudo sthack start"
+}
+```
+
+From your dev computer type `grunt deploy`
