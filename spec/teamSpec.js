@@ -3,6 +3,7 @@ var Promise = require('bluebird');
 var crypto = require('crypto');
 var DBo = require('../src/DB').DB;
 var _ = require('lodash');
+var where = require('lodash.where');
 
 var DB = {
       find: function(collection, request, fields){
@@ -12,7 +13,7 @@ var DB = {
                           }];
           var results = [];
           if(_.size(request)){
-            content = _.where(content, request);
+            content = where(content, request);
           }
           if(_.size(fields)){
             _.filter(content, function(value){

@@ -7,28 +7,61 @@
 var express           = require('express');
 var session           = require('express-session');
 var https             = require('https');
-var http              = require('http');
+var net               = require('net');
 var io                = require('socket.io');
 var device            = require('express-device');
 var fs                = require('fs');
 var cookieParse       = require('cookie');
 var cookieParser      = require('cookie-parser');
-var connect           = require('express/node_modules/connect');
+var bodyParser        = require('body-parser');
 var _                 = require('lodash');
 if(process.env.NODE_ENV==='production'){
   var cluster           = require('cluster');
   var numCPUs           = require('os').cpus().length;
   var redis             = require('redis');
   var RedisStore        = require('connect-redis')(session);
-  var IoRedisStore      = require('socket.io/lib/stores/redis');
+  var IoRedisStore      = require('socket.io-redis')
 
   var redisHost          = process.env.REDIS_HOST||'127.0.0.1';
   var redisPort          = process.env.REDIS_PORT||6379;
   var redisAuth          = process.env.REDIS_AUTH||null;
   if (cluster.isMaster) {
+    var workers = [];
+
+    // Helper function for spawning worker at index 'i'.
+    var spawn = function(i) {
+        workers[i] = cluster.fork();
+
+        // Optional: Restart worker on exit
+        workers[i].on('exit', function(worker, code, signal) {
+            console.log('respawning worker', i);
+            spawn(i);
+        });
+    };
+
     for (var i = 0; i < numCPUs; i++) {
-      cluster.fork();
+      spawn(i);
     }
+
+    var worker_index = function(ip, len) {
+        var s = '';
+        for (var i = 0, _len = ip.length; i < _len; i++) {
+            if (ip[i] !== '.') {
+                s += ip[i];
+            }
+        }
+
+        return Number(s) % len;
+    };
+
+    // Create the outside facing server listening on our port.
+    var server = net.createServer({ pauseOnConnect: true }, function(connection) {
+        // We received a connection and need to pass it to the appropriate
+        // worker. Get the worker for this connection's source IP and pass
+        // it the connection.
+        var worker = workers[worker_index(connection.remoteAddress, numCPUs)];
+        worker.send('sticky-session:connection', connection);
+    }).listen(process.env.PORT, '0.0.0.0');
   }
 }
 
@@ -43,8 +76,12 @@ function list(object, callback, callbackError){
 
 
 if(typeof cluster === 'undefined' || cluster.isWorker){
-
-var runningPortNumber  = process.env.PORT;
+  if(process.env.NODE_ENV==='production'){
+    var runningPortNumber = 0;
+  }
+  else{
+    var runningPortNumber = process.env.PORT;
+  }
 var DBConnectionString = process.env.DB_CONNECTION_STRING;
 var adminName          = process.env.ADMIN_NAME;
 var closedTaskDelay    = process.env.CLOSED_TASK_DELAY;
@@ -60,7 +97,7 @@ var Task    = require('./src/Task').Task;
 var Message = require('./src/Message').Message;
 var DB      = require('./src/DB').DB;
 
-if(process.env.NODE_ENV==='production'){
+if(process.env.NODE_ENV === 'production'){
   var redisClient       = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth});
   var redisPub          = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth});
   var redisSub          = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth});
@@ -78,9 +115,7 @@ var sslOptions = {
   cert: fs.readFileSync(process.env.CERT_PATH)
 };
 
-var app               = express();
-var server            = http.createServer(app);
-var parseSignedCookie = connect.utils.parseSignedCookie;
+var app = express();
 
 if(app.get('env') === 'production'){
   app.sessionStore = new RedisStore({
@@ -89,7 +124,7 @@ if(app.get('env') === 'production'){
 }
 
 if(app.get('env') === 'development'){
-  app.sessionStore = new express.session.MemoryStore({reapInterval: 60000 * 10 });
+  app.sessionStore = new session.MemoryStore();
 }
 
 
@@ -98,9 +133,8 @@ app.use(express.static(__dirname + '/public'));
 app.set('view engine', 'ejs');
 app.set('views', __dirname +'/views');
 
-app.use(express.cookieParser());
-app.use(express.json());
-app.use(express.urlencoded());
+app.use(bodyParser.urlencoded({ extended: false }))
+app.use(bodyParser.json());
 app.use(device.capture());
 
 app.use(session({
@@ -134,13 +168,26 @@ app.use(function(req, res, next){
 var appSSL = https.createServer(sslOptions, app).listen(runningPortNumber);
 var socketIO;
 
+process.on('message', function(message, connection) {
+  if (message !== 'sticky-session:connection') {
+    return;
+  }
+
+  // Emulate a connection event on the server by emitting the
+  // event with the connection the master sent us.
+  appSSL.emit('connection', connection);
+
+  connection.resume();
+});
+
+
 if(process.env.NODE_ENV==='production'){
-  socketIO = io.listen(appSSL, { log: false });
-  socketIO.set('store',
-    new IoRedisStore({
-      redisPub: redisPub,
-      redisSub: redisSub,
-      redisClient: redisClient
+  socketIO = io.listen(appSSL, { log: true });
+  socketIO.adapter(IoRedisStore({
+      host: redisHost,
+      port: redisPort,
+      pubClient: redisPub,
+      subClient: redisSub
     })
   );
   redisSub.subscribe('adminAction');
@@ -272,8 +319,8 @@ app.post('/submitFlag', function(req, res){
         console.log('"'+d+'" "'+req.connection.remoteAddress+'" "'+req.session.authenticated.replace(/"/g,'\\"')+'" "submitFlag" "'+req.body.title.replace(/"/g,'\\"')+'" "ok"' );
         socketIO.sockets.emit('validation', {title: req.body.title, team: req.session.authenticated});
         var message = req.session.authenticated+' solved '+req.body.title;
-        socketIO.sockets.emit('message', {submit: 2, message: message});
-        messageDB.addMessage(message);
+        //socketIO.sockets.emit('message', {submit: 2, message: message});
+        //messageDB.addMessage(message);
         if(closedTaskDelay > 0){
           setTimeout(function(){
             socketIO.sockets.emit('reopenTask', req.body.title);
@@ -333,9 +380,9 @@ if(app.get('env') === 'production'){
   });
 }
 
-if(app.get('env') === 'development'){
-  app.use(express.errorHandler());
-}
+// if(app.get('env') === 'development'){
+//   app.use(express.errorHandler());
+// }
 
 socketIO.set('authorization', function (handshake, callback) {
   if(handshake.headers.cookie){
@@ -394,16 +441,13 @@ function getScoreInfos(tasks, team){
 }
 
 socketIO.on('connection', function (socket) {
-
   socket.on('getTasks', function(){
     teamDB.list().then(function(teams){
-      taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
-        socket.emit('giveTasks', tasks.infos);
-        var score = getScoreInfos(tasks.raw, socket.handshake.authenticated);
-        socket.emit('giveScore', {name: socket.handshake.authenticated, score: score.value, breakthrough: score.breakthrough});
-      }, function(error){
-        socket.emit('error', error);
-      });
+      return taskDB.getTasks(socket.handshake.authenticated, teams.length);
+    }).then(function(tasks){
+      socket.emit('giveTasks', tasks.infos);
+      var score = getScoreInfos(tasks.raw, socket.handshake.authenticated);
+      socket.emit('giveScore', {name: socket.handshake.authenticated, score: score.value, breakthrough: score.breakthrough});
     }, function(error){
       socket.emit('error', error);
     });
@@ -411,13 +455,11 @@ socketIO.on('connection', function (socket) {
 
   socket.on('updateTaskScores', function(){
     teamDB.list().then(function(teams){
-      taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
-        socket.emit('updateTaskScores', tasks.infos);
-        var score = getScoreInfos(tasks.raw, socket.handshake.authenticated);
-        socket.emit('giveScore', {name: socket.handshake.authenticated, score: score.value, breakthrough: score.breakthrough});
-      }, function(error){
-        socket.emit('error', error);
-      });
+      return taskDB.getTasks(socket.handshake.authenticated, teams.length);
+    }).then(function(tasks){
+      socket.emit('updateTaskScores', tasks.infos);
+      var score = getScoreInfos(tasks.raw, socket.handshake.authenticated);
+      socket.emit('giveScore', {name: socket.handshake.authenticated, score: score.value, breakthrough: score.breakthrough});
     }, function(error){
       socket.emit('error', error);
     });
@@ -427,11 +469,9 @@ socketIO.on('connection', function (socket) {
     var d = new Date().toISOString();
     console.log('"'+d+'" "'+socket.handshake.address.address+'" "'+socket.handshake.authenticated.replace(/"/g,'\\"')+'" "getTask" "'+title+'" "-"' );
     teamDB.list().then(function(teams){
-      taskDB.getTaskInfos(title, socket.handshake.authenticated, teams.length, true).then(function(task){
-        socket.emit('giveTask', task);
-      }, function(error){
-        socket.emit('error', error);
-      });
+      return taskDB.getTaskInfos(title, socket.handshake.authenticated, teams.length, true);
+    }).then(function(task){
+      socket.emit('giveTask', task);
     }, function(error){
       socket.emit('error', error);
     });
@@ -439,29 +479,27 @@ socketIO.on('connection', function (socket) {
 
   socket.on('updateTask', function(title){
     teamDB.list().then(function(teams){
-      taskDB.getTaskInfos(title, socket.handshake.authenticated, teams.length, false).then(function(task){
-        socket.emit('updateTask', task);
-      }, function(error){
-        socket.emit('error', error);
-      });
+      return taskDB.getTaskInfos(title, socket.handshake.authenticated, teams.length, false);
+    }).then(function(task){
+      socket.emit('updateTask', task);
     }, function(error){
-      socket.emit('error', error);
+        socket.emit('error', error);
     });
   });
 
   socket.on('getScoreboard', function(){
-    teamDB.list().then(function(teams){
-      taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
-        var scoreboard = [];
-        teams.forEach(function(team){
-          var score = getScoreInfos(tasks.raw, team.name);
-          scoreboard.push({team: team.name, score: score.value, lastTask: score.lastTask, time: -score.last, breakthrough: score.breakthrough});
-        });
-        var orderedScoreboard = _.sortBy(scoreboard, ['score', 'time']).reverse();
-        socket.emit('giveScoreboard', orderedScoreboard);
-      }, function(error){
-        socket.emit('error', error);
+    var teams;
+    teamDB.list().then(function(retTeams){
+      teams = retTeams;
+      return taskDB.getTasks(socket.handshake.authenticated, teams.length);
+    }).then(function(tasks){
+      var scoreboard = [];
+      teams.forEach(function(team){
+        var score = getScoreInfos(tasks.raw, team.name);
+        scoreboard.push({team: team.name, score: score.value, lastTask: score.lastTask, time: -score.last, breakthrough: score.breakthrough});
       });
+      var orderedScoreboard = _.sortBy(scoreboard, ['score', 'time']).reverse();
+      socket.emit('giveScoreboard', orderedScoreboard);
     }, function(error){
       socket.emit('error', error);
     });
@@ -469,12 +507,10 @@ socketIO.on('connection', function (socket) {
 
   socket.on('getScore', function(){
     teamDB.list().then(function(teams){
-      taskDB.getTasks(socket.handshake.authenticated, teams.length).then(function(tasks){
-        var score = getScoreInfos(tasks.raw, socket.handshake.authenticated);
-        socket.emit('giveScore', {name: socket.handshake.authenticated, score: score.value, breakthrough: score.breakthrough});
-      }, function(error){
-        socket.emit('error', error);
-      });
+      return taskDB.getTasks(socket.handshake.authenticated, teams.length);
+    }).then(function(tasks){
+      var score = getScoreInfos(tasks.raw, socket.handshake.authenticated);
+      socket.emit('giveScore', {name: socket.handshake.authenticated, score: score.value, breakthrough: score.breakthrough});
     }, function(error){
       socket.emit('error', error);
     });
@@ -487,8 +523,8 @@ socketIO.on('connection', function (socket) {
         console.log('"'+d+'" "'+socket.handshake.address.address+'" "'+socket.handshake.authenticated.replace(/"/g,'\\"')+'" "submitFlag" "'+datas.title+'" "ok"' );
         socketIO.sockets.emit('validation', {title: datas.title, team: socket.handshake.authenticated});
         var message = socket.handshake.authenticated+' solved '+datas.title;
-        socketIO.sockets.emit('message', {submit: 2, message: message});
-        messageDB.addMessage(message);
+        //socketIO.sockets.emit('message', {submit: 2, message: message});
+        //messageDB.addMessage(message);
         if(closedTaskDelay > 0){
           setTimeout(function(){
             socketIO.sockets.emit('reopenTask', datas.title);

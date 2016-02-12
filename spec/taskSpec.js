@@ -2,7 +2,7 @@ var Task = require('../src/Task').Task;
 var Promise = require('bluebird');
 var crypto = require('crypto');
 var _ = require('lodash');
-
+var where = require('lodash.where');
 
 var DB = {
       find: function(collection, request, fields){
@@ -12,38 +12,43 @@ var DB = {
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
              'type': 'Stegano',
-             'difficulty': 'easy'},
+             'difficulty': 'easy',
+             'author': 'agix'},
             {'title': 'Second task',
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
              'type': 'Stegano',
              'difficulty': 'medium',
-             'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792226000}]},
+             'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792226000}],
+             'author': 'agix'},
             {'title': 'Third task',
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
              'type': 'Stegano',
              'difficulty': 'hard',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792225833},
-                        {'teamName' : 'myTeam', 'timestamp' : 1410792226000}]},
+                        {'teamName' : 'myTeam', 'timestamp' : 1410792226000}],
+             'author': 'agix'},
             {'title': 'Fourth task',
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
              'type': 'Stegano',
              'difficulty': 'medium',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792225833},
-                        {'teamName' : 'myTeam', 'timestamp' : 1410792224000}]},
+                        {'teamName' : 'myTeam', 'timestamp' : 1410792224000}],
+             'author': 'agix'},
             {'title': 'Fifth task',
              'description': 'Description with <b>html</b> support.',
              'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
              'type': 'Stegano',
              'difficulty': 'medium',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : (new Date()).getTime() + 1000 * 60 * 5},
-                        {'teamName' : 'myTeam', 'timestamp' : 1410792224000}]},
+                        {'teamName' : 'myTeam', 'timestamp' : 1410792224000}],
+             'author': 'agix'},
           ];
           var results = [];
           if(_.size(request)){
-            content = _.where(content, request);
+            content = where(content, request);
           }
           delete fields._id;
           if(_.size(fields)){
@@ -86,7 +91,10 @@ describe("Tasks", function() {
   var config;
 
   beforeEach(function(){
-    config = {delay: 1000 * 60 * 10};
+    config = {
+      delay: 1000 * 60 * 10,
+      baseScore: 50
+    };
   });
 
   it("can be listed", function(done){
@@ -106,32 +114,53 @@ describe("Tasks", function() {
   it("can be get", function(done){
     var promise = new Task(DB, config).getTasks('myTeam', 3);
     promise.then(function(tasks){
-      expect(tasks).toEqual([ { title: 'First task',
-                                type: 'Stegano',
-                                difficulty: 'easy',
-                                score: 150,
-                                state: 0 },
-                              { title: 'Second task',
-                                type: 'Stegano',
-                                difficulty: 'medium',
-                                score: 200,
-                                state: 1 },
-                              { title: 'Third task',
-                                type: 'Stegano',
-                                difficulty: 'hard',
-                                score: 150,
-                                state: 2 },
-                              { title: 'Fourth task',
-                                type: 'Stegano',
-                                difficulty: 'medium',
-                                score: 100,
-                                state: 3 },
-                              { title: 'Fifth task',
-                                type: 'Stegano',
-                                difficulty: 'medium',
-                                score: 100,
-                                state: 3 }
-                            ]);
+      expect(tasks.infos).toEqual([
+    {
+        "author": "agix",
+        "difficulty": "medium",
+        "open": false,
+        "score": 100,
+        "state": 3,
+        "title": "Fifth task",
+        "type": "Stegano"
+    },
+    {
+        "author": "agix",
+        "difficulty": "easy",
+        "open": true,
+        "score": 150,
+        "state": 0,
+        "title": "First task",
+        "type": "Stegano"
+    },
+    {
+        "author": "agix",
+        "difficulty": "medium",
+        "open": true,
+        "score": 100,
+        "state": 3,
+        "title": "Fourth task",
+        "type": "Stegano"
+    },
+    {
+        "author": "agix",
+        "difficulty": "medium",
+        "open": true,
+        "score": 200,
+        "state": 1,
+        "title": "Second task",
+        "type": "Stegano"
+    },
+    {
+        "author": "agix",
+        "difficulty": "hard",
+        "open": true,
+        "score": 150,
+        "state": 2,
+        "title": "Third task",
+        "type": "Stegano"
+    }
+]);
     }, function(error){
       expect(true).toBe(false);
     }).finally(done);
