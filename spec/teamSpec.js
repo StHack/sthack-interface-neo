@@ -75,7 +75,7 @@ describe("Not authenticated team", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("Team already exists");
+      expect(error.toString()).toEqual('Error: Team already exists');
     }).finally(done);
   });
 });

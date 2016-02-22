@@ -19,8 +19,8 @@ DB.prototype.find = function(collection, request, fields){
     connect(function(db, callback){
       var coll = db.collection(collection);
       coll.find(request, fields).toArray(function(err, results){
-        callback();
         fulfill(results);
+        callback();
       });
     });
   });
@@ -31,8 +31,8 @@ DB.prototype.insert = function(collection, object){
     connect(function(db, callback){
       var coll = db.collection(collection);
       coll.insert(object, function(err, results){
-        callback();
         fulfill(results);
+        callback();
       });
     });
   });
@@ -43,8 +43,8 @@ DB.prototype.update = function(collection, object, update){
     connect(function(db, callback){
       var coll = db.collection(collection);
       coll.update(object, {'$set': update}, function(err, results){
-        callback();
         fulfill(results);
+        callback();
       });
     });
   });
@@ -55,8 +55,8 @@ DB.prototype.remove = function(collection, object){
     connect(function(db, callback){
       var coll = db.collection(collection);
       coll.remove(object, {}, function(err, results){
+        fulfill(results.result.n);
         callback();
-        fulfill(results);
       });
     });
   });

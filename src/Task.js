@@ -10,12 +10,8 @@ var Task = function(db, config) {
 
 Task.prototype.list = function(){
   var db = this.db;
-  return new Promise(function(fulfill, reject){
-    db.find('tasks', {}, {'title': 1, '_id': 0}).then(function(result){
-      fulfill(result);
-    }, function(error){
-      reject(error);
-    });
+  return db.find('tasks', {}, {'title': 1, '_id': 0}).then(function(result){
+    return result;
   });
 };
 
@@ -24,19 +20,15 @@ Task.prototype.getTasks = function(teamName, countTeam){
   var self = this;
   var infosTasks = [];
 
-  return new Promise(function(fulfill, reject){
-    db.find('tasks', {}, {'_id': 0}).then(function(result){
-      result.forEach(function(task){
-        var infos = self.getInfos(task, teamName, countTeam);
-        task.score = infos.score;
-        task.state = infos.state;
-        task.open  = infos.open;
-        infosTasks.push(infos);
-      });
-      fulfill({infos: _.sortBy(infosTasks, ['title']), raw: _.sortBy(result, ['title'])});
-    }, function(error){
-      reject(error);
+  return db.find('tasks', {}, {'_id': 0}).then(function(result){
+    result.forEach(function(task){
+      var infos = self.getInfos(task, teamName, countTeam);
+      task.score = infos.score;
+      task.state = infos.state;
+      task.open  = infos.open;
+      infosTasks.push(infos);
     });
+    return {infos: _.sortBy(infosTasks, ['title']), raw: _.sortBy(result, ['title'])};
   });
 };
 
@@ -59,30 +51,21 @@ Task.prototype.getInfos = function(task, teamName, countTeam, description){
 Task.prototype.getTaskInfos = function(title, teamName, countTeam, description){
   var db = this.db;
   var self = this;
-
-  return new Promise(function(fulfill, reject){
-    db.find('tasks', {'title' : title}, {'_id': 0}).then(function(result){
-      if(result.length !== 0){
-        fulfill(self.getInfos(result[0], teamName, countTeam, description));
-      }
-      else{
-        reject("Task doesn't exsit");
-      }
-    }, function(error){
-      reject(error);
-    });
+  return db.find('tasks', {'title' : title}, {'_id': 0}).then(function(result){
+    if(result.length !== 0){
+      return self.getInfos(result[0], teamName, countTeam, description);
+    }
+    else{
+      throw new Error('Task doesn\'t exsit');
+    }
   });
 };
 
 Task.prototype.exists = function(title){
-  var db = this.db;
-  return new Promise(function(fulfill, reject){
-    db.find('tasks', {'title' : title}, {'title': 1, '_id': 0}).then(function(result){
-      fulfill(result.length !== 0);
-    }, function(error){
-      reject(error);
-    });
-  });
+  var db = this.db  
+  return db.find('tasks', {'title' : title}, {'title': 1, '_id': 0}).then(function(result){
+    return result.length !== 0;
+  });  
 };
 
 Task.prototype.getScore = function(task, countTeam){
@@ -187,58 +170,47 @@ Task.prototype.isFlag = function(task, flag){
 Task.prototype.solveTask = function(title, flag, teamName){
   var db = this.db;
   var self = this;
-  return new Promise(function(fulfill, reject){
-    self.getTask(title).then(function(task){
-      if(self.isSolvableByTeam(task, teamName)){
-        if(self.isFlag(task, flag)){
-          var solved = self.getSolved(task);
-          solved.push({"teamName": teamName, "timestamp": new Date().getTime()});
-          db.update('tasks', {'title': title}, {'solved': solved}).then(function(result){
-            fulfill(true);
-          }, function(error){
-            reject(error);
-          });
-        }
-        else{
-          reject("Bad flag");
-        }
+  return self.getTask(title).then(function(task){
+    if(self.isSolvableByTeam(task, teamName)){
+      if(self.isFlag(task, flag)){
+        var solved = self.getSolved(task);
+        solved.push({"teamName": teamName, "timestamp": new Date().getTime()});
+        return db.update('tasks', {'title': title}, {'solved': solved});
       }
       else{
-        reject("You can't solve this task");
+        throw new Error('Bad flag');
       }
-    }, function(error){
-      reject(error);
-    });
+    }
+    else{
+      throw new Error("You can't solve this task");
+    }
+  }).then(function(result){
+    return true;
   });
 };
 
 Task.prototype.getTask = function(title){
   var db = this.db;
   var self = this;
-  return new Promise(function(fulfill, reject){
-    db.find('tasks', {'title' : title}, {'_id': 0}).then(function(result){
-      if(result.length !== 0){
-        fulfill(result[0]);
-      }
-      else{
-        reject("Task doesn't exsit");
-      }
-    }, function(error){
-      reject(error);
-    });
+  return db.find('tasks', {'title' : title}, {'_id': 0}).then(function(result){
+    if(result.length !== 0){
+      return result[0];
+    }
+    else{
+      throw new Error('Task doesn\'t exsit');
+    }
   });
 };
 
 Task.prototype.addTask = function(title, description, flag, type, difficulty, author){
   var db = this.db;
   var self = this;
-  return new Promise(function(fulfill, reject){
-    self.exists(title).then(function(result){
+  return self.exists(title).then(function(result){
       if(result){
-        reject("Task already exists");
+        throw new Error('Task already exists');
       }
       else{
-        hashedFlag = crypto.createHash('sha256').update(flag).digest('hex');
+        var hashedFlag = crypto.createHash('sha256').update(flag).digest('hex');
         var task = {
           'title': title,
           'description': description,
@@ -247,65 +219,54 @@ Task.prototype.addTask = function(title, description, flag, type, difficulty, au
           'difficulty': difficulty,
           'author': author
         };
-        db.insert('tasks', task).then(function(result){
-          fulfill(true);
-        }, function(error){
-          reject(error);
-        });
+        return db.insert('tasks', task);
       }
-    });
+  }).then(function(result){
+    return true;
   });
 };
 
 Task.prototype.editTask = function(title, description, flag, type, difficulty, author){
   var db = this.db;
   var self = this;
-  return new Promise(function(fulfill, reject){
-    hashedFlag = crypto.createHash('sha256').update(flag).digest('hex');
-    var task = {
-      'description': description,
-      'flag': hashedFlag,
-      'type': type,
-      'difficulty': difficulty,
-      'author': author
-    };
-    if(flag===''){
-      delete task.flag;
+  var hashedFlag = crypto.createHash('sha256').update(flag).digest('hex');
+  var task = {
+    'description': description,
+    'flag': hashedFlag,
+    'type': type,
+    'difficulty': difficulty,
+    'author': author
+  };
+  if(flag===''){
+    delete task.flag;
+  }
+  return db.update('tasks', {'title': title}, task).then(function(result){
+    if(result === 1){
+      return true;
     }
-    db.update('tasks', {'title': title}, task).then(function(result){
-      if(result === 1){
-        fulfill(true);
-      }
-      else{
-        reject("No task updated");
-      }
-    }, function(error){
-      reject(error);
-    });
+    else{
+      return new Throw('No task updated');
+    }
   });
 };
 
 Task.prototype.deleteTask = function(title){
   var db = this.db;
   var self = this;
-  return new Promise(function(fulfill, reject){
-    db.remove('tasks', {'title' : title}).then(function(result){
-      if(result === 1){
-        fulfill(true);
-      }
-      else{
-        reject("No team removed");
-      }
-    }, function(error){
-      reject(error);
-    });
+  return db.remove('tasks', {'title' : title}).then(function(result){
+    if(result === 1){
+      return true;
+    }
+    else{
+      return new Error('No team removed');
+    }
   });
 };
 
 Task.prototype.cleanSolved = function(teamName, countTeam){
   var db = this.db;
   var self = this;
-  self.getTasks(teamName, countTeam).then(function(tasks){
+  return self.getTasks(teamName, countTeam).then(function(tasks){
     tasks.raw.forEach(function(task){
       if(typeof task.solved !== 'undefined'){
         var countSolved = task.solved.length;
@@ -317,6 +278,7 @@ Task.prototype.cleanSolved = function(teamName, countTeam){
         }
       }
     });
+    return null;
   });
 };
 

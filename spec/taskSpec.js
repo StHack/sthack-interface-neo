@@ -81,7 +81,7 @@ var DB = {
             fulfill(1);
           }
           else{
-            reject("No task updated");
+            reject("Error: No task updated");
           }
         });
       }
@@ -180,7 +180,7 @@ describe("Tasks", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("Task already exists");
+      expect(error.toString()).toEqual("Error: Task already exists");
     }).finally(done);
   });
 
@@ -198,7 +198,7 @@ describe("Tasks", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("No task updated");
+      expect(error.toString()).toEqual("Error: No task updated");
     }).finally(done);
   });
 });
@@ -274,7 +274,7 @@ describe("Tasks never solved", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("Bad flag");
+      expect(error.toString()).toEqual("Error: Bad flag");
     }).finally(done);
   });
 
@@ -351,7 +351,7 @@ describe("Tasks solved by other team", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("Bad flag");
+      expect(error.toString()).toEqual("Error: Bad flag");
     }).finally(done);
   });
 
@@ -420,7 +420,7 @@ describe("Tasks solved by my team", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("You can't solve this task");
+      expect(error.toString()).toEqual("Error: You can't solve this task");
     }).finally(done);
   });
 
@@ -429,7 +429,7 @@ describe("Tasks solved by my team", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("You can't solve this task");
+      expect(error.toString()).toEqual("Error: You can't solve this task");
     }).finally(done);
   });
 
@@ -497,7 +497,7 @@ describe("Tasks solved by my team first", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("You can't solve this task");
+      expect(error.toString()).toEqual("Error: You can't solve this task");
     }).finally(done);
   });
 
@@ -506,7 +506,7 @@ describe("Tasks solved by my team first", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("You can't solve this task");
+      expect(error.toString()).toEqual("Error: You can't solve this task");
     }).finally(done);
   });
 
@@ -534,7 +534,7 @@ describe("Tasks closed", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("You can't solve this task");
+      expect(error.toString()).toEqual("Error: You can't solve this task");
     }).finally(done);
   });
 
@@ -543,7 +543,7 @@ describe("Tasks closed", function() {
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
-      expect(error).toEqual("You can't solve this task");
+      expect(error.toString()).toEqual("Error: You can't solve this task");
     }).finally(done);
   });
 
