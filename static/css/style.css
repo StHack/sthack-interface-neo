@@ -16,7 +16,7 @@ body{
     text-align: center;
     font-family: consolas, monospace;
     text-decoration: none;
-    color: #c72127;
+    color: #0065cc;
     font-size: 1vw;
 }
 
@@ -35,7 +35,7 @@ body{
 }
 
 .btn:hover{
-    background-color: #4d0d0f;
+    background-color: #002142;
 }
 
 .right{
@@ -97,7 +97,7 @@ body{
     overflow-y: auto;
     overflow-x: hidden;
     font-family: consolas, monospace;
-    color: #c72127;
+    color: #0065cc;
     background-color: #000;
 }
 
@@ -129,8 +129,10 @@ body{
     position:absolute;
     /*min-width: 925px;
     min-height: 680px;*/
+    border-radius: 5%;
     width:60%;
     height: 85%;
+    background: black;
 }
 
 .titleBar{
@@ -152,11 +154,11 @@ body{
     cursor: pointer;
 }
 
-#titlePopup img{
-    width: 5%;
-    margin-right: 1%;
-    float: right;
-    cursor: pointer;
+#titlePopup {
+    text-align: center;
+    font-size: 3em;
+    margin-top: 7%;
+    margin-bottom: 6%;
 }
 
 /*@media screen and (max-width: 1400px){
@@ -186,12 +188,14 @@ body{
     }
 }*/
 
+#challenges{
+    margin: 3%;
+    height: 88%;
+    background: white;
+}
+
 .content{
     font-family: consolas, monospace;
-    overflow-y: auto;
-    overflow-x: hidden;
-    margin: 1%;
-    height: 88%;
 }
 
 .content div{
@@ -207,10 +211,6 @@ body{
 .content h3{
     margin:1%;
     font-weight: bold;
-}
-
-.content div{
-    margin:2%;
 }
 
 .center{
@@ -274,14 +274,13 @@ body{
 }
 
 canvas {
-    width: 30%;
-    height: initial;
+    border-radius: 15%;
 }
 
 .buttonTask, .buttonDir{
     cursor: pointer;
-    margin-left: 1%;
-    margin-top: 1%;
+    margin-left: 3%;
+    margin-top: 3%;
 }
 
 .directory{
@@ -299,21 +298,11 @@ canvas {
 
 #popup{
     display: none;
-    z-index: 100;
     /*min-width: 510px;
     min-height: 330px;*/
-    width: 36%;
-    height: 50%;
-    position: absolute;
-    top: 30%;
-    left: 50%;
 }
 
 #contentPopup{
-    overflow-y: auto;
-    overflow-x: hidden;
-    margin: 2%;
-    height: 83%;
     font-size: 1vw;
 }
 
@@ -325,7 +314,7 @@ canvas {
 
 #submit{
     text-align:center;
-    margin-top:2%;
+    margin-top:8%;
 }
 
 #submit input{
@@ -386,9 +375,16 @@ canvas {
 }
 
 #informations{
-    margin-top:2%;
+    font-size: 1.7em;
+    margin-bottom: 6%;
     font-style: italic;
     text-align:center;
+}
+
+#description{
+    padding-left: 6%;
+    padding-right: 6%;
+    font-size: 1.2em;
 }
 
 #error{
@@ -396,6 +392,7 @@ canvas {
     margin-top:2%;
     color: #fc2828;
     text-align:center;
+    font-size: 1.2em;
 }
 
 .new_line{
@@ -467,8 +464,17 @@ canvas {
     position:absolute;
     /*min-width: 925px;
     min-height: 680px;*/
+    border-radius: 5%;
     width:85%;
     height: 85%;
+    background: black;
+}
+
+#rulesin{
+    height: 90%;
+    width: 91%;
+    margin-left: 2%;
+    margin-right: 2%;
 }
 
 #rulesin div.content {
@@ -518,4 +524,45 @@ canvas {
 
 .lastTime{
     display:none;
+}
+
+#challenges .content{
+    position:absolute;
+    overflow-y: auto;
+    overflow-x: hidden;
+    width: 95%;
+    height: 90%;
+}
+
+#button{
+    display: inline-block;
+    background: black;
+    width: 100%;
+    height: 10%;
+    margin: auto;
+    margin-top: -5%;
+    text-align: center;
+    border-bottom-right-radius: 80%;
+    border-bottom-left-radius: 80%;
+}
+
+#button button{
+    height: 100%;
+    width: 7%;
+
+}
+
+#button button:first{
+    margin-left: 3%;
+}
+
+#home{
+    height: 90%;
+    cursor: pointer;
+}
+
+#prev{
+    cursor: pointer;
+    height: 70%;
+    margin-top: -5%;
 }

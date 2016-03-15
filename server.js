@@ -98,9 +98,9 @@ var Message = require('./src/Message').Message;
 var DB      = require('./src/DB').DB;
 
 if(process.env.NODE_ENV === 'production'){
-  var redisClient       = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth});
-  var redisPub          = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth});
-  var redisSub          = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth});
+  var redisClient       = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth, detect_buffers: true, return_buffers: false});
+  var redisPub          = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth, detect_buffers: true, return_buffers: false});
+  var redisSub          = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth, return_buffers: true});
 
   var ctfOpen = true;
   var registrationOpen = true;
@@ -356,10 +356,15 @@ app.get(adminPath, function(req, res){
 });
 
 app.post("/", function(req, res){
+  var d = new Date().toISOString();
   if(typeof req.body.name !== 'undefined' && typeof req.body.password !== 'undefined'){
     teamDB.areLoginsValid(req.body.name, req.body.password).then(function(result){
       if(result){
+        console.log('"'+d+'" "'+req.connection.remoteAddress+'" "-" "login" "'+req.body.name+'" "ok"' );
         req.session.authenticated = req.body.name;
+      }
+      else{
+        console.log('"'+d+'" "'+req.connection.remoteAddress+'" "-" "login" "'+req.body.name+'" "ko"' );
       }
       res.redirect(302, '/');
     }, function(error){
@@ -382,7 +387,8 @@ if(app.get('env') === 'production'){
 //   app.use(express.errorHandler());
 // }
 
-socketIO.set('authorization', function (handshake, callback) {
+socketIO.use(function(socket, next) {
+  var handshake = socket.request;
   if(handshake.headers.cookie){
     var cookie = cookieParse.parse(handshake.headers.cookie);
     var sessionID = cookieParser.signedCookie(cookie[sessionKey], sessionSecret);
@@ -391,10 +397,10 @@ socketIO.set('authorization', function (handshake, callback) {
         var session = JSON.parse(content);
         if(session.authenticated){
           handshake.authenticated = session.authenticated;
-          callback(null, true);
+          next();
         }
         else{
-          callback(null, false);
+          next(new Error('not authorized'));
         }
       });
     }
@@ -403,16 +409,16 @@ socketIO.set('authorization', function (handshake, callback) {
         var session = JSON.parse(app.sessionStore.sessions[sessionID]);
         if(session.authenticated){
           handshake.authenticated = session.authenticated;
-          callback(null, true);
+          next();
         }
         else{
-          callback(null, false);
+          next(new Error('not authorized'));
         }
       }
     }
   }
-  else{
-    callback(null, false);
+  else{    
+    next(new Error('not authorized'));
   }
 });
 
@@ -440,7 +446,7 @@ function getScoreInfos(tasks, team){
 
 socketIO.on('connection', function (socket) {
   socket.on('getTasks', function(){
-    var auth = socket.client.request.authenticated;
+    var auth = socket.client.request.authenticated;    
     teamDB.list().then(function(teams){
       return taskDB.getTasks(auth, teams.length);
     }).then(function(tasks){
@@ -537,7 +543,7 @@ socketIO.on('connection', function (socket) {
         }
       }, function(error){
         console.log('"'+d+'" "'+socket.handshake.address+'" "'+auth.replace(/"/g,'\\"')+'" "submitFlag" "'+datas.title+'" "ko"' );
-        socket.emit('nope', error);
+        socket.emit('nope', error.toString());
       });
     }
     else{

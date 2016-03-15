@@ -6,15 +6,15 @@ var blink_val = 0;
 var blink;
 
 $(document).ready(function () {
-  $('#console').draggable({cursor: 'crosshair', drag: function(event, ui){
-            if(ui.position.top < $('#navbar').height()){
-                ui.position.top = $('#navbar').height();
-            }
-            if(ui.position.left < 0){
-                ui.position.left = 0;
-            }
-        }
-    });
+  // $('#console').draggable({cursor: 'crosshair', drag: function(event, ui){
+  //           if(ui.position.top < $('#navbar').height()){
+  //               ui.position.top = $('#navbar').height();
+  //           }
+  //           if(ui.position.left < 0){
+  //               ui.position.left = 0;
+  //           }
+  //       }
+  //   });
 
 
   $('#console').on('blink', function(){
@@ -156,10 +156,10 @@ function setup(){
 $(document).ready(function () {
   $('#console').append('<p class="new_line">$ </p>');
   setTimeout(function(){
-    $('.new_line').last().teletype({animDelay: 50, text: 'nc inso2k15 31337'}, function(){
+    $('.new_line').last().teletype({animDelay: 50, text: 'nc inso2k16 31337'}, function(){
       setTimeout(function(){
         $('#console').append('<p class="new_line">Welcome on Insomni\'hack communicator</p>');
-        $('#console').append('<p class="new_line">Downloading last messages and tasks...</p>');
+        $('#console').append('<p class="new_line">Connecting to your Internet of $h!t devices...</p>');
         setTimeout(function(){
           setup();
         }, 1000);

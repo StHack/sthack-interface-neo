@@ -1,30 +1,27 @@
 <% include head.ejs %>
   <div id="pad" class="window">
-    <div class="titleBar">
-      Control Interface
-    </div>
-    <div class="content" id="challenges">
-    </div>
-  </div>
+    <div id="challenges">
+      <div class="content" id="popup">        
+        <div id="contentPopup">
+          <h3 id="titlePopup"></h3>
+          <div id="informations">
+          </div>
+          <div id="description">
+          </div>
+          <div id="error">
+          </div>
+          <div id="submit">
+            <input type="password" id="flag" placeholder="Flag"/><br />
+          </div>
+        </div>
+      </div>
 
-
-<div id="popup" class="window">
-  <div id="titlePopup" class="popupTitleBar">
-  </div>
-  <div id="contentPopup">
-    <div id="description">
     </div>
-    <div id="informations">
-    </div>
-    <div id="error">
-    </div>
-    <div id="submit">
-      <input type="password" id="flag" placeholder="Flag"/><br />
-      <button id="submitFlag">Submit</button>
-      <button id="cancel">Cancel</button>
+    <div id="button">
+      <img src="/img/back.svg" id="prev">
+      <img src="/img/home.svg" id="home">
     </div>
   </div>
-</div>
 
 </body>
 </html>
