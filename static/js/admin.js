@@ -64,11 +64,13 @@ $(document).ready(function () {
             $('#taskAuthor').val('');
             $('#taskDifficulty').val('easy');
             $('#taskDescription').val('');
+            $("#broken").prop('checked', false);
         }
         else{
             $('#addTask').css('display', 'none');
             $('#editTask').css('display', 'inline');
             $('#deleteTask').css('display', 'inline');
+            $("#broken").attr('checked', false);
             sock.emit('getTask', $(this).val());
         }
     });
@@ -94,6 +96,12 @@ $(document).ready(function () {
         $('#taskDescription').val(task.description);
         $('#taskDescription').focus();
         $('#taskDifficulty').val(task.difficulty);
+        if(typeof(task.broken) !== 'undefined'){
+            $("#broken").prop('checked', task.broken);
+        }
+        else{
+            $("#broken").prop('checked', false);
+        }
     });
 
     sock.emit('adminListTasks');
@@ -184,6 +192,15 @@ $(document).ready(function () {
         $('#score').text(team.score);
         for(var i = 0; i < team.breakthrough; i++){
             $('#breakthrough').append('<img src="/img/coeur.png" />');
+        }
+    });
+
+    $('#broken').click(function(){
+        if($('#taskTitle').val() !== ''){
+            sock.emit('adminBreak', {
+                title: $('#taskTitle').val(),
+                broken: $(this).is(':checked'),
+            });
         }
     });
 

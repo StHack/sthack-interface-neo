@@ -1,5 +1,4 @@
 loadImages(function(){
-    console.log('images');
     var prev = 'start';
 
     //$('#pad').resizable();
@@ -126,12 +125,28 @@ loadImages(function(){
         }
         else{
             var infos = JSON.parse($(e.target).text());
-            prev = infos.type.checksum();
-            clickTask(e.target, function(){
-                var title = infos.title;
-                sock.emit('getTask', title);
-            });
+            if(typeof(infos.broken) === 'undefined' || infos.broken === false){
+                prev = infos.type.checksum();
+                clickTask(e.target, function(){
+                    var title = infos.title;
+                    sock.emit('getTask', title);
+                });
+            }
+            else{
+                alert('We have trouble with this task ! We are working on it...');
+            }
         }
+    });
+
+    sock.on('breakTask', function(task){
+        if($('#popup').css('display') === 'block' && $('#titlePopup').text()===task.title){
+            alert('We have trouble with this task ! We are working on it...');
+        }
+        var canvasTask = document.getElementById('task-'+task.title.checksum());
+        var taskInfo = JSON.parse($(canvasTask).text());
+        taskInfo.broken = task.broken;
+        canvasTask.textContent = JSON.stringify(taskInfo);
+        loadTask(canvasTask);
     });
 
     sock.on('giveTask', function(task){

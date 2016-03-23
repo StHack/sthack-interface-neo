@@ -10,6 +10,9 @@
   <script src="/js/jquery.min.js"></script>
   <script src="/js/jquery-ui.min.js"></script>
   <script src="/js/jquery.ui.touch-punch.dk.js"></script>
+  <script>
+    var Images = <%- Images %>;
+  </script>
   <%if (typeof auth !== 'undefined'){ %>
     <script src="/socket.io/socket.io.js"></script>
     <script>

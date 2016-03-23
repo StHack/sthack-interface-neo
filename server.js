@@ -101,6 +101,8 @@ if(process.env.NODE_ENV === 'production'){
   var redisClient       = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth, detect_buffers: true, return_buffers: false});
   var redisPub          = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth, detect_buffers: true, return_buffers: false});
   var redisSub          = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth, return_buffers: true});
+  var redisAdminPub     = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth, detect_buffers: true, return_buffers: false});
+  var redisAdminSub     = redis.createClient(redisPort, redisHost, {auth_pass: redisAuth, detect_buffers: true, return_buffers: false});
 
   var ctfOpen = true;
   var registrationOpen = true;
@@ -190,8 +192,8 @@ if(process.env.NODE_ENV==='production'){
       subClient: redisSub
     })
   );
-  redisSub.subscribe('adminAction');
-  redisSub.on('message', function(channel, message){
+  redisAdminSub.subscribe('adminAction');
+  redisAdminSub.on('message', function(channel, message){
     if(message === 'openCTF'){
       ctfOpen = true;
     }
@@ -210,6 +212,23 @@ else{
   socketIO = io.listen(appSSL, { log: true });
 }
 
+var sources = {
+  backdoor: 'backdoor.png',
+  crypto: 'crypto.png',
+  forensic: 'forensics.png',
+  hardware: 'hardware.png',
+  network: 'network.png',
+  pwn: 'pwn.png',
+  reverse: 'reverse.png',
+  shellcode: 'shellcode.png',
+  web: 'web.png',
+  misc: 'misc.png',
+};
+
+var taskImages = fs.readdirSync(__dirname + '/public/img/tasks');
+taskImages.forEach(function(image){
+  sources[image.substr(0, image.length-4).toLowerCase()] = 'tasks/'+image;
+});
 
 app.get("/", function(req, res){
   if(req.session.authenticated){
@@ -218,6 +237,7 @@ app.get("/", function(req, res){
       current: 'index',
       auth: 1,
       socketIOUrl: 'https://'+req.headers.host,
+      Images: JSON.stringify(sources)
     });
   }
   else{
@@ -226,7 +246,8 @@ app.get("/", function(req, res){
         title: siteTitle,
         current: 'index',
         teams_list: teams,
-        registrationOpen: registrationOpen
+        registrationOpen: registrationOpen,
+        Images: JSON.stringify(sources)
       });
     },function(error){
       console.log(error);
@@ -250,7 +271,8 @@ app.all("/register", function(req, res){
           current: 'register',
           title: siteTitle,
           error: error,
-          registrationOpen: registrationOpen
+          registrationOpen: registrationOpen,
+          Images: JSON.stringify(sources)
         });
       });
     }
@@ -259,7 +281,8 @@ app.all("/register", function(req, res){
         current: 'register',
         title: siteTitle,
         error: '',
-        registrationOpen: registrationOpen
+        registrationOpen: registrationOpen,
+        Images: JSON.stringify(sources)
       });
     }
   }
@@ -278,7 +301,8 @@ app.get('/rules', function(req, res){
     title: siteTitle,
     auth: auth,
     registrationOpen: registrationOpen,
-    socketIOUrl: 'https://'+req.headers.host
+    socketIOUrl: 'https://'+req.headers.host,
+    Images: JSON.stringify(sources)
   });
 });
 
@@ -288,7 +312,8 @@ app.get('/scoreboard', function(req, res){
     title: siteTitle,
     auth: 1,
     registrationOpen: registrationOpen,
-    socketIOUrl: 'https://'+req.headers.host
+    socketIOUrl: 'https://'+req.headers.host,
+    Images: JSON.stringify(sources)
   });
 });
 
@@ -347,7 +372,8 @@ app.get(adminPath, function(req, res){
       current: 'index',
       admin: 1,
       auth: 1,
-      socketIOUrl: 'https://'+req.headers.host
+      socketIOUrl: 'https://'+req.headers.host,
+      Images: JSON.stringify(sources)
     });
   }
   else{
@@ -560,40 +586,63 @@ socketIO.on('connection', function (socket) {
     });
   });
 
-  socket.on('adminCloseRegistration', function(data){
-    if(process.env.NODE_ENV==='production'){
-      redisPub.publish('adminAction', 'closeRegistration');
+  socket.on('adminBreak', function(data){
+    var auth = socket.client.request.authenticated;
+    if(auth === adminName) {
+      taskDB.breakTask(data.title, data.broken);
+      socketIO.sockets.emit('breakTask', data);
     }
-    registrationOpen = false;
-    socket.emit('adminInfo', registrationOpen);
+  });
+
+  socket.on('adminCloseRegistration', function(data){
+    var auth = socket.client.request.authenticated;
+    if(auth === adminName) {
+      if(process.env.NODE_ENV==='production'){
+        redisAdminPub.publish('adminAction', 'closeRegistration');
+      }
+      registrationOpen = false;
+      socket.emit('adminInfo', registrationOpen);
+    }
   });
 
   socket.on('adminOpenRegistration', function(data){
-    if(process.env.NODE_ENV==='production'){
-      redisPub.publish('adminAction', 'openRegistration');
+    var auth = socket.client.request.authenticated;
+    if(auth === adminName) {
+      if(process.env.NODE_ENV==='production'){
+        redisAdminPub.publish('adminAction', 'openRegistration');
+      }
+      registrationOpen = true;
+      socket.emit('adminInfo', registrationOpen);
     }
-    registrationOpen = true;
-    socket.emit('adminInfo', registrationOpen);
   });
 
   socket.on('adminCloseCTF', function(data){
-    if(process.env.NODE_ENV==='production'){
-      redisPub.publish('adminAction', 'closeCTF');
+    var auth = socket.client.request.authenticated;
+    if(auth === adminName) {
+      if(process.env.NODE_ENV==='production'){
+        redisAdminPub.publish('adminAction', 'closeCTF');
+      }
+      ctfOpen = false;
+      socket.emit('adminInfo', ctfOpen);
     }
-    ctfOpen = false;
-    socket.emit('adminInfo', ctfOpen);
   });
 
   socket.on('adminOpenCTF', function(data){
-    if(process.env.NODE_ENV==='production'){
-      redisPub.publish('adminAction', 'openCTF');
+    var auth = socket.client.request.authenticated;
+    if(auth === adminName) {
+      if(process.env.NODE_ENV==='production'){
+        redisAdminPub.publish('adminAction', 'openCTF');
+      }
+      ctfOpen = true;
+      socket.emit('adminInfo', ctfOpen);
     }
-    ctfOpen = true;
-    socket.emit('adminInfo', ctfOpen);
   });
 
   socket.on('adminRefresh', function(data){
-    socketIO.sockets.emit('refresh');
+    var auth = socket.client.request.authenticated;
+    if(auth === adminName) {
+      socketIO.sockets.emit('refresh');
+    }
   });
 
   socket.on('adminAddTask', function(data){

@@ -26,6 +26,7 @@ Task.prototype.getTasks = function(teamName, countTeam){
       task.score = infos.score;
       task.state = infos.state;
       task.open  = infos.open;
+      task.broken = infos.broken;
       infosTasks.push(infos);
     });
     return {infos: _.sortBy(infosTasks, ['title']), raw: _.sortBy(result, ['title'])};
@@ -42,6 +43,7 @@ Task.prototype.getInfos = function(task, teamName, countTeam, description){
   infos.state = self.getSolvedState(task, teamName).state;
   infos.open =  self.isOpen(task);
   infos.author = task.author;
+  infos.broken = task.broken;
   if(description){
     infos.description = task.description;
   }
@@ -248,6 +250,12 @@ Task.prototype.editTask = function(title, description, flag, type, difficulty, a
       return new Throw('No task updated');
     }
   });
+};
+
+Task.prototype.breakTask = function(title, broken){
+  var db = this.db;
+  var self = this;
+  db.update('tasks', {'title': title}, {'broken': broken});
 };
 
 Task.prototype.deleteTask = function(title){

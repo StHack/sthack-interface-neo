@@ -14,36 +14,20 @@ String.prototype.checksum = function() {
 images = {};
 
 function loadImages(callback) {
-    var sources = {
-        tv: 'tv.png',
-        folder: 'folder.png',
-        folder_open: 'folder_open.png',
-        easy: 'easy.jpg',
-        medium: 'medium.jpg',
-        hard: 'hard.jpg',
-        backdoor: 'backdoor.png',
-        crypto: 'crypto.png',
-        forensic: 'forensics2.png',
-        hardware: 'hardware.png',
-        networking: 'networking.png',
-        pwning: 'pwning.png',
-        reversing: 'reversing.png',
-        shellcoding: 'shellcoding.png'
-    };
     var loadedImages = 0;
     var numImages = 0;
     var src;
-    for(src in sources) {
+    for(src in Images) {
         numImages++;
     }
-    for(src in sources) {
+    for(src in Images) {
         images[src] = new Image();
         images[src].onload = function() {
             if(++loadedImages >= numImages) {
                 callback();
             }
         };
-        images[src].src = '/img/'+sources[src];
+        images[src].src = '/img/'+Images[src];
     }
 }
 
@@ -191,6 +175,24 @@ function printText(ctx, canvasTask, task){
     ctx.restore();
 }
 
+function printBroken(ctx, canvasTask){
+    ctx.save();
+    ctx.textAlign = 'center';
+    var fontsize = 2;
+    
+    ctx.font = fontsize+'em DejaVu Sans';
+    ctx.shadowColor = '#000';
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = 'red';
+    //ctx.fillText(task.title, canvasTask.width/2, canvasTask.height/2-20);
+
+    ctx.font = '2em DejaVu Sans';
+    ctx.fillText('Down', canvasTask.width/2, canvasTask.height/2);
+    ctx.restore();
+}
+
 function loadTask(canvasTask){
     var task = JSON.parse($(canvasTask).text());
     var ctx = canvasTask.getContext('2d');
@@ -204,11 +206,19 @@ function loadTask(canvasTask){
         // ctx.fill();
         // ctx.stroke();
         ctx.globalAlpha=0.2;
-        ctx.drawImage(images['shellcoding'], 0, 0, images['shellcoding'].width, images['shellcoding'].height, canvasTask.width*0.3/2, canvasTask.height*0.3/2, canvasTask.width*0.7, canvasTask.height*0.7);
+    }
+    
+    if(typeof(images[task.title.toLowerCase()]) === 'undefined'){
+        ctx.fillStyle = "blue";
+        ctx.fillRect(canvasTask.width*0.3/2, 0, canvasTask.width*0.7, canvasTask.height*0.7);
     }
     else{
         //printImage(ctx, canvasTask, task, 0);
-        ctx.drawImage(images['shellcoding'], 0, 0, images['shellcoding'].width, images['shellcoding'].height, canvasTask.width*0.3/2, canvasTask.height*0.3/2, canvasTask.width*0.7, canvasTask.height*0.7);
+        ctx.drawImage(images[task.title.toLowerCase()], 0, 0, images[task.title.toLowerCase()].width, images[task.title.toLowerCase()].height, canvasTask.width*0.3/2, 0, canvasTask.width*0.7, canvasTask.height*0.7);
+    }
+
+    if(typeof(task.broken) !== 'undefined' && task.broken === true){
+        printBroken(ctx, canvasTask);
     }
 
     //ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);

@@ -16,7 +16,7 @@ body{
     text-align: center;
     font-family: consolas, monospace;
     text-decoration: none;
-    color: #0065cc;
+    color: #3599FF;
     font-size: 1vw;
 }
 
@@ -97,7 +97,7 @@ body{
     overflow-y: auto;
     overflow-x: hidden;
     font-family: consolas, monospace;
-    color: #0065cc;
+    color: #3599FF;
     background-color: #000;
 }
 
@@ -396,7 +396,7 @@ canvas {
 }
 
 .new_line{
-    font-size: 1vw;
+    font-size: 1.2vw;
     line-height: 120%;
     direction:ltr;
 }
