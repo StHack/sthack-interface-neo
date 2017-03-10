@@ -15,6 +15,12 @@ var cookieParse       = require('cookie');
 var cookieParser      = require('cookie-parser');
 var bodyParser        = require('body-parser');
 var _                 = require('lodash');
+
+var passport = require('passport');
+var TwitterStrategy = require('passport-twitter').Strategy;
+var twitterKey    = process.env.TWITTER_KEY
+var twitterSecret = process.env.TWITTER_SECRET
+
 if(process.env.NODE_ENV==='production'){
   var cluster           = require('cluster');
   var numCPUs           = require('os').cpus().length;
@@ -25,6 +31,7 @@ if(process.env.NODE_ENV==='production'){
   var redisHost          = process.env.REDIS_HOST||'127.0.0.1';
   var redisPort          = process.env.REDIS_PORT||6379;
   var redisAuth          = process.env.REDIS_AUTH||null;
+
   if (cluster.isMaster) {
     var workers = [];
 
@@ -93,6 +100,7 @@ var baseScore          = process.env.BASE_SCORE;
 
 // Sthack prototypes
 var Team    = require('./src/Team').Team;
+var Solo    = require('./src/Solo').Solo;
 var Task    = require('./src/Task').Task;
 var Message = require('./src/Message').Message;
 var DB      = require('./src/DB').DB;
@@ -148,13 +156,43 @@ app.use(session({
   })
 );
 
+
+app.use(passport.initialize());
+
+app.use(passport.session());
+app.get('/auth/twitter', passport.authenticate('twitter'));
+app.get('/auth/twitter/callback',
+  passport.authenticate('twitter', { successRedirect: '/',
+                                     failureRedirect: '/auth/twitter' }));
+
 var db        = new DB(DBConnectionString);
 var teamDB    = new Team(db);
+var soloDB    = new Solo(db);
 var taskDB    = new Task(db, {delay: closedTaskDelay, baseScore: baseScore});
 var messageDB = new Message(db);
 
 var unAuthRoute = ['/register', '/', '', '/rules'];
 var authRoute = ['/scoreboard', '/', '', '/rules', adminPath, '/simple', '/submitFlag'];
+
+
+passport.use(new TwitterStrategy({
+  consumerKey: twitterKey,
+  consumerSecret: twitterSecret,
+  callbackURL: '/auth/twitter/callback'
+}, function(token, tokenSecret, profile, done) {
+  return soloDB.addSolo(profile.username).then(function(user){
+    return done(null, profile.username);
+  });
+}
+));
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
 
 /* à revoir en mode authentificationMiddleware */
 app.use(function(req, res, next){
@@ -223,7 +261,11 @@ var sources = {
   shellcode: 'shellcode.png',
   web: 'web.png',
   misc: 'misc.png',
+  programmation : 'programmation.png',
+  système : 'systeme.png',
+  stegano : 'stegano.png'
 };
+
 
 var taskImages = fs.readdirSync(__dirname + '/public/img/tasks');
 taskImages.forEach(function(image){
@@ -231,6 +273,10 @@ taskImages.forEach(function(image){
 });
 
 app.get("/", function(req, res){
+  if(typeof(req.user) !== 'undefined'){
+    req.session.authenticated = req.user;
+    req.session.solo = true;
+  }
   if(req.session.authenticated){
     res.render('index', {
       title: siteTitle,
@@ -318,12 +364,18 @@ app.get('/scoreboard', function(req, res){
 });
 
 app.get('/simple', function(req, res){
-  teamDB.list().then(function(teams){
-    return taskDB.getTasks(req.session.authenticated, teams.length);
+  if(req.session.solo === true){
+    var choosenDB = soloDB;
+  }
+  else{
+    var choosenDB = teamDB;
+  }
+  choosenDB.list().then(function(teams){
+    return taskDB.getTasks({name: req.session.authenticated, solo: req.session.solo}, teams.length);
   }).then(function(tasks){
     var score = 0;
     tasks.raw.forEach(function(task){
-      var solved = taskDB.teamSolved(task, req.session.authenticated);
+      var solved = taskDB.teamSolved(task, {name: req.session.authenticated, solo: req.session.solo});
       if(solved.ok){
         score += task.score;
       }
@@ -338,7 +390,7 @@ app.post('/submitFlag', function(req, res){
   if(typeof req.body.title !== 'undefined' && typeof req.body.flag !== 'undefined'){
     var d = new Date().toISOString();
     if(ctfOpen){
-      taskDB.solveTask(req.body.title, req.body.flag, req.session.authenticated).then(function(result){
+      taskDB.solveTask(req.body.title, req.body.flag, {name: req.session.authenticated, solo: req.session.solo}).then(function(result){
         console.log('"'+d+'" "'+req.connection.remoteAddress+'" "'+req.session.authenticated.replace(/"/g,'\\"')+'" "submitFlag" "'+req.body.title.replace(/"/g,'\\"')+'" "ok"' );
         socketIO.sockets.emit('validation', {title: req.body.title, team: req.session.authenticated});
         var message = req.session.authenticated+' solved '+req.body.title;
@@ -402,12 +454,12 @@ app.post("/", function(req, res){
   }
 });
 
-if(app.get('env') === 'production'){
-  app.use(function(err, req, res, next){
-    res.status(500);
-    res.render('error', {current: 'error', title: siteTitle, registrationOpen: registrationOpen});
-  });
-}
+// if(app.get('env') === 'production'){
+//   app.use(function(err, req, res, next){
+//     res.status(500);
+//     res.render('error', {current: 'error', title: siteTitle, registrationOpen: registrationOpen, Images: JSON.stringify(sources)});
+//   });
+// }
 
 // if(app.get('env') === 'development'){
 //   app.use(express.errorHandler());
@@ -420,13 +472,19 @@ socketIO.use(function(socket, next) {
     var sessionID = cookieParser.signedCookie(cookie[sessionKey], sessionSecret);
     if(process.env.NODE_ENV==='production'){
       redisClient.get(app.sessionStore.prefix+sessionID, function(err, content){
-        var session = JSON.parse(content);
-        if(session.authenticated){
-          handshake.authenticated = session.authenticated;
-          next();
+        if(content === null){
+          next(new Error('not authorized'));
         }
         else{
-          next(new Error('not authorized'));
+          var session = JSON.parse(content);
+          if(session.authenticated){
+            handshake.authenticated = session.authenticated;
+            handshake.solo = session.solo;
+            next();
+          }
+          else{
+            next(new Error('not authorized'));
+          }
         }
       });
     }
@@ -435,6 +493,7 @@ socketIO.use(function(socket, next) {
         var session = JSON.parse(app.sessionStore.sessions[sessionID]);
         if(session.authenticated){
           handshake.authenticated = session.authenticated;
+          handshake.solo = session.solo;
           next();
         }
         else{
@@ -443,21 +502,21 @@ socketIO.use(function(socket, next) {
       }
     }
   }
-  else{    
+  else{
     next(new Error('not authorized'));
   }
 });
 
 function getScoreInfos(tasks, team){
   var score = 0;
-  var bt = 0;
+  var bt = [];
   var last = 0;
   var lastTask = '';
   tasks.forEach(function(task){
     var solved = taskDB.teamSolved(task, team);
     if(solved.ok){
       if(taskDB.teamSolvedFirst(task, team).ok){
-        bt+=1;
+        bt.push(task.title);
       }
       score += task.score;
       if(last < solved.time){
@@ -472,12 +531,20 @@ function getScoreInfos(tasks, team){
 
 socketIO.on('connection', function (socket) {
   socket.on('getTasks', function(){
-    var auth = socket.client.request.authenticated;    
-    teamDB.list().then(function(teams){
-      return taskDB.getTasks(auth, teams.length);
+    var auth = socket.client.request.authenticated;
+    var solo = socket.client.request.solo;
+    if(solo === true){
+      var choosenDB = soloDB;
+    }
+    else{
+      var choosenDB = teamDB;
+    }
+
+    choosenDB.list().then(function(teams){
+      return taskDB.getTasks({name: auth, solo: solo}, teams.length);
     }).then(function(tasks){
       socket.emit('giveTasks', tasks.infos);
-      var score = getScoreInfos(tasks.raw, auth);
+      var score = getScoreInfos(tasks.raw, {name: auth, solo: solo});
       socket.emit('giveScore', {name: auth, score: score.value, breakthrough: score.breakthrough});
     }, function(error){
       socket.emit('error', error);
@@ -486,11 +553,18 @@ socketIO.on('connection', function (socket) {
 
   socket.on('updateTaskScores', function(){
     var auth = socket.client.request.authenticated;
-    teamDB.list().then(function(teams){
-      return taskDB.getTasks(auth, teams.length);
+    var solo = socket.client.request.solo;
+    if(solo === true){
+      var choosenDB = soloDB;
+    }
+    else{
+      var choosenDB = teamDB;
+    }
+    choosenDB.list().then(function(teams){
+      return taskDB.getTasks({name: auth, solo: solo}, teams.length);
     }).then(function(tasks){
       socket.emit('updateTaskScores', tasks.infos);
-      var score = getScoreInfos(tasks.raw, auth);
+      var score = getScoreInfos(tasks.raw, {name: auth, solo: solo});
       socket.emit('giveScore', {name: auth, score: score.value, breakthrough: score.breakthrough});
     }, function(error){
       socket.emit('error', error);
@@ -499,10 +573,17 @@ socketIO.on('connection', function (socket) {
 
   socket.on('getTask', function(title){
     var d = new Date().toISOString();
-    var auth = socket.client.request.authenticated
+    var auth = socket.client.request.authenticated;
+    var solo = socket.client.request.solo;
     console.log('"'+d+'" "'+socket.handshake.address+'" "'+auth.replace(/"/g,'\\"')+'" "getTask" "'+title+'" "-"' );
-    teamDB.list().then(function(teams){
-      return taskDB.getTaskInfos(title, auth, teams.length, true);
+    if(solo === true){
+      var choosenDB = soloDB;
+    }
+    else{
+      var choosenDB = teamDB;
+    }
+    choosenDB.list().then(function(teams){
+      return taskDB.getTaskInfos(title, {name: auth, solo: solo}, teams.length, true);
     }).then(function(task){
       socket.emit('giveTask', task);
     }, function(error){
@@ -511,9 +592,16 @@ socketIO.on('connection', function (socket) {
   });
 
   socket.on('updateTask', function(title){
-    teamDB.list().then(function(teams){
-      var auth = socket.client.request.authenticated
-      return taskDB.getTaskInfos(title, auth, teams.length, false);
+    var auth = socket.client.request.authenticated;
+    var solo = socket.client.request.solo;
+    if(solo === true){
+      var choosenDB = soloDB;
+    }
+    else{
+      var choosenDB = teamDB;
+    }
+    choosenDB.list().then(function(teams){
+      return taskDB.getTaskInfos(title, {name: auth, solo: solo}, teams.length, false);
     }).then(function(task){
       socket.emit('updateTask', task);
     }, function(error){
@@ -524,13 +612,21 @@ socketIO.on('connection', function (socket) {
   socket.on('getScoreboard', function(){
     var teams;
     var auth = socket.client.request.authenticated;
-    teamDB.list().then(function(retTeams){
+    var solo = socket.client.request.solo;
+    if(solo === true){
+      var choosenDB = soloDB;
+    }
+    else{
+      var choosenDB = teamDB;
+    }
+
+    choosenDB.list().then(function(retTeams){
       teams = retTeams;
-      return taskDB.getTasks(auth, teams.length);
+      return taskDB.getTasks({name: auth, solo: solo}, teams.length);
     }).then(function(tasks){
       var scoreboard = [];
       teams.forEach(function(team){
-        var score = getScoreInfos(tasks.raw, team.name);
+        var score = getScoreInfos(tasks.raw, {name: team.name, solo: solo});
         scoreboard.push({team: team.name, score: score.value, lastTask: score.lastTask, time: -score.last, breakthrough: score.breakthrough});
       });
       var orderedScoreboard = _.sortBy(scoreboard, ['score', 'time']).reverse();
@@ -542,10 +638,17 @@ socketIO.on('connection', function (socket) {
 
   socket.on('getScore', function(){
     var auth = socket.client.request.authenticated;
-    teamDB.list().then(function(teams){
-      return taskDB.getTasks(auth, teams.length);
+    var solo = socket.client.request.solo;
+    if(solo === true){
+      var choosenDB = soloDB;
+    }
+    else{
+      var choosenDB = teamDB;
+    }
+    choosenDB.list().then(function(teams){
+      return taskDB.getTasks({name: auth, solo: solo}, teams.length);
     }).then(function(tasks){
-      var score = getScoreInfos(tasks.raw, auth);
+      var score = getScoreInfos(tasks.raw, {name: auth, solo: solo});
       socket.emit('giveScore', {name: auth, score: score.value, breakthrough: score.breakthrough});
     }, function(error){
       socket.emit('error', error);
@@ -555,8 +658,9 @@ socketIO.on('connection', function (socket) {
   socket.on('submitFlag', function(datas){
     var d = new Date().toISOString();
     var auth = socket.client.request.authenticated;
+    var solo = socket.client.request.solo;
     if(ctfOpen){
-      taskDB.solveTask(datas.title, datas.flag, auth).then(function(result){
+      taskDB.solveTask(datas.title, datas.flag, {name: auth, solo: solo}).then(function(result){
         console.log('"'+d+'" "'+socket.handshake.address+'" "'+auth.replace(/"/g,'\\"')+'" "submitFlag" "'+datas.title+'" "ok"' );
         socketIO.sockets.emit('validation', {title: datas.title, team: auth});
         var message = auth+' solved '+datas.title;
@@ -722,11 +826,11 @@ socketIO.on('connection', function (socket) {
         return list(teamDB);
       }).then(function(retTeams){
         teams = retTeams;
-        return taskDB.cleanSolved(data.name, teams.length);
+        return taskDB.cleanSolved({name: data.name, solo: false}, teams.length);
       }, function(error){
         socket.emit('adminInfo', error);
       });
-        
+
       var handshakes = socketIO.sockets.connected;
       for(var key in handshakes){
         if(handshakes[key].conn.request.authenticated === data.name){

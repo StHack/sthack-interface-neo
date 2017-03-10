@@ -17,6 +17,7 @@ function loadImages(callback) {
     var loadedImages = 0;
     var numImages = 0;
     var src;
+    Images['cross'] = 'red-cross.png';
     for(src in Images) {
         numImages++;
     }
@@ -221,6 +222,10 @@ function loadTask(canvasTask){
         printBroken(ctx, canvasTask);
     }
 
+    if(task.open === false){
+        ctx.drawImage(images['cross'], 0, 0, images['cross'].width, images['cross'].height, canvasTask.width*0.3/2, 0, canvasTask.width*0.7, canvasTask.height*0.7);
+    }
+
     //ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
 
     printText(ctx, canvasTask, task);
@@ -268,8 +273,9 @@ function clickTask(canvasTask, callback){
 }
 
 function reopenTask(canvasTask){
-
+    loadTask(canvasTask);
 }
 
 function closeTask(canvasTask){
+    loadTask(canvasTask);
 }

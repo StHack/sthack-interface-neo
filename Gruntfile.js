@@ -7,7 +7,7 @@ var RUNNING_PORT = 4443; // <- if you change this, you need to change in public/
 var RUNNING_CERT_PATH = 'server.crt';
 var RUNNING_KEY_PATH = 'server.key';
 var RUNNING_ADMIN_NAME = 'admin';
-var RUNNING_CLOSED_TASK_DELAY = 0;
+var RUNNING_CLOSED_TASK_DELAY = 1000*60*10;
 var RUNNING_SESSION_SECRET = 'change_me';
 var RUNNING_DB_CONNECTION_STRING = 'mongodb://127.0.0.1:27017/sthack';
 var RUNNING_SESSION_KEY = 'sthackSession';
@@ -139,7 +139,9 @@ module.exports = function (grunt) {
             ADMIN_PATH          : RUNNING_ADMIN_PATH,
             TITLE               : RUNNING_TITLE,
             BASE_SCORE          : RUNNING_BASE_SCORE,
-            NODE_ENV            : RUNNING_NODE_ENV
+            NODE_ENV            : RUNNING_NODE_ENV,
+            TWITTER_KEY         : '<%= secret.twitterkey %>',
+            TWITTER_SECRET      : '<%= secret.twittersecret %>'
           },
           cwd: __dirname
         }
@@ -180,7 +182,7 @@ module.exports = function (grunt) {
           archive: 'dist/sthack-interface-neo.tar.gz'
         },
         files: [
-          {src: ['public/**', 'server.js', 'src/**', 'views/**', 'package.json']}
+          {src: ['public/**', 'server.js', 'src/**', 'views/**', 'package.json', 'bower.json']}
         ]
       }
     },

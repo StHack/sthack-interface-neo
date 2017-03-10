@@ -25,7 +25,7 @@ $(document).ready(function () {
 
   sock.emit('getScoreboard');
   sock.on('giveScoreboard', function(scoreboard){
-    $('#scoreboard').html('<div class="line head"><div class="column pos">Pos</div><div class="column team">Team</div><div class="column score">Score</div><div class="column last">Last Solved</div></div>');
+    $('#scoreboard').html('<div class="line head"><div class="column pos">Pos</div><div class="column team">Team</div><div class="column score">Score</div><div class="column bt">Breakthrough</div></div>');
     var lineDiv;
     var posDiv;
     var teamDiv;
@@ -52,13 +52,18 @@ $(document).ready(function () {
       scoreDiv.text(line.score);
       lastDiv = $('<div></div>');
       lastDiv.addClass('column');
-      lastDiv.addClass('last');
-      time = new Date(-line.time);
-      timeSpan = $('<span></span>');
-      timeSpan.addClass('lastTime');
-      timeSpan.text(time);
-      lastDiv.text(line.lastTask+' '+pad(time.getHours())+':'+pad(time.getMinutes())+':'+pad(time.getSeconds()));
+      lastDiv.addClass('bt');
+      // time = new Date(-line.time);
+      timeSpan = $('<div></div>');
+      timeSpan.text(line.lastTask);
+      // lastDiv.text(line.lastTask+' '+);
       lastDiv.append(timeSpan);
+      for(var i = 0; i < line.breakthrough.length; i++){
+        var heart = new Image();
+        heart.src = '/img/coeur.png';
+        heart.title = line.breakthrough[i]
+        lastDiv.append(heart);
+      }
       lineDiv.append(posDiv);
       lineDiv.append(teamDiv);
       lineDiv.append(scoreDiv);
@@ -72,8 +77,9 @@ $(document).ready(function () {
   sock.on('giveScore', function(team){
     $('#team').text(team.name);
     $('#score').text(team.score);
-    for(var i = 0; i < team.breakthrough; i++){
-      $('#breakthrough').append('<img src="/img/coeur.png" />');
+    $('#breakthrough').html('');
+    for(var i = 0; i < team.breakthrough.length; i++){
+      $('#breakthrough').append('<img src="/img/coeur.png" title="'+team.breakthrough[i]+'"/>');
     }
 
   });

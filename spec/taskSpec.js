@@ -112,7 +112,7 @@ describe("Tasks", function() {
   });
 
   it("can be get", function(done){
-    var promise = new Task(DB, config).getTasks('myTeam', 3);
+    var promise = new Task(DB, config).getTasks({'name': 'myTeam', 'solo': false}, 3);
     promise.then(function(tasks){
       expect(tasks.infos).toEqual([
     {
@@ -234,7 +234,7 @@ describe("Tasks never solved", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('First task');
     promise.then(function(task){
-      expect(taskDB.teamSolved(task, 'myTeam').ok).toBe(false);
+      expect(taskDB.teamSolved(task, {'name': 'myTeam', 'solo': false}).ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -244,7 +244,7 @@ describe("Tasks never solved", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('First task');
     promise.then(function(task){
-      expect(taskDB.teamSolvedFirst(task, 'myTeam').ok).toBe(false);
+      expect(taskDB.teamSolvedFirst(task, {'name': 'myTeam', 'solo': false}).ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -261,7 +261,7 @@ describe("Tasks never solved", function() {
   });
 
   it("can be solved with good flag", function(done){
-    var promise = new Task(DB, config).solveTask('First task', 'flag', 'myTeam');
+    var promise = new Task(DB, config).solveTask('First task', 'flag', {'name': 'myTeam', 'solo': false});
     promise.then(function(result){
       expect(result).toBe(true);
     },function(error){
@@ -270,7 +270,7 @@ describe("Tasks never solved", function() {
   });
 
   it("can't be solved with bad flag", function(done){
-    var promise = new Task(DB, config).solveTask('First task', 'bad flag', 'myTeam');
+    var promise = new Task(DB, config).solveTask('First task', 'bad flag', {'name': 'myTeam', 'solo': false});
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
@@ -311,7 +311,7 @@ describe("Tasks solved by other team", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Second task');
     promise.then(function(task){
-      expect(taskDB.teamSolved(task, 'myTeam').ok).toBe(false);
+      expect(taskDB.teamSolved(task, {'name': 'myTeam', 'solo': false}).ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -321,7 +321,7 @@ describe("Tasks solved by other team", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Second task');
     promise.then(function(task){
-      expect(taskDB.teamSolvedFirst(task, 'myTeam').ok).toBe(false);
+      expect(taskDB.teamSolvedFirst(task, {'name': 'myTeam', 'solo': false}).ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -338,7 +338,7 @@ describe("Tasks solved by other team", function() {
   });
 
   it("can be solved with good flag", function(done){
-    var promise = new Task(DB, config).solveTask('Second task', 'flag', 'myTeam');
+    var promise = new Task(DB, config).solveTask('Second task', 'flag', {'name': 'myTeam', 'solo': false});
     promise.then(function(result){
       expect(result).toBe(true);
     },function(error){
@@ -347,7 +347,7 @@ describe("Tasks solved by other team", function() {
   });
 
   it("can't be solved with bad flag", function(done){
-    var promise = new Task(DB, config).solveTask('Second task', 'bad flag', 'myTeam');
+    var promise = new Task(DB, config).solveTask('Second task', 'bad flag', {'name': 'myTeam', 'solo': false});
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
@@ -389,7 +389,7 @@ describe("Tasks solved by my team", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Third task');
     promise.then(function(task){
-      expect(taskDB.teamSolved(task, 'myTeam').ok).toBe(true);
+      expect(taskDB.teamSolved(task, {'name': 'myTeam', 'solo': false}).ok).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -399,7 +399,7 @@ describe("Tasks solved by my team", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Third task');
     promise.then(function(task){
-      expect(taskDB.teamSolvedFirst(task, 'myTeam').ok).toBe(false);
+      expect(taskDB.teamSolvedFirst(task, {'name': 'myTeam', 'solo': false}).ok).toBe(false);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -416,7 +416,7 @@ describe("Tasks solved by my team", function() {
   });
 
   it("can't be solved with good flag", function(done){
-    var promise = new Task(DB, config).solveTask('Third task', 'flag', 'myTeam');
+    var promise = new Task(DB, config).solveTask('Third task', 'flag', {'name': 'myTeam', 'solo': false});
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
@@ -425,7 +425,7 @@ describe("Tasks solved by my team", function() {
   });
 
   it("can't be solved with bad flag", function(done){
-    var promise = new Task(DB, config).solveTask('Third task', 'bad flag', 'myTeam');
+    var promise = new Task(DB, config).solveTask('Third task', 'bad flag', {'name': 'myTeam', 'solo': false});
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
@@ -466,7 +466,7 @@ describe("Tasks solved by my team first", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Fourth task');
     promise.then(function(task){
-      expect(taskDB.teamSolved(task, 'myTeam').ok).toBe(true);
+      expect(taskDB.teamSolved(task, {'name': 'myTeam', 'solo': false}).ok).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -476,7 +476,7 @@ describe("Tasks solved by my team first", function() {
     var taskDB = new Task(DB, config);
     var promise = taskDB.getTask('Fourth task');
     promise.then(function(task){
-      expect(taskDB.teamSolvedFirst(task, 'myTeam').ok).toBe(true);
+      expect(taskDB.teamSolvedFirst(task, {'name': 'myTeam', 'solo': false}).ok).toBe(true);
     },function(error){
       expect(true).toBe(false);
     }).finally(done);
@@ -493,7 +493,7 @@ describe("Tasks solved by my team first", function() {
   });
 
   it("can't be solved with good flag", function(done){
-    var promise = new Task(DB, config).solveTask('Fourth task', 'flag', 'myTeam');
+    var promise = new Task(DB, config).solveTask('Fourth task', 'flag', {'name': 'myTeam', 'solo': false});
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
@@ -502,7 +502,7 @@ describe("Tasks solved by my team first", function() {
   });
 
   it("can't be solved with bad flag", function(done){
-    var promise = new Task(DB, config).solveTask('Fourth task', 'bad flag', 'myTeam');
+    var promise = new Task(DB, config).solveTask('Fourth task', 'bad flag', {'name': 'myTeam', 'solo': false});
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
@@ -530,7 +530,7 @@ describe("Tasks closed", function() {
   });
 
   it("can't be solved with good flag", function(done){
-    var promise = new Task(DB, config).solveTask('Fifth task', 'flag', 'newTeam');
+    var promise = new Task(DB, config).solveTask('Fifth task', 'flag', {'name': 'newTeam', 'solo': false});
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){
@@ -539,7 +539,7 @@ describe("Tasks closed", function() {
   });
 
   it("can't be solved with bad flag", function(done){
-    var promise = new Task(DB, config).solveTask('Fifth task', 'bad flag', 'newTeam');
+    var promise = new Task(DB, config).solveTask('Fifth task', 'bad flag', {'name': 'newTeam', 'solo': false});
     promise.then(function(result){
       expect(true).toBe(false);
     },function(error){

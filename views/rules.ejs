@@ -3,58 +3,44 @@
   <div id="challenges">
     <div id="rulesin" class="content">
       <br /><br />
-      <h2><u>Flags</u></h2>
-      <br />
-      Unless said otherwise in the task description, the flag format is the following: <br />
-      <div style="padding: 20px 20px 20px 30px;">
-        <code style="padding: 10px; background-color: #b7b7b7; border: 1px solid #4e4c4c;">INS{some random string here}</code>
-      </div>
-      You must submit the whole thing, including the <code>INS{}</code> part.
-      <br /><br /><br />
       <h2><u>Scoring</u></h2>
       <br />
-      This year the scoring is dynamic, the formula is the following:<br />
+      Comme chaque année le score est dynamique, il suit cette formule toute simple :<br />
 
       <div style="padding: 20px 20px 20px 30px;">
         <code style="padding: 10px; background-color: #b7b7b7; border: 1px solid #4e4c4c;">task_points = (base_score * base_difficulty) * (total_teams - solvers)</code>
       </div>
 
-      Where:
+      Ou:
       <ul>
-        <li><code>base_score</code> is the constant <strong><%= baseScore %></strong></li>
-        <li><code>base_difficulty</code> is <strong>1</strong> (<em>easy</em>), <strong>2</strong> (<em>medium</em>) or <strong>3</strong> (<em>hard</em>)</li>
-        <li><code>total_teams</code> is the total number of teams playing the CTF</li>
-        <li><code>solvers</code> is the number of teams that solved this task</li>
+        <li><code>base_score</code> est la constante <strong><%= baseScore %></strong></li>
+        <li><code>base_difficulty</code> est égal à <strong>1</strong> (<em>facile</em>), <strong>2</strong> (<em>moyen</em>) or <strong>3</strong> (<em>difficile</em>)</li>
+        <li><code>total_teams</code> est le nombre total d'équipe participant au CTF</li>
+        <li><code>solvers</code> est le nombre d'équipe ayant résolu l'épreuve</li>
       </ul>
       <br />
-      This means you should expect the task points and your score to:
-      <ul>
-        <li>increase at the beginning of the CTF, when teams are registering</li>
-        <li>decrease while people solve tasks</li>
-      </ul>
+      Cela veut dire que vous pouvez vous attendre à voir vos points diminuer au fur et à mesure que des équipes résolvent les mêmes épreuves que vous.
       
       <br />
-      There is no bonus points for breakthrough.<br :>
-      All tasks <em>*should*</em> be unlocked when the CTF starts.
+      Il n'y a pas de point bonus pour les breakthrough, en revanche ils sont récompensés par un lot.<br :>
+      Toutes les épreuves <em>*devraient*</em> être ouvertes dès le début du CTF.
       <br /><br /><br />
 
-      <h2><u>Help/Questions</u></h2>
+      <h2><u>Questions</u></h2>
       <br />
-      You can come and ask us your questions directly at the staff desk, or on IRC at <strong>#insomnihack</strong> on <strong>freenode</strong>.<br />
-      Follow us on twitter at <a href="https://twitter.com/1ns0mn1h4ck">https://twitter.com/1ns0mn1h4ck</a>
+      N'hésitez pas à solliciter le staff si vous avez des questions/doutes/difficultés/envies de pisser<br />
       <br /><br /><br />
-      <h2><u>Rules</u></h2>
+      <h2><u>Règle</u></h2>
       <br />
       <ul>
-        <li>Team size limit is 8</li>
-        <li>Remote players are not allowed</li>
-        <li>Only one account per team</li>
-        <li>Sharing flags is forbidden</li>
-        <li>Don't attack the scoring system</li>
-        <li>Denial of Service on our infrastructure means expulsion and adding your name to the wall of shame</li>
+        <li>Une équipe ne doit pas dépasser 5 personnes</li>
+        <li>Les joueurs à distance ne sont pas autorisés</li>
+        <li>Il est interdit de partager des flags</li>
+        <li>Evitez d'attaquer le scoreboard</li>
+        <li>De la même manière éviter tout déni de service sur les épreuves.</li>
       </ul>
       <br />
-      We reserve the rights to disqualify any cheating team.
+      Nous nous réservons le droit de disqualifier n'importe quelle équipe pour n'importe quel motif !
       <br /><br />
     </div>
     </div>

@@ -15,14 +15,14 @@ Task.prototype.list = function(){
   });
 };
 
-Task.prototype.getTasks = function(teamName, countTeam){
+Task.prototype.getTasks = function(team, countTeam){
   var db = this.db;
   var self = this;
   var infosTasks = [];
 
   return db.find('tasks', {}, {'_id': 0}).then(function(result){
     result.forEach(function(task){
-      var infos = self.getInfos(task, teamName, countTeam);
+      var infos = self.getInfos(task, team, countTeam);
       task.score = infos.score;
       task.state = infos.state;
       task.open  = infos.open;
@@ -33,15 +33,15 @@ Task.prototype.getTasks = function(teamName, countTeam){
   });
 };
 
-Task.prototype.getInfos = function(task, teamName, countTeam, description){
+Task.prototype.getInfos = function(task, team, countTeam, description){
   var self = this;
   var infos = {};
   infos.title = task.title;
   infos.type = task.type;
   infos.difficulty = task.difficulty;
-  infos.score = self.getScore(task, countTeam);
-  infos.state = self.getSolvedState(task, teamName).state;
-  infos.open =  self.isOpen(task);
+  infos.score = self.getScore(task, countTeam, team.solo);
+  infos.state = self.getSolvedState(task, team).state;
+  infos.open =  self.isOpen(task, team.solo);
   infos.author = task.author;
   infos.broken = task.broken;
   if(description){
@@ -50,12 +50,12 @@ Task.prototype.getInfos = function(task, teamName, countTeam, description){
   return infos;
 };
 
-Task.prototype.getTaskInfos = function(title, teamName, countTeam, description){
+Task.prototype.getTaskInfos = function(title, team, countTeam, description){
   var db = this.db;
   var self = this;
   return db.find('tasks', {'title' : title}, {'_id': 0}).then(function(result){
     if(result.length !== 0){
-      return self.getInfos(result[0], teamName, countTeam, description);
+      return self.getInfos(result[0], team, countTeam, description);
     }
     else{
       throw new Error('Task doesn\'t exsit');
@@ -64,15 +64,15 @@ Task.prototype.getTaskInfos = function(title, teamName, countTeam, description){
 };
 
 Task.prototype.exists = function(title){
-  var db = this.db  
+  var db = this.db
   return db.find('tasks', {'title' : title}, {'title': 1, '_id': 0}).then(function(result){
     return result.length !== 0;
-  });  
+  });
 };
 
-Task.prototype.getScore = function(task, countTeam){
+Task.prototype.getScore = function(task, countTeam, solo){
   var self = this;
-  var solved = self.getSolved(task);
+  var solved = self.getSolved(task, solo);
   if(task.difficulty === 'easy'){
     return self.config.baseScore*(countTeam-solved.length);
   }
@@ -84,20 +84,20 @@ Task.prototype.getScore = function(task, countTeam){
   }
 };
 
-Task.prototype.getSolvedState = function(task, teamName){
+Task.prototype.getSolvedState = function(task, team){
   var self = this;
-  var solved = self.getSolved(task);
+  var solved = self.getSolved(task, team.solo);
   //nobody solved
   var solvedState = 0;
   var solvedTime = 0;
   if(solved.length > 0){
     //someone solved
     solvedState++;
-    solvedTime = _.result(_.find(solved, {'teamName': teamName}), 'timestamp');
+    solvedTime = _.result(_.find(solved, {'teamName': team.name}), 'timestamp');
     if(typeof solvedTime !== 'undefined'){
       //your team solved
       solvedState++;
-      if(solved[0].teamName === teamName){
+      if(solved[0].teamName === team.name){
         //your team solved first
         solvedState++;
       }
@@ -106,9 +106,9 @@ Task.prototype.getSolvedState = function(task, teamName){
   return {state: solvedState, time: solvedTime};
 };
 
-Task.prototype.expectedState = function(task, teamName, state){
+Task.prototype.expectedState = function(task, team, state){
   var self = this;
-  var solved = self.getSolvedState(task, teamName);
+  var solved = self.getSolvedState(task, team);
   if(state === 0){
     return (solved.state === state);
   }
@@ -125,21 +125,21 @@ Task.prototype.someoneSolved = function(task){
   return this.expectedState(task, '', 1).ok;
 };
 
-Task.prototype.teamSolved = function(task, teamName){
-  return this.expectedState(task, teamName, 2);
+Task.prototype.teamSolved = function(task, team){
+  return this.expectedState(task, team, 2);
 };
 
-Task.prototype.teamSolvedFirst = function(task, teamName){
-  return this.expectedState(task, teamName, 3);
+Task.prototype.teamSolvedFirst = function(task, team){
+  return this.expectedState(task, team, 3);
 };
 
-Task.prototype.isSolvableByTeam = function(task, teamName){
+Task.prototype.isSolvableByTeam = function(task, team){
   var self = this;
-  if(self.teamSolved(task, teamName).ok){
+  if(self.teamSolved(task, team).ok){
     return false;
   }
   else{
-    if(self.isOpen(task)){
+    if(self.isOpen(task, team.solo)){
       return true;
     }
     else{
@@ -148,9 +148,9 @@ Task.prototype.isSolvableByTeam = function(task, teamName){
   }
 };
 
-Task.prototype.isOpen = function(task){
+Task.prototype.isOpen = function(task, solo){
   var self = this;
-  var solved = self.getSolved(task);
+  var solved = self.getSolved(task, solo);
   if(solved.length > 0 && parseInt(solved[solved.length-1].timestamp) + parseInt(self.config.delay) > (new Date()).getTime()){
     return false;
   }
@@ -159,8 +159,13 @@ Task.prototype.isOpen = function(task){
   }
 };
 
-Task.prototype.getSolved = function(task){
-  return _.sortBy(task.solved,['timestamp']);
+Task.prototype.getSolved = function(task, solo){
+  if(solo === true){
+    return _.sortBy(task.solvedSolo,['timestamp']);
+  }
+  else{
+    return _.sortBy(task.solved,['timestamp']);
+  }
 };
 
 Task.prototype.isFlag = function(task, flag){
@@ -169,15 +174,20 @@ Task.prototype.isFlag = function(task, flag){
   return (task.flag === hashedFlag);
 };
 
-Task.prototype.solveTask = function(title, flag, teamName){
+Task.prototype.solveTask = function(title, flag, team){
   var db = this.db;
   var self = this;
   return self.getTask(title).then(function(task){
-    if(self.isSolvableByTeam(task, teamName)){
+    if(self.isSolvableByTeam(task, team)){
       if(self.isFlag(task, flag)){
-        var solved = self.getSolved(task);
-        solved.push({"teamName": teamName, "timestamp": new Date().getTime()});
-        return db.update('tasks', {'title': title}, {'solved': solved});
+        var solved = self.getSolved(task, team.solo);
+        solved.push({"teamName": team.name, "timestamp": new Date().getTime()});
+        if(team.solo === true){
+          return db.update('tasks', {'title': title}, {'solvedSolo': solved});
+        }
+        else{
+          return db.update('tasks', {'title': title}, {'solved': solved});
+        }
       }
       else{
         throw new Error('Bad flag');
@@ -271,18 +281,27 @@ Task.prototype.deleteTask = function(title){
   });
 };
 
-Task.prototype.cleanSolved = function(teamName, countTeam){
+Task.prototype.cleanSolved = function(team, countTeam){
   var db = this.db;
   var self = this;
-  return self.getTasks(teamName, countTeam).then(function(tasks){
+  if(team.solo === true){
+    var solvedKey = 'solvedSolo';
+  }
+  else{
+    var solvedKey = 'solved';
+  }
+  return self.getTasks(team, countTeam).then(function(tasks){
     tasks.raw.forEach(function(task){
-      if(typeof task.solved !== 'undefined'){
-        var countSolved = task.solved.length;
-        var newSolved = _.filter(task.solved, function(elem){
-          return teamName !== elem.teamName;
+      if(typeof task[solvedKey] !== 'undefined'){
+        var countSolved = task[solvedKey].length;
+        var newSolved = _.filter(task[solvedKey], function(elem){
+          return team.name !== elem.teamName;
         });
+
         if(newSolved.length !== countSolved){
-          db.update('tasks', {'title': task.title}, {'solved': newSolved});
+          var solvedSubmit = {}
+          solvedSubmit[solvedKey] = newSolved;
+          db.update('tasks', {'title': task.title}, solvedSubmit);
         }
       }
     });

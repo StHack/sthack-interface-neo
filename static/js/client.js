@@ -6,10 +6,10 @@ loadImages(function(){
     sock.on('giveScore', function(team){
         $('#team').text(team.name);
         $('#score').text(team.score);
-        for(var i = 0; i < team.breakthrough; i++){
-            $('#breakthrough').append('<img src="/img/coeur.png" />');
+        $('#breakthrough').html('');
+        for(var i = 0; i < team.breakthrough.length; i++){
+            $('#breakthrough').append('<img src="/img/coeur.png" title="'+team.breakthrough[i]+'"/>');
         }
-
     });
 
     sock.emit('getTasks');
@@ -17,6 +17,7 @@ loadImages(function(){
         //$('#challenges').html('');
         var canvases = [];
         var types = [];
+
         tasks.forEach(function(task){
             var canvas = $('<canvas></canvas>');
             canvas.text(JSON.stringify(task));
@@ -35,6 +36,7 @@ loadImages(function(){
         $('#challenges').append(firstContent);
         var parentWidth = $("#challenges").width();
         var parentHeight = $("#challenges").height();
+
         types.forEach(function(type){
             var canvasDir = $('<canvas></canvas>');
             canvasDir.text(type);
@@ -164,6 +166,12 @@ loadImages(function(){
             $('#flag').val('Solved');
             $('#submitFlag').css('display', 'none');
         }
+        else if(task.open === false){
+            $('#flag').attr('disabled', true);
+            $('#flag').attr('type', 'text');
+            $('#flag').val('Closed');
+            $('#submitFlag').css('display', 'none');
+        }
         else{
             $('#flag').attr('disabled', false);
             $('#flag').attr('type', 'password');
@@ -199,6 +207,9 @@ loadImages(function(){
     });
 
     sock.on('reopenTask', function(title){
+        if($('#popup').css('display') === 'block' && $('#titlePopup').text()===title){
+            sock.emit('getTask', title);
+        }
         var canvasTask = document.getElementById('task-'+title.checksum());
         var task = JSON.parse(canvasTask.textContent);
         task.open = true;
@@ -258,7 +269,7 @@ $(document).keypress(function(e) {
             if($('#error').css('display')==='none'){
                 sock.emit('submitFlag', {title: $('#titlePopup').text(), flag: $('#flag').val()});
                 $('#flag').val('');
-            }    
+            }
         }
     }
 });
