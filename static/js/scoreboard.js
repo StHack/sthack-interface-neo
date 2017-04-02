@@ -64,6 +64,8 @@ $(document).ready(function () {
       lineDiv.append(scoreDiv);
       lineDiv.append(lastDiv);
       $('#scoreboard').append(lineDiv);
+
+      console.log(line.team, line.solved);
     });
 
   });

@@ -2,6 +2,21 @@ var Promise = require('bluebird');
 var DB = require('./DB').DB;
 var crypto = require('crypto');
 var _ = require('lodash');
+var fs = require('fs');
+
+String.prototype.checksum = function() {
+    var hash = 0, i, chr, len;
+    if (this.length === 0){
+        return hash;
+    }
+    for (i = 0, len = this.length; i < len; i++) {
+        chr   = this.charCodeAt(i);
+        hash  = ((hash << 5) - hash) + chr;
+        hash |= 0;
+    }
+    return hash.toString();
+};
+
 
 var Task = function(db, config) {
   this.config = config;
@@ -11,7 +26,7 @@ var Task = function(db, config) {
 Task.prototype.list = function(){
   var db = this.db;
   return db.find('tasks', {}, {'title': 1, '_id': 0}).then(function(result){
-    return result;
+    return _.sortBy(result, ['title']);
   });
 };
 
@@ -40,12 +55,15 @@ Task.prototype.getInfos = function(task, teamName, countTeam, description){
   infos.type = task.type;
   infos.difficulty = task.difficulty;
   infos.score = self.getScore(task, countTeam);
+  infos.solved = self.getSolved(task);
   infos.state = self.getSolvedState(task, teamName).state;
   infos.open =  self.isOpen(task);
   infos.author = task.author;
   infos.broken = task.broken;
+  infos.img = task.img;
   if(description){
     infos.description = task.description;
+    infos.tags = task.tags;
   }
   return infos;
 };
@@ -64,10 +82,10 @@ Task.prototype.getTaskInfos = function(title, teamName, countTeam, description){
 };
 
 Task.prototype.exists = function(title){
-  var db = this.db  
+  var db = this.db
   return db.find('tasks', {'title' : title}, {'title': 1, '_id': 0}).then(function(result){
     return result.length !== 0;
-  });  
+  });
 };
 
 Task.prototype.getScore = function(task, countTeam){
@@ -166,7 +184,7 @@ Task.prototype.getSolved = function(task){
 Task.prototype.isFlag = function(task, flag){
   var self = this;
   var hashedFlag = crypto.createHash('sha256').update(flag).digest('hex');
-  return (task.flag === hashedFlag);
+  return (task.flags.indexOf(hashedFlag) > -1);
 };
 
 Task.prototype.solveTask = function(title, flag, teamName){
@@ -204,7 +222,7 @@ Task.prototype.getTask = function(title){
   });
 };
 
-Task.prototype.addTask = function(title, description, flag, type, difficulty, author){
+Task.prototype.addTask = function(title, description, flag, type, difficulty, author, img, tags){
   var db = this.db;
   var self = this;
   return self.exists(title).then(function(result){
@@ -212,12 +230,23 @@ Task.prototype.addTask = function(title, description, flag, type, difficulty, au
         throw new Error('Task already exists');
       }
       else{
+        var path = 'default';
+        if (img !== '') {
+          var buf = Buffer.from(img.split(',')[1], 'base64');
+          if(buf.readUInt32BE(0) !== 2303741511){
+            throw 'Suce toi !';
+          }
+          path = title.checksum();
+          fs.writeFileSync(__dirname+'/../public/img/tasks/'+path+'.png', buf);
+        }
         var hashedFlag = crypto.createHash('sha256').update(flag).digest('hex');
         var task = {
           'title': title,
+          'img': path,
           'description': description,
-          'flag': hashedFlag,
-          'type': type,
+          'flags': [hashedFlag],
+          'type': type.toLowerCase(),
+          'tags': tags,
           'difficulty': difficulty,
           'author': author
         };
@@ -228,27 +257,36 @@ Task.prototype.addTask = function(title, description, flag, type, difficulty, au
   });
 };
 
-Task.prototype.editTask = function(title, description, flag, type, difficulty, author){
+Task.prototype.editTask = function(title, description, flag, type, difficulty, author, img, tags){
   var db = this.db;
   var self = this;
   var hashedFlag = crypto.createHash('sha256').update(flag).digest('hex');
+  var path = 'default';
+  if (img !== '') {
+    var buf = Buffer.from(img.split(',')[1], 'base64');
+    if(buf.readUInt32BE(0) !== 2303741511){
+      return Promise.reject('Suce toi !');
+    }
+    path = title.checksum();
+    fs.writeFileSync(__dirname+'/../public/img/tasks/'+path+'.png', buf);
+  }
   var task = {
     'description': description,
-    'flag': hashedFlag,
-    'type': type,
+    'flags': [hashedFlag],
+    'img': path,
+    'type': type.toLowerCase(),
+    'tags': tags,
     'difficulty': difficulty,
     'author': author
   };
   if(flag===''){
-    delete task.flag;
+    delete task.flags;
+  }
+  if(img===''){
+    delete task.img;
   }
   return db.update('tasks', {'title': title}, task).then(function(result){
-    if(result === 1){
-      return true;
-    }
-    else{
-      return new Throw('No task updated');
-    }
+    return true;
   });
 };
 

@@ -37,9 +37,11 @@
       <div class="f-left">
         <h3 class="center">Add task</h3>
         <p><h4>Title : </h4><input type="text" id="taskTitle" /></p>
+        <p><h4>png only: </h4><input type="file" id="taskImg" /></p>
         <p><h4>Flag : </h4><input type="text" id="taskFlag" /></p>
         <p><h4>Type : </h4><input type="text" id="taskType" /></p>
         <p><h4>Author : </h4><input type="text" id="taskAuthor" /></p>
+        <p><h4>Tags : </h4><input type="text" id="taskTags" /></p>
         <p>
           <h4>Difficulty : </h4>
           <select id="taskDifficulty">
@@ -50,7 +52,7 @@
         </p>
         <p>
           <h4>Description : </h4><br />
-          <textarea rows="10" cols="50" id="taskDescription"></textarea>
+          <textarea rows="7" cols="50" id="taskDescription"></textarea>
         </p>
         <p class="center"><button id="addTask">Add</button><button style="display: none" id="editTask">Edit</button><button style="display: none" id="deleteTask">Delete</button></p>
       </div>

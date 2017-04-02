@@ -212,22 +212,34 @@ else{
   socketIO = io.listen(appSSL, { log: true });
 }
 
-var sources = {
-  backdoor: 'backdoor.png',
-  crypto: 'crypto.png',
-  forensic: 'forensics.png',
-  hardware: 'hardware.png',
-  network: 'network.png',
-  pwn: 'pwn.png',
-  reverse: 'reverse.png',
-  shellcode: 'shellcode.png',
-  web: 'web.png',
-  misc: 'misc.png',
-};
+function getImgs(tasks){
+  var retSources = {
+    backdoor: 'backdoor.png',
+    crypto: 'crypto.png',
+    forensic: 'forensics.png',
+    hardware: 'hardware.png',
+    network: 'network.png',
+    pwn: 'pwn.png',
+    reverse: 'reverse.png',
+    shellcode: 'shellcode.png',
+    web: 'web.png',
+    misc: 'misc.png',
+    recon: 'recon.png',
+    game: 'game.png',
+  };
 
-var taskImages = fs.readdirSync(__dirname + '/public/img/tasks');
-taskImages.forEach(function(image){
-  sources[image.substr(0, image.length-4).toLowerCase()] = 'tasks/'+image;
+  return taskDB.getTasks(adminName, 1).then(function(tasks) {
+    tasks.raw.forEach(function(task) {
+      retSources[task.img] = 'tasks/'+task.img+'.png';
+    });
+    return retSources;
+  });
+}
+
+var sources;
+
+getImgs().then(function(retSources) {
+  sources = retSources;
 });
 
 app.get("/", function(req, res){
@@ -443,7 +455,7 @@ socketIO.use(function(socket, next) {
       }
     }
   }
-  else{    
+  else{
     next(new Error('not authorized'));
   }
 });
@@ -453,6 +465,7 @@ function getScoreInfos(tasks, team){
   var bt = 0;
   var last = 0;
   var lastTask = '';
+  var taskSolved = {};
   tasks.forEach(function(task){
     var solved = taskDB.teamSolved(task, team);
     if(solved.ok){
@@ -464,15 +477,16 @@ function getScoreInfos(tasks, team){
         last = solved.time;
         lastTask = task.title;
       }
+      taskSolved[task.title] = solved.time;
     }
   });
 
-  return {value: score, breakthrough: bt, lastTask: lastTask, last:last};
+  return {value: score, breakthrough: bt, lastTask: lastTask, last:last, solved: taskSolved};
 }
 
 socketIO.on('connection', function (socket) {
   socket.on('getTasks', function(){
-    var auth = socket.client.request.authenticated;    
+    var auth = socket.client.request.authenticated;
     teamDB.list().then(function(teams){
       return taskDB.getTasks(auth, teams.length);
     }).then(function(tasks){
@@ -531,7 +545,7 @@ socketIO.on('connection', function (socket) {
       var scoreboard = [];
       teams.forEach(function(team){
         var score = getScoreInfos(tasks.raw, team.name);
-        scoreboard.push({team: team.name, score: score.value, lastTask: score.lastTask, time: -score.last, breakthrough: score.breakthrough});
+        scoreboard.push({team: team.name, score: score.value, lastTask: score.lastTask, time: -score.last, breakthrough: score.breakthrough, solved: score.solved});
       });
       var orderedScoreboard = _.sortBy(scoreboard, ['score', 'time']).reverse();
       socket.emit('giveScoreboard', orderedScoreboard);
@@ -648,9 +662,12 @@ socketIO.on('connection', function (socket) {
   socket.on('adminAddTask', function(data){
     var auth = socket.client.request.authenticated;
     if(auth === adminName) {
-      taskDB.addTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author).then(function(){
+      taskDB.addTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author, data.img, data.tags).then(function(){
         return list(taskDB);
       }).then(function(tasks){
+        getImgs().then(function(retSources) {
+          sources = retSources;
+        });
         //socketIO.sockets.emit('refresh');
         socket.emit('updateTasks', tasks);
       }, function(error){
@@ -662,9 +679,12 @@ socketIO.on('connection', function (socket) {
   socket.on('adminEditTask', function(data){
     var auth = socket.client.request.authenticated;
     if(auth === adminName) {
-      taskDB.editTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author).then(function(){
+      taskDB.editTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author, data.img, data.tags).then(function(){
         return list(taskDB);
       }).then(function(tasks){
+        getImgs().then(function(retSources) {
+          sources = retSources;
+        });
         //socketIO.sockets.emit('refresh');
         socket.emit('updateTasks', tasks);
       }, function(error){
@@ -726,7 +746,7 @@ socketIO.on('connection', function (socket) {
       }, function(error){
         socket.emit('adminInfo', error);
       });
-        
+
       var handshakes = socketIO.sockets.connected;
       for(var key in handshakes){
         if(handshakes[key].conn.request.authenticated === data.name){

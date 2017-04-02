@@ -10,20 +10,20 @@ var DB = {
           var content = [
             {'title': 'First task',
              'description': 'Description with <b>html</b> support.',
-             'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
+             'flags': ['807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87'],
              'type': 'Stegano',
              'difficulty': 'easy',
              'author': 'agix'},
             {'title': 'Second task',
              'description': 'Description with <b>html</b> support.',
-             'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
+             'flags': ['807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87'],
              'type': 'Stegano',
              'difficulty': 'medium',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792226000}],
              'author': 'agix'},
             {'title': 'Third task',
              'description': 'Description with <b>html</b> support.',
-             'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
+             'flags': ['807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87'],
              'type': 'Stegano',
              'difficulty': 'hard',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792225833},
@@ -31,7 +31,7 @@ var DB = {
              'author': 'agix'},
             {'title': 'Fourth task',
              'description': 'Description with <b>html</b> support.',
-             'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
+             'flags': ['807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87'],
              'type': 'Stegano',
              'difficulty': 'medium',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : 1410792225833},
@@ -39,7 +39,7 @@ var DB = {
              'author': 'agix'},
             {'title': 'Fifth task',
              'description': 'Description with <b>html</b> support.',
-             'flag': '807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87',
+             'flags': ['807d0fbcae7c4b20518d4d85664f6820aafdf936104122c5073e7744c46c4b87'],
              'type': 'Stegano',
              'difficulty': 'medium',
              'solved': [{'teamName' : 'otherTeam', 'timestamp' : (new Date()).getTime() + 1000 * 60 * 5},
@@ -114,6 +114,9 @@ describe("Tasks", function() {
   it("can be get", function(done){
     var promise = new Task(DB, config).getTasks('myTeam', 3);
     promise.then(function(tasks){
+      tasks.infos.forEach(function(task) {
+        delete task.solved;
+      });
       expect(tasks.infos).toEqual([
     {
         "author": "agix",

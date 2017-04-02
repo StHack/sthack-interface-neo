@@ -59,8 +59,10 @@ $(document).ready(function () {
             $('#taskTitle').val('');
             $('#taskTitle').attr('disabled', false);
             $('#taskTitle').focus();
+            $('#taskImg').val('');
             $('#taskFlag').val('');
             $('#taskType').val('');
+            $('#taskTags').val('');
             $('#taskAuthor').val('');
             $('#taskDifficulty').val('easy');
             $('#taskDescription').val('');
@@ -92,6 +94,8 @@ $(document).ready(function () {
         $('#taskTitle').val(task.title);
         $('#taskTitle').attr('disabled', true);
         $('#taskType').val(task.type);
+        $('#taskTags').val(task.tags.join(', '));
+        $('#taskImg').val('');
         $('#taskAuthor').val(task.author);
         $('#taskDescription').val(task.description);
         $('#taskDescription').focus();
@@ -123,6 +127,9 @@ $(document).ready(function () {
     });
 
     sock.on('adminInfo', function(info){
+        if(info === 'Suce toi !'){
+            alert(info);
+        }
         console.log(info);
     });
 
@@ -145,45 +152,70 @@ $(document).ready(function () {
     });
 
     $('#deleteTeam').click(function(){
-        sock.emit('adminDeleteTeam', {
-            name:     $('#teamName').val()
-        });
-        $('#teams').val('');
-        $('#teams').change();
+        if(confirm("Are you sure")) {
+            sock.emit('adminDeleteTeam', {
+                name:     $('#teamName').val()
+            });
+            $('#teams').val('');
+            $('#teams').change();
+        }
     });
 
+    function handleImg(cb){
+        var file = $('#taskImg')[0].files[0];
+        if(typeof file !== 'undefined'){
+            var reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(readedFile) {
+                cb(readedFile.target.result);
+            };
+        } else {
+            cb('');
+        }
+    }
+
     $('#addTask').click(function(){
-        sock.emit('adminAddTask', {
-            title:       $('#taskTitle').val(),
-            flag:        $('#taskFlag').val(),
-            type:        $('#taskType').val(),
-            author:      $('#taskAuthor').val(),
-            difficulty:  $('#taskDifficulty').val(),
-            description: $('#taskDescription').val(),
+        handleImg(function(img){
+            sock.emit('adminAddTask', {
+                title:       $('#taskTitle').val(),
+                img:         img,
+                flag:        $('#taskFlag').val(),
+                type:        $('#taskType').val(),
+                author:      $('#taskAuthor').val(),
+                tags:        $('#taskTags').val() !== '' ? $('#taskTags').val().split(',').map(function(a){return a.trim();}) : [],
+                difficulty:  $('#taskDifficulty').val(),
+                description: $('#taskDescription').val(),
+            });
+            $('#tasks').val('');
+            $('#tasks').change();
         });
-        $('#tasks').val('');
-        $('#tasks').change();
     });
 
     $('#editTask').click(function(){
-        sock.emit('adminEditTask', {
-            title:       $('#taskTitle').val(),
-            flag:        $('#taskFlag').val(),
-            type:        $('#taskType').val(),
-            author:      $('#taskAuthor').val(),
-            difficulty:  $('#taskDifficulty').val(),
-            description: $('#taskDescription').val(),
+        handleImg(function(img){
+            sock.emit('adminEditTask', {
+                title:       $('#taskTitle').val(),
+                img:         img,
+                flag:        $('#taskFlag').val(),
+                type:        $('#taskType').val(),
+                tags:        $('#taskTags').val() !== '' ? $('#taskTags').val().split(',').map(function(a){return a.trim();}) : [],
+                author:      $('#taskAuthor').val(),
+                difficulty:  $('#taskDifficulty').val(),
+                description: $('#taskDescription').val(),
+            });
+            $('#tasks').val('');
+            $('#tasks').change();
         });
-        $('#tasks').val('');
-        $('#tasks').change();
     });
 
     $('#deleteTask').click(function(){
-        sock.emit('adminDeleteTask', {
-            title:       $('#taskTitle').val(),
-        });
-        $('#tasks').val('');
-        $('#tasks').change();
+        if(confirm("Are you sure ?")){
+            sock.emit('adminDeleteTask', {
+                title:       $('#taskTitle').val(),
+            });
+            $('#tasks').val('');
+            $('#tasks').change();
+        }
     });
 
     sock.emit('getScore');

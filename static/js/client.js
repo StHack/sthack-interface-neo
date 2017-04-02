@@ -16,7 +16,7 @@ loadImages(function(){
     sock.on('giveTasks', function(tasks){
         //$('#challenges').html('');
         var canvases = [];
-        var types = [];
+        var types = {};
         tasks.forEach(function(task){
             var canvas = $('<canvas></canvas>');
             canvas.text(JSON.stringify(task));
@@ -25,8 +25,13 @@ loadImages(function(){
             canvas.addClass('buttonTask');
             canvas.addClass('');
             canvases.push({canvas: canvas, task: task});
-            if(types.indexOf(task.type) === -1){
-                types.push(task.type);
+
+            if(typeof types[task.type] === 'undefined'){
+                types[task.type] = {count: 0, solved: 0};
+            }
+            types[task.type].count += 1;
+            if(task.state > 1){
+                types[task.type].solved += 1;
             }
         });
         var firstContent = $('<div></div>');
@@ -35,9 +40,9 @@ loadImages(function(){
         $('#challenges').append(firstContent);
         var parentWidth = $("#challenges").width();
         var parentHeight = $("#challenges").height();
-        types.forEach(function(type){
+        Object.keys(types).forEach(function(type){
             var canvasDir = $('<canvas></canvas>');
-            canvasDir.text(type);
+            canvasDir.text(JSON.stringify(types[type]));
             canvasDir.attr('id', type.checksum());
             canvasDir.attr('title', type);
             canvasDir.addClass('buttonDir');
@@ -157,7 +162,13 @@ loadImages(function(){
         // imgClose.addClass('imgClosePopup');
         // imgClose.attr('src','/img/close-window.png');
         // $('#titlePopup').append(imgClose);
-        $('#informations').text('Author : '+task.author+' - Difficulty : '+task.difficulty);
+        $('#informations').children('span:eq(1)').text(task.author+' - ');
+        $('#informations').children('span:eq(3)').text(task.difficulty);
+        var tags = '#'+task.type + ', ';
+        task.tags.forEach(function(tag) {
+            tags += '#'+tag+', ';
+        });
+        $('#tags').children('span:eq(1)').text(tags.substring(0, tags.length-2));
         if(task.state > 1){
             $('#flag').attr('disabled', true);
             $('#flag').attr('type', 'text');
@@ -189,6 +200,8 @@ loadImages(function(){
         if($('#team').text()===infos.team){
             var canvasTask = document.getElementById('task-'+infos.title.checksum());
             validateTask(canvasTask, function(){
+                var task = JSON.parse(canvasTask.textContent);
+                loadDir(task.type, true);
                 sock.emit('updateTask', infos.title);
             });
         }
@@ -258,7 +271,7 @@ $(document).keypress(function(e) {
             if($('#error').css('display')==='none'){
                 sock.emit('submitFlag', {title: $('#titlePopup').text(), flag: $('#flag').val()});
                 $('#flag').val('');
-            }    
+            }
         }
     }
 });

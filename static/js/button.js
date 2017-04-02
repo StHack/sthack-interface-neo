@@ -27,6 +27,12 @@ function loadImages(callback) {
                 callback();
             }
         };
+        images[src].onerror = function(e) {
+            delete images[src];
+            if(++loadedImages >= numImages) {
+                callback();
+            }
+        }
         images[src].src = '/img/'+Images[src];
     }
 }
@@ -71,9 +77,10 @@ function openDir(canvasDir, type, callback){
     callback();
 }
 
-function loadDir(type){
+function loadDir(type, plus){
     var idDir = type.checksum();
     var canvasDir = document.getElementById(idDir);
+    var status = JSON.parse($(canvasDir).text());
     var ctx = canvasDir.getContext('2d');
     ctx.save();
     ctx.clearRect(0, 0, canvasDir.width, canvasDir.height);
@@ -87,13 +94,21 @@ function loadDir(type){
     }
 
     ctx.textAlign = 'center';
-    ctx.font = '1.5em DejaVu Sans';
+    ctx.font = '1.2em DejaVu Sans';
     ctx.shadowColor = '#000';
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
     ctx.shadowBlur = 5;
-    ctx.fillStyle = '#000';
-    //ctx.fillText(type, canvasDir.width/2, canvasDir.height*0.95);
+    if (typeof plus !== 'undefined') {
+        status.solved += 1;
+        canvasDir.textContent = JSON.stringify(status);
+    }
+    if (status.count === status.solved){
+        ctx.fillStyle = 'green';
+    } else {
+        ctx.fillStyle = 'red';
+    }
+    ctx.fillText(status.solved+'/'+status.count, canvasDir.width*0.90, canvasDir.height*0.20);
 
     ctx.restore();
 }
@@ -101,7 +116,8 @@ function loadDir(type){
 var anim;
 
 function enter(canvasTask){
-    // var task = JSON.parse($(canvasTask).text());
+    var task = JSON.parse($(canvasTask).text());
+    console.log(task.title, task.solved);
     // if(task.state <= 1){
     //     var ctx = canvasTask.getContext('2d');
     //     var index = 0;
@@ -179,7 +195,7 @@ function printBroken(ctx, canvasTask){
     ctx.save();
     ctx.textAlign = 'center';
     var fontsize = 2;
-    
+
     ctx.font = fontsize+'em DejaVu Sans';
     ctx.shadowColor = '#000';
     ctx.shadowOffsetX = 0;
@@ -207,14 +223,14 @@ function loadTask(canvasTask){
         // ctx.stroke();
         ctx.globalAlpha=0.2;
     }
-    
-    if(typeof(images[task.title.toLowerCase()]) === 'undefined'){
+
+    if(typeof(images[task.img]) === 'undefined'){
         ctx.fillStyle = "blue";
         ctx.fillRect(canvasTask.width*0.3/2, 0, canvasTask.width*0.7, canvasTask.height*0.7);
     }
     else{
         //printImage(ctx, canvasTask, task, 0);
-        ctx.drawImage(images[task.title.toLowerCase()], 0, 0, images[task.title.toLowerCase()].width, images[task.title.toLowerCase()].height, canvasTask.width*0.3/2, 0, canvasTask.width*0.7, canvasTask.height*0.7);
+        ctx.drawImage(images[task.img], 0, 0, images[task.img].width, images[task.img].height, canvasTask.width*0.3/2, 0, canvasTask.width*0.7, canvasTask.height*0.7);
     }
 
     if(typeof(task.broken) !== 'undefined' && task.broken === true){
@@ -224,6 +240,16 @@ function loadTask(canvasTask){
     //ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
 
     printText(ctx, canvasTask, task);
+    ctx.textAlign = 'center';
+    ctx.font = '1.2em DejaVu Sans';
+    ctx.shadowColor = '#000';
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 5;
+
+    ctx.fillStyle = 'blue';
+
+    ctx.fillText(''+task.solved.length, canvasTask.width*0.80, canvasTask.height*0.10);
 }
 
 function validateTask(canvasTask, callback){

@@ -11,6 +11,7 @@
 <% for(var i=0; i<tasks.length; i++) {%>
    <li><b><%= tasks[i].title %></b> <%- tasks[i].description %><br />
    <%= tasks[i].type+' - '+tasks[i].difficulty+' - Author : '+ tasks[i].author %><br />
+   <%= tasks[i].tags %><br />
    <%= tasks[i].score+' pts' %>
    <% if(tasks[i].state <= 1) { %>
    <form method="POST" action="/submitFlag">

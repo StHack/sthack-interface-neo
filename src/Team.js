@@ -9,7 +9,9 @@ var Team = function(db) {
 
 Team.prototype.list = function(){
   var db = this.db;
-  return db.find('teams', {}, {'name' : 1, '_id' : 0});
+  return db.find('teams', {}, {'name' : 1, '_id' : 0}).then(function(result) {
+    return _.sortBy(result, ['name']);
+  })
 };
 
 Team.prototype.areLoginsValid = function(name, password){
@@ -28,7 +30,7 @@ Team.prototype.areLoginsValid = function(name, password){
 
 Team.prototype.addTeam = function(name, password){
   var db = this.db;
-  var self = this;  
+  var self = this;
   var hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
   return db.find('teams', {'name' : name}, {}).then(function(result){
     if(result.length===0){
