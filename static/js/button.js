@@ -209,6 +209,24 @@ function printBroken(ctx, canvasTask){
     ctx.restore();
 }
 
+function printClosed(ctx, canvasTask){
+    ctx.save();
+    ctx.textAlign = 'center';
+    var fontsize = 2;
+
+    ctx.font = fontsize+'em DejaVu Sans';
+    ctx.shadowColor = '#000';
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+    ctx.shadowBlur = 5;
+    ctx.fillStyle = 'red';
+    //ctx.fillText(task.title, canvasTask.width/2, canvasTask.height/2-20);
+
+    ctx.font = '2em DejaVu Sans';
+    ctx.fillText('Pwned', canvasTask.width/2, canvasTask.height/2);
+    ctx.restore();
+}
+
 function loadTask(canvasTask){
     var task = JSON.parse($(canvasTask).text());
     var ctx = canvasTask.getContext('2d');
@@ -235,7 +253,11 @@ function loadTask(canvasTask){
 
     if(typeof(task.broken) !== 'undefined' && task.broken === true){
         printBroken(ctx, canvasTask);
+    } else if(typeof(task.open) !== 'undefined' && task.open === false){
+        printClosed(ctx, canvasTask);
     }
+
+
 
     //ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
 
@@ -294,8 +316,9 @@ function clickTask(canvasTask, callback){
 }
 
 function reopenTask(canvasTask){
-
+    loadTask(canvasTask);
 }
 
 function closeTask(canvasTask){
+    loadTask(canvasTask);
 }

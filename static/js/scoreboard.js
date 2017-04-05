@@ -25,7 +25,7 @@ $(document).ready(function () {
 
   sock.emit('getScoreboard');
   sock.on('giveScoreboard', function(scoreboard){
-    $('#scoreboard').html('<div class="line head"><div class="column pos">Pos</div><div class="column team">Team</div><div class="column score">Score</div><div class="column last">Last Solved</div></div>');
+    $('#scoreboard').html('<div class="line head"><div class="column pos">Pos</div><div class="column team">Team</div><div class="column score">Score</div><div class="column last">Breakthrough</div></div>');
     var lineDiv;
     var posDiv;
     var teamDiv;
@@ -57,7 +57,15 @@ $(document).ready(function () {
       timeSpan = $('<span></span>');
       timeSpan.addClass('lastTime');
       timeSpan.text(time);
-      lastDiv.text(line.lastTask+' '+pad(time.getHours())+':'+pad(time.getMinutes())+':'+pad(time.getSeconds()));
+      // lastDiv.text(line.lastTask+' '+pad(time.getHours())+':'+pad(time.getMinutes())+':'+pad(time.getSeconds()));
+      lastDiv.append(timeSpan);
+      console.log(line);
+      for(var i = 0; i < line.breakthrough.length; i++){
+        var heart = new Image();
+        heart.src = '/img/coeur.png';
+        heart.title = line.breakthrough[i]
+        lastDiv.append(heart);
+      }
       lastDiv.append(timeSpan);
       lineDiv.append(posDiv);
       lineDiv.append(teamDiv);

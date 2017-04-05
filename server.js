@@ -462,7 +462,7 @@ socketIO.use(function(socket, next) {
 
 function getScoreInfos(tasks, team){
   var score = 0;
-  var bt = 0;
+  var bt = [];
   var last = 0;
   var lastTask = '';
   var taskSolved = {};
@@ -470,7 +470,7 @@ function getScoreInfos(tasks, team){
     var solved = taskDB.teamSolved(task, team);
     if(solved.ok){
       if(taskDB.teamSolvedFirst(task, team).ok){
-        bt+=1;
+        bt.push(task.title);
       }
       score += task.score;
       if(last < solved.time){
