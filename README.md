@@ -1,26 +1,25 @@
-sthack-interface
-================
+# sthack-interface
 
-Introduction
---------------------
+## Introduction
+
 The NodeJS interface for St'Hack CTF game.
-More information on the  event : https://www.sthack.fr/
+More information on the  event : <https://www.sthack.fr/>
 
-Installation
---------------------
+## Installation
+
 You need nodejs with npm, bower, and grunt.
 
-```
-$ git clone https://github.com/agix/sthack-interface-neo
-$ cd sthack-interface-neo
-$ npm install
-$ bower install
-$ openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server.key -out server.crt
+```bash
+git clone https://github.com/agix/sthack-interface-neo
+cd sthack-interface-neo
+npm install
+bower install
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout server.key -out server.crt
 ```
 
-You need to create a sshProduction.json file to use the deploy procedure (see later).
+You need to create a `sshProduction.json` file to use the deploy procedure (see later).
 
-```
+```json
 {
     "host"          : "production_host",
     "username"      : "ssh user",
@@ -32,10 +31,11 @@ You need to create a sshProduction.json file to use the deploy procedure (see la
 }
 ```
 
-Mongodb
---------------------
+### Mongodb
+
 You just need to manually create your first admin user.
-```
+
+```bash
 $ mongo sthack
 MongoDB shell version: 2.4.6
 connecting to: sthack
@@ -44,34 +44,34 @@ connecting to: sthack
 
 To reset scoreboard :
 
-```
+```js
 db.tasks.update({'solved':{'$exists':true}},{'$unset':{'solved':''}},{upsert:false, multi:true});
 ```
 
 To reset messages :
 
-```
+```js
 db.messages.remove();
 ```
 
 To reset teams :
 
-```
+```js
 db.teams.remove({'name':{$ne:'admin'}});
 ```
 
-Run
---------------------
+## Run
+
 Edit all RUNNING variable from Gruntfile.js.
 
+```bash
+grunt
 ```
-$ grunt
-```
+
 Enjoy !
 
+## Deploy procedure
 
-Deploy procedure
---------------------
 You just need nodejs a mongodb server obviously and a redis server.
 
 We need 2 simple users :
@@ -82,7 +82,7 @@ We need 2 simple users :
 
 Create the init script with your config env.
 
-```
+```bash
 description "Sthack scoreboard"
 
 start on runlevel [2345]
@@ -127,16 +127,18 @@ respawn
 
 exec /usr/bin/nodejs /var/www/server.js
 ```
+
 Add `sthackuser` in sudoers.
 
 `/etc/sudoers.d/sthack`
 
-```
+```bash
 sthackuser ALL = (root) NOPASSWD: /sbin/start sthack, /sbin/stop sthack, /sbin/restart sthack, /sbin/status sthack
 ```
 
-sshProduction.json example
-```
+`sshProduction.json` example
+
+```json
 {
     "host"          : "10.13.37.100",
     "username"      : "sthackuser",
