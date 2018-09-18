@@ -18,12 +18,12 @@
     "express-session": "*",
     "lodash": "^4.2.1",
     "lodash.where": "^3.1.0",
-    "mongodb": "^2.1.6",
+    "mongodb": "^3.1.6",
     "morgan": "^1.5.1",
     "net": "^1.0.2",
     "redis": "^2.4.2",
-    "socket.io": "^1.4.5",
-    "socket.io-redis": "^4.0.0"
+    "socket.io": "^2.1.1",
+    "socket.io-redis": "^5.2.0"
   },
   "devDependencies": {
     "bower": "~1.8.0",
@@ -32,23 +32,23 @@
     "grunt-concurrent": "~2.3.1",
     "grunt-contrib-compress": "^1.4.1",
     "grunt-contrib-concat": "~1.0.1",
-    "grunt-contrib-connect": "~1.0.2",
-    "grunt-contrib-cssmin": "^2.0.0",
-    "grunt-contrib-jasmine": "^1.0.0",
+    "grunt-contrib-connect": "^2.0.0",
+    "grunt-contrib-cssmin": "^3.0.0",
+    "grunt-contrib-jasmine": "^2.0.2",
     "grunt-contrib-jshint": "~1.1.0",
-    "grunt-contrib-less": "~1.4.1",
+    "grunt-contrib-less": "^2.0.0",
     "grunt-contrib-sass": "~1.0.0",
     "grunt-contrib-stylus": "~1.2.0",
-    "grunt-contrib-uglify": "~2.2.0",
-    "grunt-contrib-watch": "~1.0.0",
+    "grunt-contrib-uglify": "~4.0.0",
+    "grunt-contrib-watch": "^1.1.0",
     "grunt-jasmine-node": "^0.3.1",
     "grunt-nodemon": "~0.4.1",
     "grunt-open": "~0.2.2",
     "grunt-ssh": "^0.12.1",
     "grunt-ssh-deploy": "^0.4.0",
-    "grunt-wait": "~0.1.0",
-    "matchdep": "~1.0.0",
-    "moment": "~2.17.1"
+    "grunt-wait": "~0.3.0",
+    "matchdep": "^2.0.0",
+    "moment": "^2.22.2"
   },
   "engines": {
     "node": ">=0.8.0"
