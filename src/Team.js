@@ -1,74 +1,57 @@
-var Promise = require('bluebird');
-var crypto = require('crypto');
+var createHash = require('crypto').createHash;
 var DB = require('./DB').DB;
-var _ = require('lodash');
+var sortBy = require('lodash').sortBy;
 
-var Team = function(db) {
-  this.db = db || new DB('mongodb://login:password@127.0.0.1:27017/sthack');
-};
+class Team {
+  constructor(db) {
+    this.db = db || new DB('mongodb://login:password@127.0.0.1:27017/sthack');
+  }
 
-Team.prototype.list = function(){
-  var db = this.db;
-  return db.find('teams', {}, {'name' : 1, '_id' : 0}).then(function(result) {
-    return _.sortBy(result, ['name']);
-  })
-};
+  async list() {
+    const teams = await this.db.find('teams', {}, { 'name': 1, '_id': 0 });
+    return sortBy(teams, ['name']);
+  }
 
-Team.prototype.areLoginsValid = function(name, password){
-  var db = this.db;
-  var self = this;
-  var hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-  return db.find('teams', {'name' : name, 'password' : hashedPassword}, {}).then(function(result){
-    if(result.length===0){
-      return false;
-    }
-    else{
-      return true;
-    }
-  });
-};
+  async areLoginsValid(name, password) {
+    var hashedPassword = createHash('sha256').update(password).digest('hex');
+    const teams = await this.db.find('teams', { 'name': name, 'password': hashedPassword }, {});
 
-Team.prototype.addTeam = function(name, password){
-  var db = this.db;
-  var self = this;
-  var hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-  return db.find('teams', {'name' : name}, {}).then(function(result){
-    if(result.length===0){
-      return db.insert('teams', {'name' : name, 'password' : hashedPassword});
-    }
-    else{
+    return teams.length > 0;
+  }
+
+  async addTeam(name, password) {
+    var hashedPassword = createHash('sha256').update(password).digest('hex');
+    const teams = await this.db.find('teams', { 'name': name }, {});
+
+    if (teams.length > 0) {
       throw new Error("Team already exists");
     }
-  }).then(function(result){
+
+    const insertResult = this.db.insert('teams', { 'name': name, 'password': hashedPassword });
+
     return true;
-  });
-};
+  }
 
-Team.prototype.editTeam = function(name, password){
-  var db = this.db;
-  var self = this;
-  var hashedPassword = crypto.createHash('sha256').update(password).digest('hex');
-  return db.update('teams', {'name' : name}, {'password': hashedPassword}).then(function(result){
-    if(result === 1){
+  async editTeam(name, password) {
+    var hashedPassword = createHash('sha256').update(password).digest('hex');
+    const updateResult = await this.db.update('teams', { 'name': name }, { 'password': hashedPassword });
+
+    if (updateResult === 1) {
       return true;
     }
-    else{
-      throw Error('No team updated');
-    }
-  });
-};
 
-Team.prototype.deleteTeam = function(name){
-  var db = this.db;
-  var self = this;
-  return db.remove('teams', {'name' : name}).then(function(result){
-    if(result === 1){
+    throw Error('No team updated');
+  }
+
+  async deleteTeam(name) {
+    const deleteResut = await this.db.remove('teams', { 'name': name });
+
+    if (deleteResut === 1) {
       return true;
     }
-    else{
-      throw Error('No team removed');
-    }
-  });
-};
+
+    throw Error('No team removed');
+  }
+}
 
 exports.Team = Team;
