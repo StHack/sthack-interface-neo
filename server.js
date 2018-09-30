@@ -6,7 +6,7 @@
 
 var express           = require('express');
 var session           = require('express-session');
-var https             = require('https');
+var http             = require('http');
 var net               = require('net');
 var io                = require('socket.io');
 var device            = require('express-device');
@@ -112,11 +112,6 @@ else{
   var registrationOpen = true;
 }
 
-var sslOptions = {
-  key: fs.readFileSync(process.env.KEY_PATH),
-  cert: fs.readFileSync(process.env.CERT_PATH)
-};
-
 var app = express();
 
 if(app.get('env') === 'production'){
@@ -167,8 +162,10 @@ app.use(function(req, res, next){
 });
 /* -------- */
 
-var appSSL = https.createServer(sslOptions, app).listen(runningPortNumber);
+var appSSL = http.createServer({}, app).listen(runningPortNumber);
 var socketIO;
+
+console.log("Application started");
 
 process.on('message', function(message, connection) {
   if (message !== 'sticky-session:connection') {

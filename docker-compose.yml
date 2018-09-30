@@ -1,0 +1,66 @@
+version: '3'
+
+services:
+  # reverse-proxy:
+  #   image: nginx
+  #   ports:
+  #   - "80:80"
+  #   - "443:443"
+  #   # build:
+  #   #   context: ./Nginx
+  #   #   dockerfile: Dockerfile
+  #   restart: always
+  #   networks:
+  #   - main
+
+  server:
+    # image: sthack-interface-neo
+    # build: .
+    # command: sh
+
+    image: node:alpine
+    working_dir: /src
+    command: node server.js
+
+    ports:
+    - "80:80"
+    volumes:
+    - ./:/src
+    environment:
+    # - NODE_ENV=
+    - REDIS_HOST=redis
+    - REDIS_PORT=6379
+    # - REDIS_AUTH
+    - PORT=80
+    - DB_CONNECTION_STRING=mongodb://sthackadmin:S74cK_1s_Aw3s0mE@mongo:27017/admin
+    - ADMIN_NAME=admin
+    - CLOSED_TASK_DELAY=0
+    - SESSION_SECRET=randomstring
+    - SESSION_KEY=sthackSession
+    - ADMIN_PATH=/admin_secret_section
+    - TITLE=Sthack
+    - BASE_SCORE=50
+    networks:
+    - main
+    depends_on:
+    - redis
+    - mongo
+
+  redis:
+    image: redis:alpine
+    networks:
+    - main
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+    - MONGO_INITDB_ROOT_USERNAME=sthackadmin
+    - MONGO_INITDB_ROOT_PASSWORD=S74cK_1s_Aw3s0mE
+    networks:
+    - main
+    # volumes:
+    # - ./mongo_data:/data/db
+
+networks:
+  main:
