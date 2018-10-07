@@ -12,7 +12,7 @@ class Task {
 
   async list() {
     const tasks = await this.db.find('tasks', {}, { 'title': 1, '_id': 0 });
-    return _.sortBy(tasks, ['title']);
+    return tasks//_.sortBy(tasks, ['title']);
   }
 
   async getTasks(teamName, countTeam) {
@@ -139,7 +139,7 @@ class Task {
 
   isOpen(task) {
     var solved = this.getSolved(task);
-    if (solved.length > 0 && parseInt(solved[solved.length - 1].timestamp) + parseInt(this.config.delay) > (new Date()).getTime()) {
+    if (solved.length > 0 && parseInt(solved[solved.length - 1].timestamp) + parseInt(this.config.closedTaskDelay) > (new Date()).getTime()) {
       return false;
     } else {
       return true;
@@ -190,7 +190,7 @@ class Task {
       throw new Error('Task already exists');
     } else {
       var path = 'default';
-      if (img !== '') {
+      if (img) {
         var buf = Buffer.from(img.split(',')[1], 'base64');
         if (buf.readUInt32BE(0) !== 2303741511) {
           throw 'Suce toi !';
@@ -219,7 +219,7 @@ class Task {
   async editTask(title, description, flag, type, difficulty, author, img, tags) {
     const hashedFlag = createHash('sha256').update(flag).digest('hex');
     var path = 'default';
-    if (img !== '') {
+    if (img) {
       var buf = Buffer.from(img.split(',')[1], 'base64');
       if (buf.readUInt32BE(0) !== 2303741511) {
         throw 'Suce toi !';
