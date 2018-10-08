@@ -14,7 +14,7 @@ class LoggerService {
 
   logError(error, message) {
     const d = new Date().toISOString();
-    console.log(`"${d}" "${error}"`);
+    console.log(`"${d}" "${error.stack || error}"`);
   }
 
   logExpressRequest(req, message) {
@@ -27,7 +27,7 @@ class LoggerService {
     const d = new Date().toISOString();
 
     console.log(`"${d}" "${req.connection.remoteAddress}" "-" "${req.path}" ${this._getMessage(message)} "ko"`);
-    console.log(error);
+    console.log(error.stack || error);
   }
 
   logInfo(message) {
