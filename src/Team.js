@@ -1,10 +1,13 @@
 var createHash = require('crypto').createHash;
-var DB = require('./DB').DB;
 var sortBy = require('lodash').sortBy;
 
 class Team {
   constructor(db) {
-    this.db = db || new DB('mongodb://login:password@127.0.0.1:27017/sthack');
+    this.db = db;
+  }
+
+  _hashPassword(password) {
+    return createHash('sha256').update(password).digest('hex');
   }
 
   async list() {
@@ -13,14 +16,14 @@ class Team {
   }
 
   async areLoginsValid(name, password) {
-    var hashedPassword = createHash('sha256').update(password).digest('hex');
+    var hashedPassword = this._hashPassword(password);
     const teams = await this.db.find('teams', { 'name': name, 'password': hashedPassword }, {});
 
     return teams.length > 0;
   }
 
   async addTeam(name, password) {
-    var hashedPassword = createHash('sha256').update(password).digest('hex');
+    var hashedPassword = this._hashPassword(password);
     const teams = await this.db.find('teams', { 'name': name }, {});
 
     if (teams.length > 0) {
@@ -33,7 +36,7 @@ class Team {
   }
 
   async editTeam(name, password) {
-    var hashedPassword = createHash('sha256').update(password).digest('hex');
+    var hashedPassword = this._hashPassword(password);
     const updateResult = await this.db.update('teams', { 'name': name }, { 'password': hashedPassword });
 
     if (updateResult === 1) {
