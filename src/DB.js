@@ -26,21 +26,21 @@ class DB {
   async insert(collection, object) {
     return await this.execute(async db => {
       var coll = db.collection(collection);
-      return await coll.insert(object);
+      return await coll.insertOne(object);
     });
   }
 
   async update(collection, object, update) {
     return await this.execute(async db => {
       var coll = db.collection(collection);
-      return await coll.update(object, { '$set': update });
+      return await coll.updateOne(object, { '$set': update });
     });
   }
 
   async remove(collection, object) {
     return await this.execute(async db => {
       var coll = db.collection(collection);
-      await coll.remove(object);
+      await coll.deleteOne(object);
     });
   }
 }
