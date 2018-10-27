@@ -11,7 +11,7 @@ class Team {
   }
 
   async list() {
-    const teams = await this.db.find('teams', {}, { 'name': 1, '_id': 0 });
+    const teams = await this.db.find('teams', {}, {});
     return sortBy(teams, ['name']);
   }
 
@@ -43,7 +43,7 @@ class Team {
       return true;
     }
 
-    throw Error('No team updated');
+    throw new Error('No team updated');
   }
 
   async deleteTeam(name) {
@@ -53,7 +53,7 @@ class Team {
       return true;
     }
 
-    throw Error('No team removed');
+    throw new Error('No team removed');
   }
 }
 

@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 class AppSocketHandler {
   constructor(
     socket,
@@ -55,7 +57,7 @@ class AppSocketHandler {
     for (const task of tasks) {
       var solved = this.taskDB.teamSolved(task, team);
       if (solved.ok) {
-        if (taskDB.teamSolvedFirst(task, team).ok) {
+        if (this.taskDB.teamSolvedFirst(task, team).ok) {
           bt.push(task.title);
         }
         score += task.score;
@@ -110,7 +112,7 @@ class AppSocketHandler {
       });
     }
 
-    var orderedScoreboard = _.sortBy(scoreboard, ['score', 'time']).reverse();
+    var orderedScoreboard = _.orderBy(scoreboard, ['score', 'time'], ['desc', 'desc']);
     this.socket.emit('giveScoreboard', orderedScoreboard);
   }
 
@@ -127,19 +129,19 @@ class AppSocketHandler {
 
   async getTask(title) {
     var d = new Date().toISOString();
-    var auth = this.socket.client.request.authenticated
+    var auth = this.socket.client.request.authenticated;
 
     console.log(`"${d}" "${this.socket.handshake.address}" "${auth.replace(/"/g, '\\"')}" "getTask" "${title}" "-"`);
 
-    const teams = this.teamDB.list();
-    const task = this.taskDB.getTaskInfos(title, auth, teams.length, true);
+    const teams = await this.teamDB.list();
+    const task = await this.taskDB.getTaskInfos(title, auth, teams.length, true);
     this.socket.emit('giveTask', task);
   }
 
   async submitFlag(datas) {
     var d = new Date().toISOString();
     var auth = this.socket.client.request.authenticated;
-    if (ctfOpen) {
+    if (this.config.ctfOpen) {
       try {
         const result = await this.taskDB.solveTask(datas.title, datas.flag, auth);
 
@@ -170,7 +172,7 @@ class AppSocketHandler {
     const teams = await this.teamDB.list();
 
     var auth = this.socket.client.request.authenticated;
-    const tasks = await this.taskDB.getTaskInfos(title, auth, teams.length, false);
+    const task = await this.taskDB.getTaskInfos(title, auth, teams.length, false);
 
     this.socket.emit('updateTask', task);
   }
@@ -181,7 +183,7 @@ class AppSocketHandler {
     const teams = await this.teamDB.list();
     const tasks = await this.taskDB.getTasks(auth, teams.length);
     this.socket.emit('updateTaskScores', tasks.infos);
-    var score = getScoreInfos(tasks.raw, auth);
+    var score = this._getScoreInfos(tasks.raw, auth);
     this.socket.emit('giveScore', { name: auth, score: score.value, breakthrough: score.breakthrough });
   }
 }

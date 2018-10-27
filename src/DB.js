@@ -19,7 +19,7 @@ class DB {
   async find(collection, request, fields) {
     return await this.execute(async db => {
       var coll = db.collection(collection);
-      return await coll.find(request, fields).toArray();
+      return await coll.find(request, { projection: fields }).toArray();
     });
   }
 
