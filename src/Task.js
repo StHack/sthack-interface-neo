@@ -11,17 +11,17 @@ class Task {
   }
 
   async list() {
-    const tasks = await this.db.find('tasks', {}, { 'title': 1, '_id': 0 });
+    const tasks = await this.db.find('tasks', {}, { 'title': 1 });
     return tasks//_.sortBy(tasks, ['title']);
   }
 
   async exists(title) {
-    const tasks = await this.db.find('tasks', { 'title': title }, { 'title': 1, '_id': 0 });
+    const tasks = await this.db.find('tasks', { 'title': title }, { 'title': 1 });
     return tasks.length > 0;
   }
 
   async getTask(title) {
-    const tasks = await this.db.find('tasks', { 'title': title }, { '_id': 0 });
+    const tasks = await this.db.find('tasks', { 'title': title });
 
     if (tasks.length < 1) {
       throw new Error('Task doesn\'t exsit');
@@ -47,7 +47,7 @@ class Task {
 
   async getTasks(teamName, countTeam) {
     var infosTasks = [];
-    const tasks = await this.db.find('tasks', {}, { '_id': 0 });
+    const tasks = await this.db.find('tasks', {});
 
     for (const task of tasks) {
       var infos = this.getInfos(task, teamName, countTeam);

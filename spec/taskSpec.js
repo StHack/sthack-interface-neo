@@ -5,6 +5,7 @@ var where = require('lodash.where');
 
 var DB = {
   find: function (collection, request, fields) {
+    fields = Object.assign({ _id: 0 }, fields);
     return new Promise(function (fulfill, reject) {
       var content = [
         {

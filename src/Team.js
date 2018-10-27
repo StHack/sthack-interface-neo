@@ -11,20 +11,20 @@ class Team {
   }
 
   async list() {
-    const teams = await this.db.find('teams', {}, {});
+    const teams = await this.db.find('teams', {});
     return sortBy(teams, ['name']);
   }
 
   async areLoginsValid(name, password) {
     var hashedPassword = this._hashPassword(password);
-    const teams = await this.db.find('teams', { 'name': name, 'password': hashedPassword }, {});
+    const teams = await this.db.find('teams', { 'name': name, 'password': hashedPassword });
 
     return teams.length > 0;
   }
 
   async addTeam(name, password) {
     var hashedPassword = this._hashPassword(password);
-    const teams = await this.db.find('teams', { 'name': name }, {});
+    const teams = await this.db.find('teams', { 'name': name });
 
     if (teams.length > 0) {
       throw new Error("Team already exists");

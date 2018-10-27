@@ -17,9 +17,11 @@ class DB {
   };
 
   async find(collection, request, fields) {
+    const enhancedFields = Object.assign({ '_id': 0 }, fields);
+
     return await this.execute(async db => {
       var coll = db.collection(collection);
-      return await coll.find(request, { projection: fields }).toArray();
+      return await coll.find(request, { projection: enhancedFields }).toArray();
     });
   }
 
