@@ -1,5 +1,4 @@
 var Task = require('../src/Task').Task;
-var Promise = require('bluebird');
 var crypto = require('crypto');
 var _ = require('lodash');
 var where = require('lodash.where');

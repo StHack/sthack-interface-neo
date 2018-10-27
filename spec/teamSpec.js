@@ -1,7 +1,5 @@
 var Team = require('../src/Team').Team;
-var Promise = require('bluebird');
 var crypto = require('crypto');
-var DBo = require('../src/DB').DB;
 var _ = require('lodash');
 var where = require('lodash.where');
 
