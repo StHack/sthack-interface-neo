@@ -35,17 +35,20 @@ class Task {
   }
 
   getInfos(task, teamName, countTeam, description) {
-    var infos = {};
-    infos.title = task.title;
-    infos.type = task.type;
-    infos.difficulty = task.difficulty;
+    var infos = {
+      title: task.title,
+      type: task.type,
+      difficulty: task.difficulty,
+      author: task.author,
+      broken: task.broken,
+      img: task.img,
+    };
+
     infos.score = this.getScore(task, countTeam);
     infos.solved = this.getSolved(task);
     infos.state = this.getSolvedState(task, teamName).state;
     infos.open = this.isOpen(task);
-    infos.author = task.author;
-    infos.broken = task.broken;
-    infos.img = task.img;
+
     if (description) {
       infos.description = task.description;
       infos.tags = task.tags;
@@ -55,18 +58,13 @@ class Task {
   }
 
   async getTaskInfos(title, teamName, countTeam, description) {
-    const tasks = await this.db.find('tasks', { 'title': title }, { '_id': 0 });
-
-    if (tasks.length === 0) {
-      throw new Error('Task doesn\'t exsit');
-    }
-
-    return this.getInfos(tasks[0], teamName, countTeam, description);
+    const task = await this.getTask(title);
+    return this.getInfos(task, teamName, countTeam, description);
   }
 
   async exists(title) {
     const tasks = await this.db.find('tasks', { 'title': title }, { 'title': 1, '_id': 0 });
-    return tasks.length !== 0;
+    return tasks.length > 0;
   }
 
   getScore(task, countTeam) {
@@ -91,7 +89,7 @@ class Task {
       //someone solved
       solvedState++;
       solvedTime = _.result(_.find(solved, { 'teamName': teamName }), 'timestamp');
-      if (typeof solvedTime !== 'undefined') {
+      if (solvedTime) {
         //your team solved
         solvedState++;
         if (solved[0].teamName === teamName) {
@@ -176,11 +174,11 @@ class Task {
   async getTask(title) {
     const tasks = await this.db.find('tasks', { 'title': title }, { '_id': 0 });
 
-    if (tasks.length !== 0) {
-      return tasks[0];
-    } else {
+    if (tasks.length < 1) {
       throw new Error('Task doesn\'t exsit');
     }
+
+    return tasks[0];
   }
 
   async addTask(title, description, flag, type, difficulty, author, img, tags) {
@@ -264,7 +262,7 @@ class Task {
 
     for (const task of tasks.raw) {
 
-      if (typeof task.solved !== 'undefined') {
+      if (task.solved) {
         var newSolved = _.filter(task.solved, (elem) => teamName !== elem.teamName);
 
         if (newSolved.length !== task.solved.length) {
