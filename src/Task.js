@@ -15,6 +15,36 @@ class Task {
     return tasks//_.sortBy(tasks, ['title']);
   }
 
+  async exists(title) {
+    const tasks = await this.db.find('tasks', { 'title': title }, { 'title': 1, '_id': 0 });
+    return tasks.length > 0;
+  }
+
+  async getTask(title) {
+    const tasks = await this.db.find('tasks', { 'title': title }, { '_id': 0 });
+
+    if (tasks.length < 1) {
+      throw new Error('Task doesn\'t exsit');
+    }
+
+    return tasks[0];
+  }
+
+  async breakTask(title, broken) {
+    await this.db.update('tasks', { 'title': title }, { 'broken': broken });
+  }
+
+  async deleteTask(title) {
+    const tasks = await this.db.remove('tasks', { 'title': title });
+    if (tasks !== 1) {
+      return new Error('No team removed');
+    }
+
+    return true;
+  }
+
+
+
   async getTasks(teamName, countTeam) {
     var infosTasks = [];
     const tasks = await this.db.find('tasks', {}, { '_id': 0 });
@@ -32,6 +62,39 @@ class Task {
       infos: _.sortBy(infosTasks, ['title']),
       raw: _.sortBy(tasks, ['title'])
     };
+  }
+
+  async getTaskInfos(title, teamName, countTeam, description) {
+    const task = await this.getTask(title);
+    return this.getInfos(task, teamName, countTeam, description);
+  }
+
+  async addTask(title, description, flag, type, difficulty, author, img, tags) {
+    const exist = await this.exists(title);
+
+    if (exist) {
+      throw new Error('Task already exists');
+    }
+
+    let imageName = 'default';
+    if (img) {
+      const imageName = StringOperator.checksum(title);
+      imageName = this.imageDB.saveImage(img.split(',')[1]);
+    }
+
+    const hashedFlag = createHash('sha256').update(flag).digest('hex');
+    const task = {
+      title: title,
+      img: imageName,
+      description: description,
+      flags: [hashedFlag],
+      type: type.toLowerCase(),
+      tags: tags,
+      difficulty: difficulty,
+      author: author
+    };
+
+    return this.db.insert('tasks', task);
   }
 
   getInfos(task, teamName, countTeam, description) {
@@ -55,16 +118,6 @@ class Task {
     }
 
     return infos;
-  }
-
-  async getTaskInfos(title, teamName, countTeam, description) {
-    const task = await this.getTask(title);
-    return this.getInfos(task, teamName, countTeam, description);
-  }
-
-  async exists(title) {
-    const tasks = await this.db.find('tasks', { 'title': title }, { 'title': 1, '_id': 0 });
-    return tasks.length > 0;
   }
 
   getScore(task, countTeam) {
@@ -171,44 +224,6 @@ class Task {
     return true;
   }
 
-  async getTask(title) {
-    const tasks = await this.db.find('tasks', { 'title': title }, { '_id': 0 });
-
-    if (tasks.length < 1) {
-      throw new Error('Task doesn\'t exsit');
-    }
-
-    return tasks[0];
-  }
-
-  async addTask(title, description, flag, type, difficulty, author, img, tags) {
-    const exist = await this.exists(title);
-
-    if (exist) {
-      throw new Error('Task already exists');
-    }
-
-    let imageName = 'default';
-    if (img) {
-      const imageName = StringOperator.checksum(title);
-      imageName = this.imageDB.saveImage(img.split(',')[1]);
-    }
-
-    const hashedFlag = createHash('sha256').update(flag).digest('hex');
-    const task = {
-      title: title,
-      img: imageName,
-      description: description,
-      flags: [hashedFlag],
-      type: type.toLowerCase(),
-      tags: tags,
-      difficulty: difficulty,
-      author: author
-    };
-
-    return this.db.insert('tasks', task);
-  }
-
   async editTask(title, description, flag, type, difficulty, author, img, tags) {
     const hashedFlag = createHash('sha256').update(flag).digest('hex');
     let imageName = 'default';
@@ -236,18 +251,6 @@ class Task {
     return await this.db.update('tasks', { 'title': title }, task);
   }
 
-  async breakTask(title, broken) {
-    await this.db.update('tasks', { 'title': title }, { 'broken': broken });
-  }
-
-  async deleteTask(title) {
-    const tasks = await this.db.remove('tasks', { 'title': title });
-    if (tasks !== 1) {
-      return new Error('No team removed');
-    }
-
-    return true;
-  }
 
   async cleanSolved(teamName, countTeam) {
     const tasks = await this.getTasks(teamName, countTeam);
