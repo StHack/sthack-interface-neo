@@ -78,8 +78,8 @@ class Task {
 
     let imageName = 'default';
     if (img) {
-      const imageName = StringOperator.checksum(title);
-      imageName = this.imageDB.saveImage(img.split(',')[1]);
+      const imgName = StringOperator.checksum(title);
+      imageName = this.imageDB.saveImage(imgName, img.split(',')[1]);
     }
 
     const hashedFlag = createHash('sha256').update(flag).digest('hex');
@@ -228,8 +228,8 @@ class Task {
     const hashedFlag = createHash('sha256').update(flag).digest('hex');
     let imageName = 'default';
     if (img) {
-      const imageName = StringOperator.checksum(title);
-      imageName = this.imageDB.saveImage(img.split(',')[1]);
+      const imgName = StringOperator.checksum(title);
+      imageName = this.imageDB.saveImage(imgName, img.split(',')[1]);
     }
 
     var task = {
