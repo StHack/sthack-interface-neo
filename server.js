@@ -59,7 +59,6 @@ const session           = require('express-session');
 const http              = require('http');
 const io                = require('socket.io');
 const device            = require('express-device');
-const fs                = require('fs');
 const cookieParse       = require('cookie');
 const cookieParser      = require('cookie-parser');
 const bodyParser        = require('body-parser');
@@ -112,10 +111,10 @@ var config = {
 
 const logger    = new LoggerService();
 const db        = new DB(DBConnectionString);
+const imageDB   = new Image();
 const teamDB    = new Team(db);
-const taskDB    = new Task(db, config);
+const taskDB    = new Task(db, config, imageDB);
 const messageDB = new Message(db);
-const imageDB   = new Image(config, taskDB);
 const redisService = new RedisService(config);
 
 var app = express();
@@ -188,7 +187,7 @@ if(process.env.NODE_ENV==='production'){
   socketIO.adapter(IoRedisStore(redisService.getSocketConfiguration()));
 }
 
-imageDB.refreshImages();
+taskDB.list().then(tasks => imageDB.initialize(tasks.map(t => t.img)));
 
 const appController = new AppController(config, logger, imageDB, teamDB, taskDB, socketIO);
 appController.RegisterRoute(app);

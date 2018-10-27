@@ -1,8 +1,7 @@
+var writeFileSync = require('fs').writeFileSync;
+
 class Image {
-  constructor(
-    config,
-    taskDB,
-  ) {
+  constructor() {
     this.resources = {
       backdoor: 'backdoor.png',
       crypto: 'crypto.png',
@@ -17,23 +16,35 @@ class Image {
       recon: 'recon.png',
       game: 'game.png',
     };
-
-    this.config = config;
-    this.taskDB = taskDB;
   }
 
   getList() {
     return this.resources;
   }
 
-  async refreshImages() {
-    const tasks = await this.taskDB.list();
-
-    for (const task of tasks) {
-      this.resources[task.img] = 'tasks/' + task.img + '.png';
+  async initialize(imageNames) {
+    for (const imageName of imageNames) {
+      this.resources[imageName] = 'tasks/' + imageName + '.png';
     }
 
     return this.resources;
+  }
+
+  saveImage(imageName, imageBase64Encoded) {
+    if (!(imageBase64Encoded)) {
+      return null;
+    }
+
+    var buf = Buffer.from(imageBase64Encoded, 'base64');
+    if (buf.readUInt32BE(0) !== 2303741511) {
+      throw new Error('Not a PNG file');
+    }
+
+    writeFileSync(__dirname + '/../public/img/tasks/' + imageName + '.png', buf);
+
+    this.resources[imageName] = 'tasks/' + imageName + '.png';
+
+    return imageName;
   }
 
 }

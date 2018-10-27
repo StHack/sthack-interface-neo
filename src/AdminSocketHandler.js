@@ -117,29 +117,17 @@ class AdminSocketHandler {
 
   async AddTask(data) {
     await this.taskDB.addTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author, data.img, data.tags);
-
-    const tasks = await this.taskDB.list();
-
-    await this.imageDB.refreshImages();
-    //this.socketBroadcast.emit('refresh');
-    this.socket.emit('updateTasks', tasks);
+    await this._refreshTasks();
   }
 
   async EditTask(data) {
     await this.taskDB.editTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author, data.img, data.tags);
-    const tasks = await this.taskDB.list();
-
-    await this.imageDB.refreshImages();
-
-    //this.socketBroadcast.emit('refresh');
-    this.socket.emit('updateTasks', tasks);
+    await this._refreshTasks();
   }
 
   async DeleteTask(data) {
     await this.taskDB.deleteTask(data.title);
-    const tasks = await this.taskDB.list();
-
-    this.socket.emit('updateTasks', tasks);
+    await this._refreshTasks();
   }
 
   async AddTeam(data) {
@@ -190,8 +178,7 @@ class AdminSocketHandler {
   }
 
   async ListTasks() {
-    const tasks = await this.taskDB.list();
-    this.socket.emit('updateTasks', tasks);
+    return await this._refreshTasks();
   }
 
   async ListTeams() {
@@ -206,6 +193,13 @@ class AdminSocketHandler {
     }
 
     this.socketBroadcast.emit('message', data);
+  }
+
+  async _refreshTasks() {
+    const tasks = await this.taskDB.list();
+
+    //this.socketBroadcast.emit('refresh');
+    this.socket.emit('updateTasks', tasks);
   }
 }
 

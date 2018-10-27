@@ -1,13 +1,13 @@
-var DB = require('./DB').DB;
 var createHash = require('crypto').createHash;
 var _ = require('lodash');
-var writeFileSync = require('fs').writeFileSync;
+
 var StringOperator = require('./StringOperator').StringOperator;
 
 class Task {
-  constructor(db, config) {
+  constructor(db, config, imageDB) {
     this.config = config;
-    this.db = db || new DB('mongodb://login:password@127.0.0.1:27017/sthack');
+    this.db = db;
+    this.imageDB = imageDB;
   }
 
   async list() {
@@ -186,53 +186,45 @@ class Task {
 
     if (exist) {
       throw new Error('Task already exists');
-    } else {
-      var path = 'default';
-      if (img) {
-        var buf = Buffer.from(img.split(',')[1], 'base64');
-        if (buf.readUInt32BE(0) !== 2303741511) {
-          throw 'Suce toi !';
-        }
-        path = StringOperator.checksum(title);
-        writeFileSync(__dirname + '/../public/img/tasks/' + path + '.png', buf);
-      }
-      const hashedFlag = createHash('sha256').update(flag).digest('hex');
-      const task = {
-        'title': title,
-        'img': path,
-        'description': description,
-        'flags': [hashedFlag],
-        'type': type.toLowerCase(),
-        'tags': tags,
-        'difficulty': difficulty,
-        'author': author
-      };
-
-      return this.db.insert('tasks', task);
     }
 
-    return true;
+    let imageName = 'default';
+    if (img) {
+      const imageName = StringOperator.checksum(title);
+      imageName = this.imageDB.saveImage(img.split(',')[1]);
+    }
+
+    const hashedFlag = createHash('sha256').update(flag).digest('hex');
+    const task = {
+      title: title,
+      img: imageName,
+      description: description,
+      flags: [hashedFlag],
+      type: type.toLowerCase(),
+      tags: tags,
+      difficulty: difficulty,
+      author: author
+    };
+
+    return this.db.insert('tasks', task);
   }
 
   async editTask(title, description, flag, type, difficulty, author, img, tags) {
     const hashedFlag = createHash('sha256').update(flag).digest('hex');
-    var path = 'default';
+    let imageName = 'default';
     if (img) {
-      var buf = Buffer.from(img.split(',')[1], 'base64');
-      if (buf.readUInt32BE(0) !== 2303741511) {
-        throw 'Suce toi !';
-      }
-      path = StringOperator.checksum(title);
-      writeFileSync(__dirname + '/../public/img/tasks/' + path + '.png', buf);
+      const imageName = StringOperator.checksum(title);
+      imageName = this.imageDB.saveImage(img.split(',')[1]);
     }
+
     var task = {
-      'description': description,
-      'flags': [hashedFlag],
-      'img': path,
-      'type': type.toLowerCase(),
-      'tags': tags,
-      'difficulty': difficulty,
-      'author': author
+      description: description,
+      flags: [hashedFlag],
+      img: imageName,
+      type: type.toLowerCase(),
+      tags: tags,
+      difficulty: difficulty,
+      author: author
     };
     if (flag === '') {
       delete task.flags;
