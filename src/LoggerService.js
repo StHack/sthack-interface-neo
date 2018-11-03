@@ -5,16 +5,26 @@ class LoggerService {
   _getMessage(message) {
     if (!(message)) {
       return '';
-    } else if (Array.isArray(message)) {
-      return message.map(value => `"${value.replace(/"/g, '\\"')}"`).reduce((str, val) => `${str} ${val}`);
-    } else {
-      return `"${message.replace(/"/g, '\\"')}"`;
     }
+
+    if (Array.isArray(message)) {
+      return message
+        .map(value => `"${value.replace(/"/g, '\\"')}"`)
+        .reduce((str, val) => `${str} ${val}`);
+    }
+
+    return `"${message.replace(/"/g, '\\"')}"`;
   }
 
   logError(error, message) {
     const d = new Date().toISOString();
-    console.log(`"${d}" "${error.stack || error}"`);
+    console.log(`"${d}" "An error occured"`);
+    console.log(error.stack || error);
+  }
+
+  logInfo(message) {
+    const d = new Date().toISOString();
+    console.log(`"${d}" ${this._getMessage(message)}`);
   }
 
   logExpressRequest(req, message) {
@@ -30,9 +40,17 @@ class LoggerService {
     console.log(error.stack || error);
   }
 
-  logInfo(message) {
+  logSocketRequest(socket, message) {
     const d = new Date().toISOString();
-    console.log(`"${d}" "${this._getMessage(message)}"`);
+
+    console.log(`"${d}" "${socket.handshake.address}" ${this._getMessage(message)}`);
+  }
+
+  logSocketError(socket, error, message) {
+    const d = new Date().toISOString();
+
+    console.log(`"${d}" "${socket.handshake.address}" ${this._getMessage(message)} "ko"`);
+    console.log(error.stack || error);
   }
 
 }
