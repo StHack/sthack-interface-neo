@@ -71,11 +71,13 @@ const { Task } = require('./src/Task');
 const { Message } = require('./src/Message');
 const { Image } = require('./src/Image');
 const { DB } = require('./src/DB');
+const { ScoreService } = require('./src/ScoreService');
 const { LoggerService } = require('./src/LoggerService');
 const { AppController } = require('./src/AppController');
 const { RedisService } = require('./src/RedisService');
 const { AppSocketHandler } = require('./src/AppSocketHandler');
 const { AdminSocketHandler } = require('./src/AdminSocketHandler');
+const { ScoreInfoService } = require('./src/ScoreInfoService');
 
 var runningPortNumber  = process.env.NODE_ENV === 'production' ? 0 : process.env.PORT;
 var DBConnectionString = process.env.DB_CONNECTION_STRING;
@@ -110,11 +112,13 @@ var config = {
 
 const logger = new LoggerService();
 const db = new DB(DBConnectionString);
+const scoreInfoService = new ScoreInfoService(config);
 const imageService = new Image();
 const teamDB = new Team(db);
-const taskDB = new Task(db, config, imageService);
+const taskDB = new Task(db, config, imageService, scoreInfoService);
 const messageDB = new Message(db);
 const redisService = new RedisService(config);
+const scoreService = new ScoreService(teamDB, taskDB, scoreInfoService);
 
 var app = express();
 
@@ -188,7 +192,7 @@ if(process.env.NODE_ENV==='production'){
 
 taskDB.list().then(tasks => imageService.initialize(tasks.map(t => t.img)));
 
-const appController = new AppController(config, logger, imageService, teamDB, taskDB, socketIO);
+const appController = new AppController(config, logger, imageService, teamDB, taskDB, scoreService, socketIO);
 appController.RegisterRoute(app);
 
 if(app.get('env') === 'production'){
@@ -244,7 +248,8 @@ socketIO.on('connection', function (socket) {
     logger,
     messageDB,
     teamDB,
-    taskDB
+    taskDB,
+    scoreService
   );
 
   appSocket.RegisterEvents();

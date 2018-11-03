@@ -1,18 +1,25 @@
-var createHash = require('crypto').createHash;
-var _ = require('lodash');
-
-var StringOperator = require('./StringOperator').StringOperator;
+const { createHash } = require('crypto');
+const { StringOperator } = require('./StringOperator');
 
 class Task {
-  constructor(db, config, imageDB) {
+  constructor(
+    db,
+    config,
+    imageDB,
+    scoreInfoService) {
     this.config = config;
     this.db = db;
     this.imageDB = imageDB;
+    this.scoreInfoService = scoreInfoService;
+  }
+
+  _hashFlag(flag) {
+    return createHash('sha256').update(flag).digest('hex');
   }
 
   async list() {
     const tasks = await this.db.find('tasks', {}, { 'title': 1 });
-    return tasks//_.sortBy(tasks, ['title']);
+    return tasks;
   }
 
   async exists(title) {
@@ -23,7 +30,7 @@ class Task {
   async getTask(title) {
     const tasks = await this.db.find('tasks', { 'title': title });
 
-    if (tasks.length < 1) {
+    if (tasks.length === 0) {
       throw new Error('Task doesn\'t exsit');
     }
 
@@ -44,24 +51,8 @@ class Task {
   }
 
 
-
-  async getTasks(teamName, countTeam) {
-    var infosTasks = [];
-    const tasks = await this.db.find('tasks', {});
-
-    for (const task of tasks) {
-      var infos = this.getInfos(task, teamName, countTeam);
-      task.score = infos.score;
-      task.state = infos.state;
-      task.open = infos.open;
-      task.broken = infos.broken;
-      infosTasks.push(infos);
-    }
-
-    return {
-      infos: _.sortBy(infosTasks, ['title']),
-      raw: _.sortBy(tasks, ['title'])
-    };
+  async getAllTasks() {
+    return await this.db.find('tasks', {});
   }
 
   async getTaskInfos(title, teamName, countTeam, description) {
@@ -82,7 +73,7 @@ class Task {
       imageName = this.imageDB.saveImage(imgName, img.split(',')[1]);
     }
 
-    const hashedFlag = createHash('sha256').update(flag).digest('hex');
+    const hashedFlag = this._hashFlag(flag);
     const task = {
       title: title,
       img: imageName,
@@ -107,10 +98,10 @@ class Task {
       img: task.img,
     };
 
-    infos.score = this.getScore(task, countTeam);
-    infos.solved = this.getSolved(task);
-    infos.state = this.getSolvedState(task, teamName).state;
-    infos.open = this.isOpen(task);
+    infos.score = this.scoreInfoService.getScore(task, countTeam);
+    infos.solved = this.scoreInfoService.getOrderedSolvation(task);
+    infos.state = this.scoreInfoService.getTaskSolvedState(task, teamName).state;
+    infos.open = this.scoreInfoService.isOpen(task);
 
     if (description) {
       infos.description = task.description;
@@ -120,119 +111,35 @@ class Task {
     return infos;
   }
 
-  getScore(task, countTeam) {
-    var solved = this.getSolved(task);
-
-    switch (task.difficulty) {
-      case 'easy':
-        return this.config.baseScore * (countTeam - solved.length);
-      case 'medium':
-        return this.config.baseScore * 2 * (countTeam - solved.length);
-      default:
-        return this.config.baseScore * 3 * (countTeam - solved.length);
-    }
-  }
-
-  getSolvedState(task, teamName) {
-    var solved = this.getSolved(task);
-    //nobody solved
-    var solvedState = 0;
-    var solvedTime = 0;
-    if (solved.length > 0) {
-      //someone solved
-      solvedState++;
-      solvedTime = _.result(_.find(solved, { 'teamName': teamName }), 'timestamp');
-      if (solvedTime) {
-        //your team solved
-        solvedState++;
-        if (solved[0].teamName === teamName) {
-          //your team solved first
-          solvedState++;
-        }
-      }
-    }
-    return { state: solvedState, time: solvedTime };
-  }
-
-  expectedState(task, teamName, state) {
-    var solved = this.getSolvedState(task, teamName);
-    if (state === 0) {
-      return (solved.state === state);
-    } else {
-      return { ok: (solved.state >= state), time: solved.time };
-    }
-  }
-
-  nobodySolved(task) {
-    return this.expectedState(task, '', 0);
-  }
-
-  someoneSolved(task) {
-    return this.expectedState(task, '', 1).ok;
-  }
-
-  teamSolved(task, teamName) {
-    return this.expectedState(task, teamName, 2);
-  }
-  teamSolvedFirst(task, teamName) {
-    return this.expectedState(task, teamName, 3);
-  }
-
-  isSolvableByTeam(task, teamName) {
-    if (this.teamSolved(task, teamName).ok) {
-      return false;
-    } else if (this.isOpen(task)) {
-      return true;
-    } else {
-      return false;
-    }
-  }
-
-  isOpen(task) {
-    var solved = this.getSolved(task);
-    if (solved.length > 0 && parseInt(solved[solved.length - 1].timestamp) + parseInt(this.config.closedTaskDelay) > (new Date()).getTime()) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  getSolved(task) {
-    return _.sortBy(task.solved, ['timestamp']);
-  }
-
   isFlag(task, flag) {
-    var hashedFlag = createHash('sha256').update(flag).digest('hex');
-    return (task.flags.indexOf(hashedFlag) > -1);
+    var hashedFlag = this._hashFlag(flag);
+    return task.flags.indexOf(hashedFlag) > -1;
   }
 
   async solveTask(title, flag, teamName) {
     const task = await this.getTask(title);
 
-    if (this.isSolvableByTeam(task, teamName)) {
-      if (this.isFlag(task, flag)) {
-        var solved = this.getSolved(task);
-        solved.push({ "teamName": teamName, "timestamp": new Date().getTime() });
-        return await this.db.update('tasks', { 'title': title }, { 'solved': solved });
-      } else {
-        throw new Error('Bad flag');
-      }
-    } else {
+    if (this.scoreInfoService.isSolvableByTeam(task, teamName) === false) {
       throw new Error("You can't solve this task");
     }
 
-    return true;
+    if (this.isFlag(task, flag) === false) {
+      throw new Error('Bad flag');
+    }
+
+    task.solved.push({ "teamName": teamName, "timestamp": new Date().getTime() });
+    return await this.db.update('tasks', { 'title': title }, { 'solved': solved });
   }
 
   async editTask(title, description, flag, type, difficulty, author, img, tags) {
-    const hashedFlag = createHash('sha256').update(flag).digest('hex');
     let imageName = 'default';
     if (img) {
       const imgName = StringOperator.checksum(title);
       imageName = this.imageDB.saveImage(imgName, img.split(',')[1]);
     }
 
-    var task = {
+    const hashedFlag = this._hashFlag(flag);
+    let task = {
       description: description,
       flags: [hashedFlag],
       img: imageName,
@@ -252,21 +159,24 @@ class Task {
   }
 
 
-  async cleanSolved(teamName, countTeam) {
-    const tasks = await this.getTasks(teamName, countTeam);
+  async cleanSolved(teamName) {
+    const tasks = await this.getAllTasks();
 
-    for (const task of tasks.raw) {
+    const updates = [];
 
-      if (task.solved) {
-        var newSolved = _.filter(task.solved, (elem) => teamName !== elem.teamName);
+    for (const task of tasks) {
+      if (!(task.solved)) {
+        continue;
+      }
 
-        if (newSolved.length !== task.solved.length) {
-          await this.db.update('tasks', { 'title': task.title }, { 'solved': newSolved });
-        }
+      let newSolved = task.solved.filter(el => el.teamName !== teamName);
+
+      if (newSolved.length !== task.solved.length) {
+        updates.push(this.db.update('tasks', { 'title': task.title }, { 'solved': newSolved }));
       }
     }
 
-    return null;
+    await Promise.all(updates);
   }
 }
 

@@ -5,6 +5,7 @@ class AppController {
     imageDB,
     teamDB,
     taskDB,
+    scoreService,
     socketBroadcast
   ) {
     this.config = config;
@@ -12,6 +13,7 @@ class AppController {
     this.imageDB = imageDB;
     this.teamDB = teamDB;
     this.taskDB = taskDB;
+    this.scoreService = scoreService;
     this.socketBroadcast = socketBroadcast;
 
     this.home = this.home.bind(this);
@@ -149,55 +151,44 @@ class AppController {
 
   async teamScoreboard(req, res) {
     try {
-      const teams = await this.teamDB.list();
-      const tasks = await this.taskDB.getTasks(req.session.authenticated, teams.length);
+      const tasks = await this.taskDB.getAllTasks();
+      const teamScore = await this.scoreService.getScoreOfTeam(req.session.authenticated);
 
-      var score = 0;
-
-      for (const task of tasks.raw) {
-        var solved = taskDB.teamSolved(task, req.session.authenticated);
-        if (solved.ok) {
-          score += task.score;
-        }
-      }
-
-      res.render('simple', { tasks: tasks.raw, title: this.config.siteTitle, score: score });
+      res.render('simple', { tasks: tasks, title: this.config.siteTitle, score: teamScore.value });
     } catch (error) {
       res.render('simple', { tasks: [], title: this.config.siteTitle, score: 0 });
     }
   }
 
   async submitFlag(req, res) {
-    if (typeof req.body.title !== 'undefined' && typeof req.body.flag !== 'undefined') {
-      if (config.ctfOpen) {
-        try {
-          await taskDB.solveTask(req.body.title, req.body.flag, req.session.authenticated);
-
-          this.logger.logExpressRequest(req, [req.session.authenticated, req.body.title, 'ok'])
-
-          this.socketBroadcast.emit('validation', { title: req.body.title, team: req.session.authenticated });
-          var message = req.session.authenticated + ' solved ' + req.body.title;
-
-          if (this.config.closedTaskDelay > 0) {
-            setTimeout(function () {
-              this.socketService.sendToAll('reopenTask', req.body.title);
-            }, this.config.closedTaskDelay);
-          }
-
-          res.redirect(302, '/simple');
-        } catch (error) {
-          this.logger.logExpressError(req, error, [req.session.authenticated, req.body.title]);
-          res.redirect(302, '/simple');
-        }
-      }
-      else {
-        this.logger.logExpressRequest(req, error, [req.session.authenticated, req.body.title, 'closed']);
-        res.redirect(302, '/simple');
-      }
-    }
-    else {
+    if (this.config.ctfOpen) {
+      this.logger.logExpressRequest(req, error, [req.session.authenticated, req.body.title, 'closed']);
       res.redirect(302, '/simple');
+      return;
     }
+
+    if (req.body.title
+      && req.body.flag) {
+
+      try {
+        await this.taskDB.solveTask(req.body.title, req.body.flag, req.session.authenticated);
+
+        this.logger.logExpressRequest(req, [req.session.authenticated, req.body.title, 'ok'])
+
+        this.socketBroadcast.emit('validation', { title: req.body.title, team: req.session.authenticated });
+
+        if (this.config.closedTaskDelay > 0) {
+          setTimeout(function () {
+            this.socketService.sendToAll('reopenTask', req.body.title);
+          }, this.config.closedTaskDelay);
+        }
+
+      } catch (error) {
+        this.logger.logExpressError(req, error, [req.session.authenticated, req.body.title]);
+      }
+    }
+
+    res.redirect(302, '/simple');
   }
 
   admin(req, res) {
