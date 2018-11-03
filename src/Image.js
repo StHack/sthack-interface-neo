@@ -1,4 +1,4 @@
-var writeFileSync = require('fs').writeFileSync;
+var { writeFileSync } = require('fs');
 
 class Image {
   constructor() {
@@ -24,7 +24,7 @@ class Image {
 
   async initialize(imageNames) {
     for (const imageName of imageNames) {
-      this.resources[imageName] = 'tasks/' + imageName + '.png';
+      this._insertResources(imageName);
     }
 
     return this.resources;
@@ -42,9 +42,13 @@ class Image {
 
     writeFileSync(__dirname + '/../public/img/tasks/' + imageName + '.png', buf);
 
-    this.resources[imageName] = 'tasks/' + imageName + '.png';
+    this._insertResources(imageName);
 
     return imageName;
+  }
+
+  _insertResources(imageName) {
+    this.resources[imageName] = 'tasks/' + imageName + '.png';
   }
 
 }

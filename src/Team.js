@@ -1,5 +1,5 @@
-var createHash = require('crypto').createHash;
-var sortBy = require('lodash').sortBy;
+var { createHash } = require('crypto');
+var { sortBy } = require('lodash');
 
 class Team {
   constructor(db) {

@@ -1,4 +1,4 @@
-var sortBy = require('lodash').sortBy;
+var { sortBy } = require('lodash');
 
 class Message {
   constructor(db) {

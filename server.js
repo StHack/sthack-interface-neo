@@ -62,21 +62,20 @@ const device            = require('express-device');
 const cookieParse       = require('cookie');
 const cookieParser      = require('cookie-parser');
 const bodyParser        = require('body-parser');
-const _                 = require('lodash');
 const RedisStore        = require('connect-redis')(session);
 const IoRedisStore      = require('socket.io-redis');
 
 // Sthack prototypes
-const Team    = require('./src/Team').Team;
-const Task    = require('./src/Task').Task;
-const Message = require('./src/Message').Message;
-const Image   = require('./src/Image').Image;
-const DB      = require('./src/DB').DB;
-const LoggerService  = require('./src/LoggerService').LoggerService;
-const AppController = require('./src/AppController').AppController;
-const RedisService = require('./src/RedisService').RedisService;
-const AppSocketHandler = require('./src/AppSocketHandler').AppSocketHandler;
-const AdminSocketHandler = require('./src/AdminSocketHandler').AdminSocketHandler;
+const { Team } = require('./src/Team');
+const { Task } = require('./src/Task');
+const { Message } = require('./src/Message');
+const { Image } = require('./src/Image');
+const { DB } = require('./src/DB');
+const { LoggerService } = require('./src/LoggerService');
+const { AppController } = require('./src/AppController');
+const { RedisService } = require('./src/RedisService');
+const { AppSocketHandler } = require('./src/AppSocketHandler');
+const { AdminSocketHandler } = require('./src/AdminSocketHandler');
 
 var runningPortNumber  = process.env.NODE_ENV === 'production' ? 0 : process.env.PORT;
 var DBConnectionString = process.env.DB_CONNECTION_STRING;
@@ -109,11 +108,11 @@ var config = {
   registrationOpen: true,
 };
 
-const logger    = new LoggerService();
-const db        = new DB(DBConnectionString);
-const imageDB   = new Image();
-const teamDB    = new Team(db);
-const taskDB    = new Task(db, config, imageDB);
+const logger = new LoggerService();
+const db = new DB(DBConnectionString);
+const imageService = new Image();
+const teamDB = new Team(db);
+const taskDB = new Task(db, config, imageService);
 const messageDB = new Message(db);
 const redisService = new RedisService(config);
 
@@ -187,9 +186,9 @@ if(process.env.NODE_ENV==='production'){
   socketIO.adapter(IoRedisStore(redisService.getSocketConfiguration()));
 }
 
-taskDB.list().then(tasks => imageDB.initialize(tasks.map(t => t.img)));
+taskDB.list().then(tasks => imageService.initialize(tasks.map(t => t.img)));
 
-const appController = new AppController(config, logger, imageDB, teamDB, taskDB, socketIO);
+const appController = new AppController(config, logger, imageService, teamDB, taskDB, socketIO);
 appController.RegisterRoute(app);
 
 if(app.get('env') === 'production'){
@@ -258,7 +257,7 @@ socketIO.on('connection', function (socket) {
     messageDB,
     teamDB,
     taskDB,
-    imageDB,
+    imageService,
     redisService
   );
 

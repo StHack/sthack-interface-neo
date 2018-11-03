@@ -1,6 +1,6 @@
-var Team = require('../src/Team').Team;
+var { Team } = require('../src/Team');
 var crypto = require('crypto');
-var _ = require('lodash');
+var { size, filter, forEach } = require('lodash');
 var where = require('lodash.where');
 
 var DB = {
@@ -11,13 +11,13 @@ var DB = {
         'password': crypto.createHash('sha256').update('exists').digest('hex')
       }];
       var results = [];
-      if (_.size(request)) {
+      if (size(request)) {
         content = where(content, request);
       }
-      if (_.size(fields)) {
-        _.filter(content, function (value) {
+      if (size(fields)) {
+        filter(content, function (value) {
           results.push({});
-          _.forEach(Object.keys(fields), function (key) {
+          forEach(Object.keys(fields), function (key) {
             if (fields[key] == 1 && value[key]) {
               results.pop();
               var result = {};

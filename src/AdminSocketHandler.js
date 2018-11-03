@@ -160,7 +160,7 @@ class AdminSocketHandler {
       await this.teamDB.deleteTeam(teamNameToDelete);
 
       teams = await this.teamDB.list();
-      const cleanSolvedResult = await this.taskDB.cleanSolved(teamNameToDelete, teams.length);
+      await this.taskDB.cleanSolved(teamNameToDelete);
     } catch (error) {
       this.socket.emit('adminInfo', error);
     }
