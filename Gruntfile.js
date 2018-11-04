@@ -7,7 +7,7 @@ var RUNNING_PORT = 4443; // <- if you change this, you need to change in public/
 var RUNNING_CERT_PATH = 'server.crt';
 var RUNNING_KEY_PATH = 'server.key';
 var RUNNING_ADMIN_NAME = 'admin';
-var RUNNING_CLOSED_TASK_DELAY = 60*1000;
+var RUNNING_CLOSED_TASK_DELAY = 60 * 1000;
 var RUNNING_SESSION_SECRET = 'change_me';
 var RUNNING_DB_CONNECTION_STRING = 'mongodb://127.0.0.1:27017/sthack';
 var RUNNING_SESSION_KEY = 'sthackSession';
@@ -15,7 +15,7 @@ var RUNNING_ADMIN_PATH = '/admin_poney';
 var RUNNING_NODE_ENV = 'production';
 var RUNNING_TITLE = 'Sthack';
 var RUNNING_BASE_SCORE = 50;
-var lrSnippet = require('connect-livereload')({port: LIVERELOAD_PORT});
+var lrSnippet = require('connect-livereload')({ port: LIVERELOAD_PORT });
 var mountFolder = function (connect, dir) {
   return connect.static(require('path').resolve(dir));
 };
@@ -44,10 +44,11 @@ module.exports = function (grunt) {
         browser: true,
         globals: {
           jQuery: true
-        }
+        },
+        esversion: 6
       },
-      files:{
-        src:['static/js/*.js', 'server.js', 'src/**/*.js']
+      files: {
+        src: ['static/js/*.js', 'src/**/*.js']
       }
     },
 
@@ -78,24 +79,24 @@ module.exports = function (grunt) {
 
     // Watch Config
     watch: {
-        src:{
-          files: ['views/**/*'],
-          options: {
-            livereload: true
-          },
+      src: {
+        files: ['src/views/**/*'],
+        options: {
+          livereload: true
         },
-        scripts: {
-            files: [
-                'static/js/**/*.js',
-            ],
-            tasks:['uglify']
-        },
-        css: {
-            files: [
-                'static/css/**/*.css',
-            ],
-            tasks:['cssmin']
-        },
+      },
+      scripts: {
+        files: [
+          'static/js/**/*.js',
+        ],
+        tasks: ['uglify']
+      },
+      css: {
+        files: [
+          'static/css/**/*.css',
+        ],
+        tasks: ['cssmin']
+      },
     },
 
     // connect: {
@@ -116,10 +117,10 @@ module.exports = function (grunt) {
     //   }
     // },
 
-    nodemon:{
+    nodemon: {
       dev: {
         options: {
-          file: 'server.js',
+          file: 'src/server.js',
           //args: ['dev'],
           //nodeArgs: ['--debug'],
           ignoredFiles: ['node_modules/**'],
@@ -149,25 +150,25 @@ module.exports = function (grunt) {
     // run 'watch' and 'nodemon' indefinitely, together
     // 'launch' will just kick it off, and won't stay running
     concurrent: {
-        target: {
-            tasks: ['nodemon', 'watch', 'wait'],
-            options: {
-                logConcurrentOutput: true
-            }
+      target: {
+        tasks: ['nodemon', 'watch', 'wait'],
+        options: {
+          logConcurrentOutput: true
         }
+      }
     },
 
-    wait:{
+    wait: {
       options: {
-          delay: 1000
+        delay: 1000
       },
-      pause:{
-        options:{
-          before:function(options){
+      pause: {
+        options: {
+          before: function (options) {
             console.log('pausing %dms before launching page', options.delay);
           },
-          after : function() {
-              console.log('pause end, heading to page (using default browser)');
+          after: function () {
+            console.log('pause end, heading to page (using default browser)');
           }
         }
       }
@@ -180,7 +181,7 @@ module.exports = function (grunt) {
           archive: 'dist/sthack-interface-neo.tar.gz'
         },
         files: [
-          {src: ['public/**', 'server.js', 'src/**', 'views/**', 'package.json']}
+          { src: ['public/**', 'src/**', 'package.json'] }
         ]
       }
     },

@@ -66,21 +66,21 @@ const RedisStore        = require('connect-redis')(session);
 const IoRedisStore      = require('socket.io-redis');
 
 // Sthack prototypes
-const { DB } = require('./src/repositories/DB');
-const { Team } = require('./src/repositories/Team');
-const { Task } = require('./src/repositories/Task');
-const { Message } = require('./src/repositories/Message');
-const { Image } = require('./src/repositories/Image');
+const { DB } = require('./repositories/DB');
+const { Team } = require('./repositories/Team');
+const { Task } = require('./repositories/Task');
+const { Message } = require('./repositories/Message');
+const { Image } = require('./repositories/Image');
 
-const { LoggerService } = require('./src/services/LoggerService');
-const { SharedConfigService } = require('./src/services/SharedConfigService');
-const { SharedConfigRedisService } = require('./src/services/SharedConfigRedisService');
-const { ScoreService } = require('./src/services/ScoreService');
-const { ScoreInfoService } = require('./src/services/ScoreInfoService');
+const { LoggerService } = require('./services/LoggerService');
+const { SharedConfigService } = require('./services/SharedConfigService');
+const { SharedConfigRedisService } = require('./services/SharedConfigRedisService');
+const { ScoreService } = require('./services/ScoreService');
+const { ScoreInfoService } = require('./services/ScoreInfoService');
 
-const { AppHttpHandler } = require('./src/handlers/AppHttpHandler');
-const { AppSocketHandler } = require('./src/handlers/AppSocketHandler');
-const { AdminSocketHandler } = require('./src/handlers/AdminSocketHandler');
+const { AppHttpHandler } = require('./handlers/AppHttpHandler');
+const { AppSocketHandler } = require('./handlers/AppSocketHandler');
+const { AdminSocketHandler } = require('./handlers/AdminSocketHandler');
 
 var runningPortNumber  = process.env.NODE_ENV === 'production' ? 0 : process.env.PORT;
 var DBConnectionString = process.env.DB_CONNECTION_STRING;
@@ -96,8 +96,6 @@ var redisPort          = process.env.REDIS_PORT||6379;
 var redisAuth          = process.env.REDIS_AUTH||null;
 
 var config = {
-  environment: process.env.NODE_ENV,
-
   redisHost: redisHost,
   redisPort: redisPort,
   redisAuth: redisAuth,
@@ -139,7 +137,7 @@ if (process.env.NODE_ENV === 'production') {
   sessionStore = new session.MemoryStore();
 }
 
-app.use(express.static(__dirname + '/public'));
+app.use(express.static(__dirname + '/../public'));
 
 app.set('view engine', 'ejs');
 app.set('views', __dirname +'/views');

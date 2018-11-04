@@ -6,4 +6,5 @@ RUN npm install --production --silent && mv node_modules ../
 RUN bower install
 COPY . .
 EXPOSE 80
+WORKDIR /usr/src/app/src
 CMD node server.js

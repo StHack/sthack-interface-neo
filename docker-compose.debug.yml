@@ -9,4 +9,4 @@ services:
     ports:
       - 80:80
       - 9229:9229
-    command: node --inspect=0.0.0.0:9229 --inspect-brk server.js
+    command: node --inspect=0.0.0.0:9229 --inspect-brk src/server.js
