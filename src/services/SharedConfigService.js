@@ -22,9 +22,6 @@ class SharedConfigService {
     this.config.registrationOpen = true;
   }
 
-  registerSessionStore(sessionStore) {
-    this.sessionStore = sessionStore;
-  }
 }
 
 exports.SharedConfigService = SharedConfigService;
