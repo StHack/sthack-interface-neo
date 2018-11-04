@@ -1,21 +1,24 @@
 $(document).ready(function () {
-  $('#pad').draggable({cursor: 'crosshair', handle: '.titleBar', drag: function(event, ui){
-            if(ui.position.top < $('#navbar').height()){
-                ui.position.top = $('#navbar').height();
-            }
-            if(ui.position.left < 0){
-                ui.position.left = 0;
-            }
-        }
-    });
+  $('#pad').draggable({
+    cursor: 'crosshair',
+    handle: '.titleBar',
+    drag: function (event, ui) {
+      if (ui.position.top < $('#navbar').height()) {
+        ui.position.top = $('#navbar').height();
+      }
+      if (ui.position.left < 0) {
+        ui.position.left = 0;
+      }
+    }
+  });
 
   $('#pad').resizable();
 
-  sock.on('validation', function(){
+  sock.on('validation', function () {
     sock.emit('getScoreboard');
   });
 
-  sock.on('updateTeams', function(){
+  sock.on('updateTeams', function () {
     sock.emit('getScoreboard');
   });
 
@@ -24,7 +27,7 @@ $(document).ready(function () {
   }
 
   sock.emit('getScoreboard');
-  sock.on('giveScoreboard', function(scoreboard){
+  sock.on('giveScoreboard', function (scoreboard) {
     $('#scoreboard').html('<div class="line head"><div class="column pos">Pos</div><div class="column team">Team</div><div class="column score">Score</div><div class="column last">Breakthrough</div></div>');
     var lineDiv;
     var posDiv;
@@ -34,7 +37,7 @@ $(document).ready(function () {
     var timeSpan;
     var pos = 1;
     var time;
-    scoreboard.forEach(function(line){
+    scoreboard.forEach(function (line) {
       lineDiv = $('<div></div>');
       lineDiv.addClass('line');
       posDiv = $('<div></div>');
@@ -60,7 +63,7 @@ $(document).ready(function () {
       // lastDiv.text(line.lastTask+' '+pad(time.getHours())+':'+pad(time.getMinutes())+':'+pad(time.getSeconds()));
       lastDiv.append(timeSpan);
       console.log(line);
-      for(var i = 0; i < line.breakthrough.length; i++){
+      for (var i = 0; i < line.breakthrough.length; i++) {
         var heart = new Image();
         heart.src = '/img/coeur.png';
         heart.title = line.breakthrough[i]
@@ -79,27 +82,27 @@ $(document).ready(function () {
   });
 
   sock.emit('getScore');
-  sock.on('giveScore', function(team){
+  sock.on('giveScore', function (team) {
     $('#team').text(team.name);
     $('#score').text(team.score);
-    for(var i = 0; i < team.breakthrough; i++){
+    for (var i = 0; i < team.breakthrough; i++) {
       $('#breakthrough').append('<img src="/img/coeur.png" />');
     }
 
   });
 
-  setInterval(function(){
+  setInterval(function () {
     var diffMax = 1000 * 60 * 5;
     var time;
     var diffTime;
-    $('.line').each(function(index, line){
+    $('.line').each(function (index, line) {
       time = new Date($(line).children('.bt').children('.lastTime').text());
-      diffTime = new Date()-time;
-      if(diffTime <= diffMax){
-        $(line).css('background-color', 'rgba(204,41,47,'+(1-diffTime/diffMax)+')');
+      diffTime = new Date() - time;
+      if (diffTime <= diffMax) {
+        $(line).css('background-color', 'rgba(204,41,47,' + (1 - diffTime / diffMax) + ')');
       }
-      else{
-        if($(line).css('background-color')!=='rgba(204,41,47, 0)'){
+      else {
+        if ($(line).css('background-color') !== 'rgba(204,41,47, 0)') {
           $(line).css('background-color', 'rgba(204,41,47, 0)');
         }
       }
