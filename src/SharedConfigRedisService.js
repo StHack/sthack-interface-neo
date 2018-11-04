@@ -1,6 +1,6 @@
 var redis = require('redis');
 
-class RedisService {
+class SharedConfigRedisService {
   constructor(
     config,
   ) {
@@ -70,43 +70,6 @@ class RedisService {
   openRegistration() {
     this.redisAdminPub.publish('adminAction', 'openRegistration');
   }
-
-  async getSession(sessionKey) {
-    return new Promise((resolve, reject) => {
-      this.redisClient.get(sessionKey, (err, content) => {
-        if (err) {
-          reject(err);
-          return;
-        }
-
-        var session = JSON.parse(content);
-        resolve(session);
-      });
-    });
-  }
-
-  removeTeam(teamName) {
-    if (this.config.environment === 'production') {
-      this.redisClient.keys(app.sessionStore.prefix + '*', (err, sessions) => {
-        for (const session of sessions) {
-          this.redisClient.get(session, (err, content) => {
-            var sessionContent = JSON.parse(content);
-            if (sessionContent.authenticated === teamName) {
-              this.redisClient.del(session);
-            }
-          });
-        }
-      });
-    } else {
-      var sessions = app.sessionStore.sessions;
-      for (key in sessions) {
-        var session = JSON.parse(sessions[key]);
-        if (session.authenticated === teamName) {
-          delete app.sessionStore.sessions[key];
-        }
-      }
-    }
-  }
 }
 
-exports.RedisService = RedisService;
+exports.SharedConfigRedisService = SharedConfigRedisService;

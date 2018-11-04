@@ -74,7 +74,8 @@ const { DB } = require('./src/DB');
 const { ScoreService } = require('./src/ScoreService');
 const { LoggerService } = require('./src/LoggerService');
 const { AppController } = require('./src/AppController');
-const { RedisService } = require('./src/RedisService');
+const { SharedConfigService } = require('./src/SharedConfigService');
+const { SharedConfigRedisService } = require('./src/SharedConfigRedisService');
 const { AppSocketHandler } = require('./src/AppSocketHandler');
 const { AdminSocketHandler } = require('./src/AdminSocketHandler');
 const { ScoreInfoService } = require('./src/ScoreInfoService');
@@ -117,21 +118,23 @@ const imageService = new Image();
 const teamDB = new Team(db);
 const taskDB = new Task(db, config, imageService, scoreInfoService);
 const messageDB = new Message(db);
-const redisService = new RedisService(config);
+let sharedConfigService = new SharedConfigService(config);
 const scoreService = new ScoreService(teamDB, taskDB, scoreInfoService);
 
-var app = express();
+let app = express();
+
+let sessionStore = null;
 
 if (process.env.NODE_ENV === 'production') {
+  sharedConfigService = new SharedConfigRedisService(config);
+  sharedConfigService.Initialize();
 
-  redisService.Initialize();
-
-  app.sessionStore = new RedisStore({
-    client: redisService.getMainClient()
+  sessionStore = new RedisStore({
+    client: sharedConfigService.getMainClient()
   });
-
 } else {
-  app.sessionStore = new session.MemoryStore();
+  sharedConfigService.Initialize();
+  sessionStore = new session.MemoryStore();
 }
 
 app.use(express.static(__dirname + '/public'));
@@ -146,7 +149,7 @@ app.use(device.capture());
 app.use(session({
   'secret': sessionSecret,
   'key'   : sessionKey,
-  'store' : app.sessionStore,
+  'store' : sessionStore,
   'saveUninitialized': true,
   'resave' : true
   })
@@ -187,7 +190,7 @@ process.on('message', function(message, connection) {
 
 
 if(process.env.NODE_ENV==='production'){
-  socketIO.adapter(IoRedisStore(redisService.getSocketConfiguration()));
+  socketIO.adapter(IoRedisStore(sharedConfigService.getSocketConfiguration()));
 }
 
 taskDB.list().then(tasks => imageService.initialize(tasks.map(t => t.img)));
@@ -208,35 +211,28 @@ if(app.get('env') === 'production'){
 
 socketIO.use(function(socket, next) {
   console.log('socket attempted');
-  var handshake = socket.request;
+  let handshake = socket.request;
   if (!(handshake.headers.cookie)) {
     next(new Error('not authorized'));
   }
 
-  var cookie = cookieParse.parse(handshake.headers.cookie);
-  var sessionID = cookieParser.signedCookie(cookie[sessionKey], sessionSecret);
-  if (process.env.NODE_ENV==='production') {
-    redisService.getSession(app.sessionStore.prefix+sessionID)
-      .then((session) => {
-        if (session.authenticated) {
-          handshake.authenticated = session.authenticated;
-          next();
-        } else {
-          next(new Error('not authorized'));
-        }
-      }, (err) => next(err));
-  } else {
-    if(app.sessionStore.sessions[sessionID]){
-      var session = JSON.parse(app.sessionStore.sessions[sessionID]);
-      if(session.authenticated){
-        handshake.authenticated = session.authenticated;
-        next();
-      }
-      else{
-        next(new Error('not authorized'));
-      }
+  let cookie = cookieParse.parse(handshake.headers.cookie);
+  let sessionID = cookieParser.signedCookie(cookie[sessionKey], sessionSecret);
+
+  sessionStore.get(sessionID, (err, sess) => {
+    if (sess && sess.authenticated) {
+      handshake.authenticated = sess.authenticated;
+      handshake.sessionID = sessionID;
+      next();
+      return;
     }
-  }
+
+    if (err) {
+      logger.logError(err);
+    }
+
+    next(new Error('not authorized'));
+  });
 });
 
 socketIO.on('connection', function (socket) {
@@ -263,7 +259,8 @@ socketIO.on('connection', function (socket) {
     teamDB,
     taskDB,
     imageService,
-    redisService
+    sharedConfigService,
+    sessionStore
   );
 
   adminSocket.RegisterEvents();

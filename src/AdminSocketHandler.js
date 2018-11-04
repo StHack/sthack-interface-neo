@@ -8,7 +8,8 @@ class AdminSocketHandler {
     teamDB,
     taskDB,
     imageDB,
-    redisService) {
+    sharedConfigService,
+    sessionStore) {
     this.socket = socket;
     this.socketBroadcast = socketBroadcast;
     this.config = config;
@@ -19,7 +20,8 @@ class AdminSocketHandler {
     this.taskDB = taskDB;
     this.imageDB = imageDB;
 
-    this.redisService = redisService;
+    this.sharedConfigService = sharedConfigService;
+    this.sessionStore = sessionStore;
   }
 
   RegisterEvents() {
@@ -49,13 +51,16 @@ class AdminSocketHandler {
     const self = this;
 
     return function () {
-      if (self.isNotAdmin()) return;
+      if (self.isNotAdmin()) {
+        self.logger.logSocketError(self.socket, `A non-admin user attempt to access '${method.name}'`)
+        return;
+      }
 
       try {
-        self.logger.logInfo(`socket -> ${method.name}`);
+        self.logger.logSocketRequest(self.socket, `socket -> ${method.name}`);
         method.bind(self)(...arguments);
       } catch (error) {
-        self.logger.logError(error);
+        self.logger.logSocketError(self.socket, error);
         self.socket.emit('error', error);
       }
     }
@@ -67,47 +72,28 @@ class AdminSocketHandler {
 
 
 
-
-
   async Break(data) {
     await this.taskDB.breakTask(data.title, data.broken);
     this.socketBroadcast.emit('breakTask', data);
   }
 
   CloseRegistration(data) {
-    if (this.config.environment === 'production') {
-      this.redisService.closeRegistration();
-    }
-
-    this.config.registrationOpen = false;
+    this.sharedConfigService.closeRegistration();
     this.socket.emit('adminInfo', this.config.registrationOpen);
   }
 
-
   OpenRegistration(data) {
-    if (this.config.environment === 'production') {
-      this.redisService.openRegistration();
-    }
-
-    this.config.registrationOpen = true;
+    this.sharedConfigService.openRegistration();
     this.socket.emit('adminInfo', this.config.registrationOpen);
   }
 
   CloseCTF(data) {
-    if (this.config.environment === 'production') {
-      this.redisService.closeCTF();
-    }
-
-    this.config.ctfOpen = false;
+    this.sharedConfigService.closeCTF();
     this.socket.emit('adminInfo', this.config.ctfOpen);
   }
 
   OpenCTF(data) {
-    if (this.config.environment === 'production') {
-      this.redisService.openCTF();
-    }
-
-    this.config.ctfOpen = true;
+    this.sharedConfigService.openCTF();
     this.socket.emit('adminInfo', this.config.ctfOpen);
   }
 
@@ -165,16 +151,35 @@ class AdminSocketHandler {
       this.socket.emit('adminInfo', error);
     }
 
-    var handshakes = this.socketBroadcast.connected;
-    for (var key in handshakes) {
-      if (handshakes[key].conn.request.authenticated === teamNameToDelete) {
-        this.socketBroadcast.sockets[key].disconnect();
-      }
-    }
+    this._disconnectTeam(teamNameToDelete);
 
-    this.redisService.removeTeam(teamNameToDelete);
     this.socketBroadcast.emit('newTeam');
     this.socket.emit('updateTeams', teams);
+  }
+
+  _disconnectTeam(teamNameToDisconnect) {
+    var handshakes = this.socketBroadcast.sockets.connected;
+    for (var key in handshakes) {
+      let authenticatedTeamName = handshakes[key].conn.request.authenticated;
+      let authenticatedSessionID = handshakes[key].conn.request.sessionID;
+
+      if (authenticatedTeamName === teamNameToDisconnect) {
+
+        delete handshakes[key].conn.request.authenticated;
+        delete handshakes[key].conn.request.sessionID;
+
+        handshakes[key].conn.request.destroy();
+        handshakes[key].disconnect();
+
+        this.sessionStore.destroy(authenticatedSessionID, (err) => {
+          if (err) {
+            this.logger.logSocketError(this.socket, err, 'Team sessions not clear properly');
+          } else {
+            this.logger.logSocketRequest(this.socket, 'Team sessions clear properly');
+          }
+        });
+      }
+    }
   }
 
   async ListTasks() {
