@@ -1,5 +1,5 @@
 const { SolvedStateEnum } = require('./ScoreInfoService');
-const { orderBy } = require('lodash')
+const { orderBy } = require('lodash');
 
 class ScoreService {
   constructor(

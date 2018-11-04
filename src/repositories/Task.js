@@ -1,5 +1,5 @@
 const { createHash } = require('crypto');
-const { StringOperator } = require('./StringOperator');
+const { StringOperator } = require('../helpers/StringOperator');
 
 class Task {
   constructor(

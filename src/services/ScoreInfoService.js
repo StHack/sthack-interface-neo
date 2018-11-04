@@ -1,5 +1,4 @@
 var { sortBy } = require('lodash');
-var { solvedState } = require('./Task').Task;
 
 const solvedStateEnum = Object.freeze({
   NotSolved: 0,

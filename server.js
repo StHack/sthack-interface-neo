@@ -66,19 +66,21 @@ const RedisStore        = require('connect-redis')(session);
 const IoRedisStore      = require('socket.io-redis');
 
 // Sthack prototypes
-const { Team } = require('./src/Team');
-const { Task } = require('./src/Task');
-const { Message } = require('./src/Message');
-const { Image } = require('./src/Image');
-const { DB } = require('./src/DB');
-const { ScoreService } = require('./src/ScoreService');
-const { LoggerService } = require('./src/LoggerService');
-const { AppController } = require('./src/AppController');
-const { SharedConfigService } = require('./src/SharedConfigService');
-const { SharedConfigRedisService } = require('./src/SharedConfigRedisService');
-const { AppSocketHandler } = require('./src/AppSocketHandler');
-const { AdminSocketHandler } = require('./src/AdminSocketHandler');
-const { ScoreInfoService } = require('./src/ScoreInfoService');
+const { DB } = require('./src/repositories/DB');
+const { Team } = require('./src/repositories/Team');
+const { Task } = require('./src/repositories/Task');
+const { Message } = require('./src/repositories/Message');
+const { Image } = require('./src/repositories/Image');
+
+const { LoggerService } = require('./src/services/LoggerService');
+const { SharedConfigService } = require('./src/services/SharedConfigService');
+const { SharedConfigRedisService } = require('./src/services/SharedConfigRedisService');
+const { ScoreService } = require('./src/services/ScoreService');
+const { ScoreInfoService } = require('./src/services/ScoreInfoService');
+
+const { AppHttpHandler } = require('./src/handlers/AppHttpHandler');
+const { AppSocketHandler } = require('./src/handlers/AppSocketHandler');
+const { AdminSocketHandler } = require('./src/handlers/AdminSocketHandler');
 
 var runningPortNumber  = process.env.NODE_ENV === 'production' ? 0 : process.env.PORT;
 var DBConnectionString = process.env.DB_CONNECTION_STRING;
@@ -195,8 +197,8 @@ if(process.env.NODE_ENV==='production'){
 
 taskDB.list().then(tasks => imageService.initialize(tasks.map(t => t.img)));
 
-const appController = new AppController(config, logger, imageService, teamDB, taskDB, scoreService, socketIO);
-appController.RegisterRoute(app);
+const appHttpHandler = new AppHttpHandler(config, logger, imageService, teamDB, taskDB, scoreService, socketIO);
+appHttpHandler.RegisterRoute(app);
 
 if(app.get('env') === 'production'){
   app.use(function(err, req, res, next){

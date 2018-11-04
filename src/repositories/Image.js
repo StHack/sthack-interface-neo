@@ -40,7 +40,7 @@ class Image {
       throw new Error('Not a PNG file');
     }
 
-    writeFileSync(__dirname + '/../public/img/tasks/' + imageName + '.png', buf);
+    writeFileSync(__dirname + '/../../public/img/tasks/' + imageName + '.png', buf);
 
     this._insertResources(imageName);
 

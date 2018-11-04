@@ -1,4 +1,4 @@
-var { Task } = require('../src/Task');
+var { Task } = require('../src/repositories/Task');
 var { size, filter, forEach, indexOf } = require('lodash');
 var where = require('lodash.where');
 

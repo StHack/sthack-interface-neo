@@ -1,4 +1,4 @@
-const { ScoreInfoService, SolvedStateEnum } = require('../src/ScoreInfoService');
+const { ScoreInfoService, SolvedStateEnum } = require('../src/services/ScoreInfoService');
 
 // Mock data
 function generateDefaultScoreInfoService() {

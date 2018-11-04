@@ -1,4 +1,4 @@
-var { Team } = require('../src/Team');
+var { Team } = require('../src/repositories/Team');
 var crypto = require('crypto');
 var { size, filter, forEach } = require('lodash');
 var where = require('lodash.where');

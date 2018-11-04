@@ -1,4 +1,4 @@
-class AppController {
+class AppHttpHandler {
   constructor(
     config,
     logger,
@@ -209,4 +209,4 @@ class AppController {
 
 }
 
-exports.AppController = AppController;
+exports.AppHttpHandler = AppHttpHandler;
