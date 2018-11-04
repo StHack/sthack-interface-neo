@@ -1,0 +1,83 @@
+<% include head.ejs %>
+<div id="pad" class="window">
+  <div id="challenges">
+    <div class="content" id="admin">
+      <div class="center">
+        <h3>Message</h3>
+        <input type="text" id="message" />
+        <button id="sendMessage">Send</button>
+      </div>
+      <div class="center">
+        CTF <button id="openCTF">Open</button>
+        <button id="closeCTF">Close</button>
+      </div>
+      <div class="center">
+        Registration <button id="openRegistration">Open</button>
+        <button id="closeRegistration">Close</button>
+      </div>
+      <div class="center">
+        <button id="refresh">Force refresh</button>
+      </div>
+      <div class="center">
+        <h3>Edit</h3>
+        <select id="teams">
+          <option value="">---- Teams ----</option>
+        </select>
+        <select id="tasks">
+          <option value="">---- Tasks ----</option>
+        </select>
+        <span style="display:inline-block;">Broken<input type="checkbox" id="broken" /></span>
+      </div>
+      <div class="f-left">
+        <h3 class="center">Add team</h3>
+        <p>
+          <h4>Name : </h4><input type="text" id="teamName" />
+        </p>
+        <p>
+          <h4>Password : </h4><input type="text" id="teamPassword" />
+        </p>
+        <p class="center"><button id="addTeam">Add</button><button style="display: none" id="editTeam">Edit</button><button
+            style="display: none" id="deleteTeam">Delete</button></p>
+      </div>
+      <div class="f-left">
+        <h3 class="center">Add task</h3>
+        <p>
+          <h4>Title : </h4><input type="text" id="taskTitle" />
+        </p>
+        <p>
+          <h4>png only: </h4><input type="file" id="taskImg" />
+        </p>
+        <p>
+          <h4>Flag : </h4><input type="text" id="taskFlag" />
+        </p>
+        <p>
+          <h4>Type : </h4><input type="text" id="taskType" />
+        </p>
+        <p>
+          <h4>Author : </h4><input type="text" id="taskAuthor" />
+        </p>
+        <p>
+          <h4>Tags : </h4><input type="text" id="taskTags" />
+        </p>
+        <p>
+          <h4>Difficulty : </h4>
+          <select id="taskDifficulty">
+            <option value="easy">Easy</option>
+            <option value="medium">Medium</option>
+            <option value="hard">Hard</option>
+          </select>
+        </p>
+        <p>
+          <h4>Description : </h4><br />
+          <textarea rows="7" cols="50" id="taskDescription"></textarea>
+        </p>
+        <p class="center"><button id="addTask">Add</button><button style="display: none" id="editTask">Edit</button><button
+            style="display: none" id="deleteTask">Delete</button></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+
+</html>

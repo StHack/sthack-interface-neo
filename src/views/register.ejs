@@ -1,0 +1,15 @@
+<% include head.ejs %>
+<div id="login">
+  <img src="/img/banner.png" alt="Sthack"><br />
+  <div style="line-height:200%; color:white;">
+    <%= error %>
+  </div>
+  <form method="POST" action="/register">
+    <input type="text" name="name" placeholder="Team name" />
+    <input type="password" name="password" placeholder="Password" />
+    <input type="submit" id="submit" value="REGISTER">
+  </form>
+</div>
+</body>
+
+</html>

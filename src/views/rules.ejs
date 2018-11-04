@@ -1,5 +1,5 @@
 <% include head.ejs %>
-  <div id="rules" class="window">
+<div id="rules" class="window">
   <div id="challenges">
     <div id="rulesin" class="content">
       <br /><br />
@@ -21,8 +21,10 @@
 
       Where:
       <ul>
-        <li><code>base_score</code> is the constant <strong><%= baseScore %></strong></li>
-        <li><code>base_difficulty</code> is <strong>1</strong> (<em>easy</em>), <strong>2</strong> (<em>medium</em>) or <strong>3</strong> (<em>hard</em>)</li>
+        <li><code>base_score</code> is the constant <strong>
+            <%= baseScore %></strong></li>
+        <li><code>base_difficulty</code> is <strong>1</strong> (<em>easy</em>), <strong>2</strong> (<em>medium</em>) or
+          <strong>3</strong> (<em>hard</em>)</li>
         <li><code>total_teams</code> is the total number of teams playing the CTF</li>
         <li><code>solvers</code> is the number of teams that solved this task</li>
       </ul>
@@ -32,7 +34,7 @@
         <li>increase at the beginning of the CTF, when teams are registering</li>
         <li>decrease while people solve tasks</li>
       </ul>
-      
+
       <br />
       There is no bonus points for breakthrough.<br :>
       All tasks <em>*should*</em> be unlocked when the CTF starts.
@@ -40,7 +42,8 @@
 
       <h2><u>Help/Questions</u></h2>
       <br />
-      You can come and ask us your questions directly at the staff desk, or on IRC at <strong>#insomnihack</strong> on <strong>freenode</strong>.<br />
+      You can come and ask us your questions directly at the staff desk, or on IRC at <strong>#insomnihack</strong> on
+      <strong>freenode</strong>.<br />
       Follow us on twitter at <a href="https://twitter.com/1ns0mn1h4ck">https://twitter.com/1ns0mn1h4ck</a>
       <br /><br /><br />
       <h2><u>Rules</u></h2>
@@ -57,16 +60,8 @@
       We reserve the rights to disqualify any cheating team.
       <br /><br />
     </div>
-    </div>
   </div>
+</div>
 </body>
+
 </html>
-<!--
-
-<html>
-<body>
-
-
-</body>
-</html>
- -->
