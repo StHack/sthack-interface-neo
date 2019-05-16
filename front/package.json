@@ -7,7 +7,7 @@
   "repository": "",
   "scripts": {
     "start": "node src/server.js",
-    "test": "jasmine"
+    "test": "npx jasmine spec/*"
   },
   "dependencies": {
     "body-parser": "^1.14.2",
@@ -48,6 +48,7 @@
     "grunt-ssh": "^0.12.1",
     "grunt-ssh-deploy": "^0.4.0",
     "grunt-wait": "~0.3.0",
+    "jasmine": "^3.4.0",
     "matchdep": "^2.0.0",
     "moment": "^2.22.2"
   },

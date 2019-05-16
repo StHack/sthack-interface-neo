@@ -1,9 +1,10 @@
 FROM node:alpine
 ENV NODE_ENV production
-WORKDIR /usr/src/app
-COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "./"]
-RUN npm install --production --silent && mv node_modules ../
+WORKDIR /app
+COPY ["package.json", "package-lock.json*", "./"]
+RUN npm install --production
 COPY . .
+RUN npm test
 EXPOSE 80
-WORKDIR /usr/src/app/src
+WORKDIR /app/src
 CMD node server.js
