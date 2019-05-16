@@ -28,7 +28,6 @@
     "socket.io-redis": "^5.2.0"
   },
   "devDependencies": {
-    "bower": "~1.8.0",
     "connect-livereload": "~0.6.0",
     "grunt": "~1.0.1",
     "grunt-concurrent": "~2.3.1",
