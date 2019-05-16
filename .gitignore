@@ -36,5 +36,4 @@ test.js
 
 #Config
 *.sh
-sshProduction.json
 dist/
