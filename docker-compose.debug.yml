@@ -1,12 +1,9 @@
-version: '2.1'
+version: '3.0'
 
 services:
-  server:
-    image: sthack-interface-neo
-    build: .
+  front:
     environment:
       NODE_ENV: development
     ports:
-      - 80:80
-      - 9229:9229
-    command: node --inspect=0.0.0.0:9229 --inspect-brk src/server.js
+    - 9229:9229
+    command: node --inspect=0.0.0.0:9229 --inspect-brk server.js

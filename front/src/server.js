@@ -40,7 +40,7 @@ if(process.env.NODE_ENV === 'production'){
         // it the connection.
         var worker = workers[worker_index(connection.remoteAddress, numCPUs)];
         worker.send('sticky-session:connection', connection);
-    }).listen(process.env.PORT, '0.0.0.0');
+    }).listen(3000, '0.0.0.0');
   }
 }
 
@@ -82,7 +82,7 @@ const { AppHttpHandler } = require('./handlers/AppHttpHandler');
 const { AppSocketHandler } = require('./handlers/AppSocketHandler');
 const { AdminSocketHandler } = require('./handlers/AdminSocketHandler');
 
-var runningPortNumber  = process.env.NODE_ENV === 'production' ? 0 : process.env.PORT;
+var runningPortNumber  = process.env.NODE_ENV === 'production' ? 0 : 3000;
 var DBConnectionString = process.env.DB_CONNECTION_STRING;
 var adminName          = process.env.ADMIN_NAME;
 var closedTaskDelay    = process.env.CLOSED_TASK_DELAY;
@@ -203,11 +203,9 @@ if(app.get('env') === 'production'){
     res.status(500);
     res.render('error', {current: 'error', title: siteTitle, registrationOpen: config.registrationOpen});
   });
+} else {
+  app.use(express.errorHandler());
 }
-
-// if(app.get('env') === 'development'){
-//   app.use(express.errorHandler());
-// }
 
 socketIO.use(function(socket, next) {
   console.log('socket attempted');

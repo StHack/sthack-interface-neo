@@ -12,6 +12,8 @@ services:
     restart: always
     networks:
     - main
+    depends_on:
+    - front
 
   front:
     image: sthack-interface-neo

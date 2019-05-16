@@ -5,6 +5,10 @@
   "version": "0.0.1",
   "private": true,
   "repository": "",
+  "scripts": {
+    "start": "node src/server.js",
+    "test": "jasmine"
+  },
   "dependencies": {
     "body-parser": "^1.14.2",
     "connect-redis": "^3.4.0",
