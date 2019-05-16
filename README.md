@@ -3,6 +3,7 @@
 ## Version 2.0
 
 - to regenerate https certificate : `docker-compose build --no-cache reverse-proxy`
+- to be able to debug from vscode : `docker-compose -f .\docker-compose.yml -f .\docker-compose.debug.yml up`
 
 ## Introduction
 

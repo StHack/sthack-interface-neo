@@ -1,0 +1,42 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Docker : Debug",
+      "port": 9229,
+      "restart": true,
+      "localRoot": "${workspaceFolder}/front/src",
+      "remoteRoot": "/app/src"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Run all tests",
+      "program": "${workspaceRoot}\\front\\node_modules\\jasmine\\bin\\jasmine.js",
+      "args": [
+        "${workspaceRoot}\\front\\spec\\*"
+      ],
+      "cwd": "${workspaceFolder}/front/src",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Test current file",
+
+      "program": "${workspaceRoot}\\front\\node_modules\\jasmine\\bin\\jasmine.js",
+      "args": [
+        "${file}"
+      ],
+      "cwd": "${workspaceFolder}/front/src",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}
