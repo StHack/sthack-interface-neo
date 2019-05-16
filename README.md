@@ -1,5 +1,9 @@
 # sthack-interface
 
+## Version 2.0
+
+- to regenerate https certificate : `docker-compose build --no-cache reverse-proxy`
+
 ## Introduction
 
 The NodeJS interface for St'Hack CTF game.
