@@ -8,3 +8,5 @@ services:
     - 9229:9229
     command: node --inspect=0.0.0.0:9229 --inspect-brk server.js
     restart: "no"
+    volumes :
+    - ./front/src:/app/src
