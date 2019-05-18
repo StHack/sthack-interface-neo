@@ -171,7 +171,7 @@ app.use(function(req, res, next){
 /* -------- */
 
 var appSSL = http.createServer({}, app).listen(runningPortNumber);
-var socketIO = io(appSSL);//.listen(appSSL, { log: true });
+var socketIO = io(appSSL).listen(appSSL, { log: true });
 
 // console.log(process.env);
 console.log("Application started");
@@ -203,8 +203,6 @@ if(app.get('env') === 'production'){
     res.status(500);
     res.render('error', {current: 'error', title: siteTitle, registrationOpen: config.registrationOpen});
   });
-} else {
-  app.use(express.errorHandler());
 }
 
 socketIO.use(function(socket, next) {

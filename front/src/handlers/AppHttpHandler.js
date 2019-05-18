@@ -43,7 +43,7 @@ class AppHttpHandler {
         title: this.config.siteTitle,
         current: 'index',
         auth: 1,
-        socketIOUrl: 'http://' + req.headers.host,
+        socketIOUrl: req.headers.host,
         Images: JSON.stringify(this.imageDB.getList())
       });
     }
@@ -133,7 +133,7 @@ class AppHttpHandler {
       title: this.config.siteTitle,
       auth: auth,
       registrationOpen: this.config.registrationOpen,
-      socketIOUrl: 'http://' + req.headers.host,
+      socketIOUrl: req.headers.host,
       Images: JSON.stringify(this.imageDB.getList())
     });
   }
@@ -144,7 +144,7 @@ class AppHttpHandler {
       title: this.config.siteTitle,
       auth: 1,
       registrationOpen: this.config.registrationOpen,
-      socketIOUrl: 'http://' + req.headers.host,
+      socketIOUrl: req.headers.host,
       Images: JSON.stringify(this.imageDB.getList())
     });
   }
@@ -198,7 +198,7 @@ class AppHttpHandler {
         current: 'index',
         admin: 1,
         auth: 1,
-        socketIOUrl: 'http://' + req.headers.host,
+        socketIOUrl: req.headers.host,
         Images: JSON.stringify(this.imageDB.getList())
       });
     }
