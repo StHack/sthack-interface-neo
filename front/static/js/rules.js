@@ -15,16 +15,4 @@ loadImages(function () {
   loadTask(document.getElementById('easy'));
   loadTask(document.getElementById('medium'));
   loadTask(document.getElementById('hard'));
-
-  $('body').on('mouseenter', '.buttonTask', function (e) {
-    enter(e.target, function () {
-
-    });
-  });
-
-  $('body').on('mouseleave', '.buttonTask', function (e) {
-    leave(e.target, function () {
-
-    });
-  });
 });

@@ -97,33 +97,10 @@ loadImages(function () {
     prev = 'start';
   });
 
-  $('body').on('mouseenter', '.buttonTask', function (e) {
-    enter(e.target, function () {
-
-    });
-  });
-
-  $('body').on('mouseleave', '.buttonTask', function (e) {
-    leave(e.target, function () {
-
-    });
-  });
-
   $('body').on('click', 'canvas', function (e) {
     if ($(e.target).attr('class') === 'buttonDir') {
       var id = $(e.target).attr('id');
-      // if($('#div-'+id).css('display')==='block'){
-      //     closeDir(e.target, $(e.target).text(), function(){
-      //         $('#div-'+id).css('display', 'none');
-      //     });
-      // }
-      // else{
-      //     openDir(e.target, $(e.target).text(),  function(){
-      //         $('#div-'+id).css('display', 'block');
-      //         $('.directory').css('z-index', '1');
-      //         $('#div-'+id).css('z-index', '2');
-      //     });
-      // }
+
       prev = 'start';
       $('#content-' + id).css('display', 'block');
       $('#content-start').css('display', 'none');
@@ -158,10 +135,7 @@ loadImages(function () {
     $('#flag').val('');
     $('#description').html(task.description);
     $('#titlePopup').text(task.title);
-    // var imgClose = $('<img/>');
-    // imgClose.addClass('imgClosePopup');
-    // imgClose.attr('src','/img/close-window.png');
-    // $('#titlePopup').append(imgClose);
+
     $('#informations').children('span:eq(1)').text(task.author + ' - ');
     $('#informations').children('span:eq(3)').text(task.difficulty);
     var tags = '#' + task.type + ', ';
@@ -224,13 +198,6 @@ loadImages(function () {
     $('#error').css('display', 'block');
     setTimeout(function () { $('#error').css('display', 'none'); }, 1000);
   });
-
-  // $('#submitFlag').click(function(){
-  //     if($('#error').css('display')==='none'){
-  //         sock.emit('submitFlag', {title: $('#titlePopup').text(), flag: $('#flag').val()});
-  //         $('#flag').val('');
-  //     }
-  // });
 
   $('#cancel').click(function () {
     $('#flag').val('');

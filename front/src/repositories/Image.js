@@ -3,18 +3,18 @@ var { writeFileSync } = require('fs');
 class Image {
   constructor() {
     this.resources = {
-      backdoor: 'backdoor.png',
-      crypto: 'crypto.png',
-      forensic: 'forensics.png',
-      hardware: 'hardware.png',
-      network: 'network.png',
-      pwn: 'pwn.png',
-      reverse: 'reverse.png',
-      shellcode: 'shellcode.png',
-      web: 'web.png',
-      misc: 'misc.png',
-      recon: 'recon.png',
-      game: 'game.png',
+      backdoor: 'categorie/backdoor.png',
+      crypto: 'categorie/crypto.png',
+      forensic: 'categorie/forensics.png',
+      hardware: 'categorie/hardware.png',
+      network: 'categorie/network.png',
+      pwn: 'categorie/pwn.png',
+      reverse: 'categorie/reverse.png',
+      shellcode: 'categorie/shellcode.png',
+      web: 'categorie/web.png',
+      misc: 'categorie/misc.png',
+      recon: 'categorie/recon.png',
+      game: 'categorie/game.png',
     };
   }
 

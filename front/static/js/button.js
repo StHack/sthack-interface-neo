@@ -115,62 +115,6 @@ function loadDir(type, plus) {
 
 var anim;
 
-function enter(canvasTask) {
-  var task = JSON.parse($(canvasTask).text());
-  console.log(task.title, task.solved);
-  // if(task.state <= 1){
-  //     var ctx = canvasTask.getContext('2d');
-  //     var index = 0;
-  //     anim = setInterval(function(){
-  //         var max = printImage(ctx, canvasTask, task, index);
-  //         index+=1;
-  //         if(index >= max){
-  //             index=0;
-  //         }
-  //         ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
-  //         printText(ctx, canvasTask, task);
-  //     }, 133);
-  // }
-  // else{
-  //     clearInterval(anim);
-  //     loadTask(canvasTask);
-  // }
-}
-
-function leave(canvasTask) {
-  // var task = JSON.parse($(canvasTask).text());
-  // if(task.state <= 1){
-  //     clearInterval(anim);
-  //     var ctx = canvasTask.getContext('2d');
-  //     printImage(ctx, canvasTask, task, 0);
-  //     ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
-  //     printText(ctx, canvasTask, task);
-  // }
-  // else{
-  //     clearInterval(anim);
-  //     loadTask(canvasTask);
-  // }
-}
-
-function printImage(ctx, canvasTask, task, index) {
-  if (task.difficulty === 'easy') {
-    var imgWidth = 480;
-    var image = images.easy;
-  }
-  else if (task.difficulty === 'medium') {
-    var imgWidth = 480;
-    var image = images.medium;
-  }
-  else {
-    var imgWidth = 480;
-    var image = images.hard;
-  }
-
-  var max = image.width / imgWidth;
-  ctx.drawImage(image, index * imgWidth, 0, imgWidth, images.easy.height, 0, 0, canvasTask.width, canvasTask.height);
-  return max;
-}
-
 function printText(ctx, canvasTask, task) {
   ctx.save();
   ctx.textAlign = 'center';
@@ -232,13 +176,6 @@ function loadTask(canvasTask) {
   var ctx = canvasTask.getContext('2d');
   ctx.clearRect(0, 0, canvasTask.width, canvasTask.height);
   if (task.state > 1) {
-    // ctx.fillStyle = '#000';
-    // ctx.fillRect(0,0,canvasTask.width,canvasTask.height);
-    // ctx.beginPath();
-    // ctx.fillStyle = '#fff';
-    // ctx.arc(canvasTask.width/2, canvasTask.height/2, 2, 0, 2 * Math.PI, false);
-    // ctx.fill();
-    // ctx.stroke();
     ctx.globalAlpha = 0.2;
   }
 
@@ -247,7 +184,6 @@ function loadTask(canvasTask) {
     ctx.fillRect(canvasTask.width * 0.3 / 2, 0, canvasTask.width * 0.7, canvasTask.height * 0.7);
   }
   else {
-    //printImage(ctx, canvasTask, task, 0);
     ctx.drawImage(images[task.img], 0, 0, images[task.img].width, images[task.img].height, canvasTask.width * 0.3 / 2, 0, canvasTask.width * 0.7, canvasTask.height * 0.7);
   }
 
@@ -256,10 +192,6 @@ function loadTask(canvasTask) {
   } else if (typeof (task.open) !== 'undefined' && task.open === false) {
     printClosed(ctx, canvasTask);
   }
-
-
-
-  //ctx.drawImage(images.tv,0,0,canvasTask.width,canvasTask.height);
 
   printText(ctx, canvasTask, task);
   ctx.textAlign = 'center';
@@ -277,37 +209,6 @@ function loadTask(canvasTask) {
 function validateTask(canvasTask, callback) {
   loadTask(canvasTask);
   callback();
-  // var task = JSON.parse($(canvasTask).text());
-  // var ctx = canvasTask.getContext('2d');
-  // var radius = 2;
-  // ctx.save();
-  // var shutdown = setInterval(function(){
-  //     ctx.arc(canvasTask.width/2, canvasTask.height/2, radius, 0, 2 * Math.PI, false);
-  //     ctx.fillStyle = '#fff';
-  //     ctx.fill();
-  //     ctx.drawImage(images.tv, 0, 0, canvasTask.width, canvasTask.height);
-  //     radius += 70;
-  //     if(radius>canvasTask.width/2+50){
-  //         clearInterval(shutdown);
-  //         var shutdown2 = setInterval(function(){
-  //             ctx.fillStyle = '#000';
-  //             ctx.fillRect(0,0,canvasTask.width,canvasTask.height);
-
-  //             ctx.beginPath();
-  //             ctx.fillStyle = '#fff';
-  //             ctx.arc(canvasTask.width/2, canvasTask.height/2, radius, 0, 2 * Math.PI, false);
-  //             ctx.fill();
-  //             ctx.stroke();
-  //             ctx.drawImage(images.tv, 0, 0, canvasTask.width, canvasTask.height);
-  //             radius -= 70;
-  //             if(radius < 0){
-  //                 clearInterval(shutdown2);
-  //                 callback();
-  //             }
-  //         }, 50);
-  //     }
-  // }, 50);
-  // ctx.restore();
 }
 
 function clickTask(canvasTask, callback) {
