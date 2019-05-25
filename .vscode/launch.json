@@ -10,8 +10,8 @@
       "name": "Docker : Debug",
       "port": 9229,
       "restart": true,
-      "localRoot": "${workspaceFolder}/front/src",
-      "remoteRoot": "/app/src"
+      "localRoot": "${workspaceFolder}/front",
+      "remoteRoot": "/src"
     },
     {
       "type": "node",
