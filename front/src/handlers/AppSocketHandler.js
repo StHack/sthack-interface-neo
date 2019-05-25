@@ -70,8 +70,13 @@ class AppSocketHandler {
 
   async getTasks() {
     const tasks = await this.taskDB.getAllTasks();
-    //TODO :ça ne marche pas .infos n'existe pas
-    // this.socket.emit('giveTasks', tasks.infos);
+
+    var auth = this.socket.client.request.authenticated;
+    const teams = await this.teamDB.list();
+
+    const promises = tasks.map(async task => await this.taskDB.getInfos(task, auth, teams.length, true));
+    const result = await Promise.all(promises);
+    this.socket.emit('giveTasks', tasks);
 
     await this.getScore();
   }
