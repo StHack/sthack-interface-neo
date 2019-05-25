@@ -6,6 +6,7 @@
   "private": true,
   "repository": "",
   "scripts": {
+    "build": "grunt build",
     "start": "node src/server.js",
     "test": "npx jasmine spec/*"
   },
