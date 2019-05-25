@@ -58,7 +58,6 @@ const express           = require('express');
 const session           = require('express-session');
 const http              = require('http');
 const io                = require('socket.io');
-const device            = require('express-device');
 const cookieParse       = require('cookie');
 const cookieParser      = require('cookie-parser');
 const bodyParser        = require('body-parser');
@@ -144,7 +143,6 @@ app.set('views', __dirname +'/views');
 
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json());
-app.use(device.capture());
 
 app.use(session({
   'secret': sessionSecret,
