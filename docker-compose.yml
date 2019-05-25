@@ -53,8 +53,11 @@ services:
     - MONGO_INITDB_ROOT_PASSWORD=S74cK_1s_Aw3s0mE
     networks:
     - main
-    # volumes:
-    # - ./mongo_data:/data/db
+    volumes:
+    - mongo_data:/data/db
 
 networks:
   main:
+
+volumes:
+  mongo_data:
