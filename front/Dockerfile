@@ -9,7 +9,7 @@ RUN npm test
 FROM node:alpine AS prod
 ENV NODE_ENV production
 WORKDIR /app
-EXPOSE 80
+EXPOSE 3000
 COPY --from=build /src /app
 RUN npm prune --production
 CMD [ "npm", "start" ]
