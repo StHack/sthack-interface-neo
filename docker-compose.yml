@@ -1,17 +1,19 @@
 version: '3.7'
 
 services:
-  reverse-proxy:
-    image: sthackproxy
-    ports:
-    - "80:80"
-    - "443:443"
+  traefik:
+    image: sthack-traefik
     build:
       context: ./reverseproxy
       dockerfile: Dockerfile
+    ports:
+    - "80:80"
+    - "443:443"
+    volumes:
+    - /var/run/docker.sock:/var/run/docker.sock # So that Traefik can listen to the Docker events
     restart: always
     networks:
-    - main
+    - traefiknet
     depends_on:
     - front
 
@@ -22,7 +24,6 @@ services:
       dockerfile: Dockerfile
     command: npm start
     restart: always
-
     environment:
     - REDIS_HOST=redis
     - REDIS_PORT=6379
@@ -36,6 +37,7 @@ services:
     - BASE_SCORE=50
     networks:
     - main
+    - traefiknet
     depends_on:
     - redis
     - mongo
@@ -58,6 +60,7 @@ services:
 
 networks:
   main:
+  traefiknet:
 
 volumes:
   mongo_data:

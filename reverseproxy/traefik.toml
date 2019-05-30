@@ -1,0 +1,33 @@
+################################################################
+# Traefik frontend configuration
+################################################################
+passHostHeader = true
+logLevel = "INFO"
+################################################################
+# TLS Support
+################################################################
+defaultEntryPoints = ["http", "https"]
+
+[entryPoints]
+  [entryPoints.http]
+  address = ":80"
+    [entryPoints.http.redirect]
+    entryPoint = "https"
+  [entryPoints.https]
+  address = ":443"
+    [entryPoints.https.tls]
+      [[entryPoints.https.tls.certificates]]
+      certFile = "/etc/ssl/certs/server.crt"
+      keyFile = "/etc/ssl/certs/server.key"
+
+################################################################
+# API and dashboard configuration
+################################################################
+# [api]
+################################################################
+# Docker configuration backend
+################################################################
+[docker]
+watch = true
+domain = "local"
+exposedByDefault = false

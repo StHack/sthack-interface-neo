@@ -1,16 +1,26 @@
 version: '3.7'
 
 services:
+
+  traefik:
+    command: --docker.swarmMode
+    labels:
+    - traefik.docker.domain=localhost
+    deploy:
+      placement:
+        constraints:
+        - node.role == manager
+
+
   front:
-    environment:
-      NODE_ENV: production
-#     volumes :
-#     - ./front/src:/app/src
-
-#   mongo:
-#     volumes:
-#     - mongo_data:/data/db
-
-# volumes:
-#   mongo_data:
-#   shared_images:
+    labels:
+    - traefik.enable=true
+    - traefik.frontend.rule=Host:localhost
+    - traefik.port=3000
+    - traefik.protocol=http
+    - traefik.backend.loadbalancer.stickiness=true
+    deploy:
+      replicas: 3
+      resources:
+        limits:
+          cpus: '1'

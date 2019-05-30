@@ -1,0 +1,19 @@
+version: '3.7'
+
+services:
+  traefik:
+    command: --api # Enables the web UI and tells Traefik to listen to docker
+    ports:
+    - "8080:8080" # The Web UI (enabled by --api)
+
+  front:
+    environment:
+    - NODE_ENV=development
+    labels:
+    - traefik.enable=true
+    - traefik.frontend.rule=Host:localhost
+    - traefik.port=3000
+    - traefik.protocol=http
+    - traefik.backend.loadbalancer.stickiness=true
+    - traefik.docker.network=sthack-interface-neo_traefiknet
+

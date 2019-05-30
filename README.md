@@ -4,6 +4,23 @@
 
 - to regenerate https certificate : `docker-compose build --no-cache reverse-proxy`
 - to be able to debug from vscode : `docker-compose -f .\docker-compose.yml -f .\docker-compose.debug.yml up`
+- to launch app on localhost with multiple instance of front : `docker-compose up -d --scale front=3`
+
+## Deployment
+
+For the prod deployment, we recommand using swarm.
+
+1. Set up vm / environment with docker swarm
+  a. To init swarm : `docker swarm init`
+  b. Add as many worker as wanted
+2. Retrieve the project : with one of the following
+  a. `git clone <this repo>` then `docker-compose build`
+  b. Download `docker-compose.yml`, `docker-compose.registry.yml` and `docker-compose.prod.yml` file
+3. Customize `docker-compose.prod.yml` file by replacing `localhost` with the DNS name you will use once deployed. e.g. : `https://ctf.sthack.fr`
+4. Change settings if needed into `docker-compose.yml` file
+5. Deploy with :
+  a. `docker-compose stack deploy -c docker-compose.yml -c docker-compose.prod.yml sthack`
+  b. or `docker-compose stack deploy -c docker-compose.yml -c docker-compose.registry.yml -c docker-compose.prod.yml sthack`
 
 ## Introduction
 
