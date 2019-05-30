@@ -74,7 +74,7 @@ class AppSocketHandler {
     var auth = this.socket.client.request.authenticated;
     const teams = await this.teamDB.list();
 
-    const promises = tasks.map(async task => await this.taskDB.getInfos(task, auth, teams.length, true));
+    const promises = tasks.map(async task => await this.taskDB.getInfos(task, auth, teams.length, false));
     const result = await Promise.all(promises);
     this.socket.emit('giveTasks', tasks);
 
