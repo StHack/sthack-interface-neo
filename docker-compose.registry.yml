@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  traefik:
+    image: ${CI_REGISTRY_IMAGE-registry.gitlab.com/nagarian/sthack-interface-neo}/traefik:${CI_COMMIT_REF_NAME-latest}
+    build:
+      context: ./reverseproxy
+      dockerfile: Dockerfile
+
+  front:
+    image: ${CI_REGISTRY_IMAGE-registry.gitlab.com/nagarian/sthack-interface-neo}/front:${CI_COMMIT_REF_NAME-latest}
+    build:
+      context: ./front
+      dockerfile: Dockerfile
