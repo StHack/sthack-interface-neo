@@ -179,12 +179,14 @@ function loadTask(canvasTask) {
     ctx.globalAlpha = 0.2;
   }
 
-  if (typeof (images[task.img]) === 'undefined') {
-    ctx.fillStyle = "blue";
-    ctx.fillRect(canvasTask.width * 0.3 / 2, 0, canvasTask.width * 0.7, canvasTask.height * 0.7);
+  var img = images[task.img] || images["default"];
+
+  if (img) {
+    ctx.drawImage(img, 0, 0, img.width, img.height, canvasTask.width * 0.3 / 2, 0, canvasTask.width * 0.7, canvasTask.height * 0.7);
   }
   else {
-    ctx.drawImage(images[task.img], 0, 0, images[task.img].width, images[task.img].height, canvasTask.width * 0.3 / 2, 0, canvasTask.width * 0.7, canvasTask.height * 0.7);
+    ctx.fillStyle = "blue";
+    ctx.fillRect(canvasTask.width * 0.3 / 2, 0, canvasTask.width * 0.7, canvasTask.height * 0.7);
   }
 
   if (typeof (task.broken) !== 'undefined' && task.broken === true) {
