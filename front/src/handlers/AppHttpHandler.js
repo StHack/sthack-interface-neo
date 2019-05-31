@@ -44,18 +44,9 @@ class AppHttpHandler {
       });
     }
     else {
-      var teams = [];
-
-      try {
-        teams = await this.teamDB.list();
-      } catch (error) {
-        this.logger.logError(error);
-      }
-
       res.render('login', {
         title: this.config.siteTitle,
         current: 'index',
-        teams_list: teams,
         registrationOpen: this.config.registrationOpen,
         Images: JSON.stringify(this.imageDB.getList())
       });

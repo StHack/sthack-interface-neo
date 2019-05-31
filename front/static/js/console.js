@@ -6,16 +6,6 @@ var blink_val = 0;
 var blink;
 
 $(document).ready(function () {
-  // $('#console').draggable({cursor: 'crosshair', drag: function(event, ui){
-  //           if(ui.position.top < $('#navbar').height()){
-  //               ui.position.top = $('#navbar').height();
-  //           }
-  //           if(ui.position.left < 0){
-  //               ui.position.left = 0;
-  //           }
-  //       }
-  //   });
-
 
   $('#console').on('blink', function () {
     clearInterval(blink);
