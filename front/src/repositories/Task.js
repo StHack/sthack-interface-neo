@@ -127,8 +127,12 @@ class Task {
       throw new Error('Bad flag');
     }
 
-    task.solved.push({ "teamName": teamName, "timestamp": new Date().getTime() });
-    return await this.db.update('tasks', { 'title': title }, { 'solved': solved });
+    const salvation = [{
+      "teamName": teamName,
+      "timestamp": new Date().getTime()
+    }];
+
+    return await this.db.update('tasks', { 'title': title }, { 'solved': salvation });
   }
 
   async editTask(title, description, flag, type, difficulty, author, img, tags) {
