@@ -12,9 +12,17 @@ class ScoreService {
     this.scoreInfoService = scoreInfoService;
   }
 
-  async getScoreBoard() {
+  async getScoredTasks(teamName) {
     const teams = await this.teamDB.list();
     const tasks = await this.taskDB.getAllTasks();
+    const promises = tasks.map(async task => await this.taskDB.getInfos(task, teamName, teams.length, false));
+    const scoredTasks = await Promise.all(promises);
+    return scoredTasks;
+  }
+
+  async getScoreBoard() {
+    const teams = await this.teamDB.list();
+    const tasks = await this.getScoredTasks();
 
     var scoreboard = [];
 
@@ -34,7 +42,7 @@ class ScoreService {
   }
 
   async getScoreOfTeam(teamName) {
-    const tasks = await this.taskDB.getAllTasks();
+    const tasks = await this.getScoredTasks(teamName);
     return this._getTeamScore(tasks, teamName);
   }
 

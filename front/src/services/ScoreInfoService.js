@@ -37,6 +37,11 @@ class ScoreInfoService {
       return { state: solvedStateEnum.NotSolved, time: 0 };
     }
 
+    if (!(teamName)) {
+      //someone else solved
+      return { state: solvedStateEnum.SolvedBySomeone, time: 0 };
+    }
+
     const teamSolved = solved.find(s => s.teamName === teamName);
 
     if (teamSolved) {

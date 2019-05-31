@@ -69,15 +69,9 @@ class AppSocketHandler {
   }
 
   async getTasks() {
-    const tasks = await this.taskDB.getAllTasks();
-
-    var auth = this.socket.client.request.authenticated;
-    const teams = await this.teamDB.list();
-
-    const promises = tasks.map(async task => await this.taskDB.getInfos(task, auth, teams.length, false));
-    const result = await Promise.all(promises);
-    this.socket.emit('giveTasks', tasks);
-
+    const authenticatedTeamName = this.socket.client.request.authenticated;
+    const scoredTasks = await this.scoreService.getScoredTasks(authenticatedTeamName);
+    this.socket.emit('giveTasks', scoredTasks);
     await this.getScore();
   }
 
@@ -122,14 +116,7 @@ class AppSocketHandler {
   }
 
   async updateTaskScores() {
-    var auth = this.socket.client.request.authenticated;
-
-    const lala = this.scoreService.getScoreBoard();
-    //TODO
-    // const teams = await this.teamDB.list();
-    // const tasks = await this.taskDB.getTasks(auth, teams.length);
-    // this.socket.emit('updateTaskScores', tasks.infos);
-
+    await this.getScoreboard();
     await this.getScore();
   }
 
