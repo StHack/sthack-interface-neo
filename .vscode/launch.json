@@ -11,7 +11,7 @@
       "port": 9229,
       "restart": true,
       "localRoot": "${workspaceFolder}/front",
-      "remoteRoot": "/src"
+      "remoteRoot": "/app"
     },
     {
       "type": "node",

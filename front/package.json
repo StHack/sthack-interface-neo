@@ -8,6 +8,8 @@
   "scripts": {
     "build": "grunt build",
     "start": "node src/server.js",
+    "docker-dev": "node --inspect=0.0.0.0:9229 src/server.js",
+    "dev": "node --inspect src/server.js",
     "test": "npx jasmine spec/*"
   },
   "dependencies": {
