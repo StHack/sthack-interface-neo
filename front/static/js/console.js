@@ -156,9 +156,9 @@ function setup() {
 $(document).ready(function () {
   $('#console').append('<p class="new_line">$ </p>');
   setTimeout(function () {
-    $('.new_line').last().teletype({ animDelay: 50, text: 'nc insomni.hack 31337' }, function () {
+    $('.new_line').last().teletype({ animDelay: 50, text: 'nc sthack 31337' }, function () {
       setTimeout(function () {
-        $('#console').append('<p class="new_line">Welcome on Insomni\'hack communicator</p>');
+        $('#console').append('<p class="new_line">Welcome on St\'hack communicator</p>');
         $('#console').append('<p class="new_line">Connecting to your device...</p>');
         setTimeout(function () {
           setup();
