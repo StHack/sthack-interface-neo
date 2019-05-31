@@ -125,7 +125,7 @@ let app = express();
 let sessionStore = null;
 
 if (process.env.NODE_ENV === 'production') {
-  sharedConfigService = new SharedConfigRedisService(config);
+  sharedConfigService = new SharedConfigRedisService(config, imageService);
   sharedConfigService.Initialize();
 
   sessionStore = new RedisStore({

@@ -102,7 +102,8 @@ class AdminSocketHandler {
   }
 
   async AddTask(data) {
-    await this.taskDB.addTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author, data.img, data.tags);
+    const task = await this.taskDB.addTask(data.title, data.description, data.flag, data.type, data.difficulty, data.author, data.img, data.tags);
+    this.sharedConfigService.notifyNewTask(task);
     await this._refreshTasks();
   }
 

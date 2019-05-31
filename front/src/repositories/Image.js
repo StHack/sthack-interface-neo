@@ -15,6 +15,7 @@ class Image {
       misc: 'categorie/misc.png',
       recon: 'categorie/recon.png',
       game: 'categorie/game.png',
+      default: 'categorie/default.png',
     };
   }
 

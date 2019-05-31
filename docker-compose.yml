@@ -41,6 +41,8 @@ services:
     depends_on:
     - redis
     - mongo
+    volumes:
+    - tasks_img:/app/public/img/tasks
 
   redis:
     image: redis:alpine
@@ -64,3 +66,4 @@ networks:
 
 volumes:
   mongo_data:
+  tasks_img:

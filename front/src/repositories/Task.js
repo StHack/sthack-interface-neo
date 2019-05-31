@@ -18,7 +18,7 @@ class Task {
   }
 
   async list() {
-    const tasks = await this.db.find('tasks', {}, { 'title': 1 });
+    const tasks = await this.db.find('tasks', {}, { 'title': 1, 'img': 1 });
     return tasks;
   }
 
@@ -82,10 +82,12 @@ class Task {
       type: type.toLowerCase(),
       tags: tags,
       difficulty: difficulty,
-      author: author
+      author: author,
+      solved: []
     };
 
-    return this.db.insert('tasks', task);
+    await this.db.insert('tasks', task);
+    return task;
   }
 
   getInfos(task, teamName, countTeam, description) {
