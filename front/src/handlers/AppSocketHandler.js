@@ -1,7 +1,7 @@
 class AppSocketHandler {
   constructor(
     socket,
-    socketBroadcast,
+    broadcasterService,
     config,
     logger,
     messageDB,
@@ -9,7 +9,7 @@ class AppSocketHandler {
     taskDB,
     scoreService) {
     this.socket = socket;
-    this.socketBroadcast = socketBroadcast;
+    this.broadcasterService = broadcasterService;
     this.logger = logger;
     this.messageDB = messageDB;
     this.teamDB = teamDB;
@@ -121,11 +121,11 @@ class AppSocketHandler {
   }
 
   notifyEveryoneOfTaskClosing(taskName, teamName) {
-    this.socketBroadcast.emit('validation', { title: taskName, team: teamName });
+    this.broadcasterService.emitSolvationTask({ title: taskName, team: teamName });
 
     if (this.config.closedTaskDelay > 0) {
       setTimeout(function () {
-        this.socketBroadcast.emit('reopenTask', taskName);
+        this.broadcasterService.emitReopenTask(taskName);
       }, this.config.closedTaskDelay);
     }
   }

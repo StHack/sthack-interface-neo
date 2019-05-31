@@ -76,6 +76,7 @@ const { SharedConfigService } = require('./services/SharedConfigService');
 const { SharedConfigRedisService } = require('./services/SharedConfigRedisService');
 const { ScoreService } = require('./services/ScoreService');
 const { ScoreInfoService } = require('./services/ScoreInfoService');
+const { BroadcasterService } = require('./services/BroadcasterService');
 
 const { AppHttpHandler } = require('./handlers/AppHttpHandler');
 const { AppSocketHandler } = require('./handlers/AppSocketHandler');
@@ -117,6 +118,7 @@ const imageService = new Image();
 const teamDB = new Team(db);
 const taskDB = new Task(db, config, imageService, scoreInfoService);
 const messageDB = new Message(db);
+const broadcasterService = new BroadcasterService();
 let sharedConfigService = new SharedConfigService(config);
 const scoreService = new ScoreService(teamDB, taskDB, scoreInfoService);
 
@@ -125,8 +127,9 @@ let app = express();
 let sessionStore = null;
 
 if (process.env.NODE_ENV === 'production') {
-  sharedConfigService = new SharedConfigRedisService(config, imageService);
+  sharedConfigService = new SharedConfigRedisService(config, imageService, broadcasterService);
   sharedConfigService.Initialize();
+  broadcasterService.initialize({ sharedConfigRedis:sharedConfigService });
 
   sessionStore = new RedisStore({
     client: sharedConfigService.getMainClient()
@@ -192,8 +195,9 @@ if(process.env.NODE_ENV==='production'){
 }
 
 taskDB.list().then(tasks => imageService.initialize(tasks.map(t => t.img)));
+broadcasterService.initialize({ socket: socketIO });
 
-const appHttpHandler = new AppHttpHandler(config, logger, imageService, teamDB, taskDB, scoreService, socketIO);
+const appHttpHandler = new AppHttpHandler(config, logger, imageService, teamDB, taskDB, scoreService, broadcasterService);
 appHttpHandler.RegisterRoute(app);
 
 if(app.get('env') === 'production'){
@@ -233,7 +237,7 @@ socketIO.on('connection', function (socket) {
 
   const appSocket = new AppSocketHandler(
     socket,
-    socketIO,
+    broadcasterService,
     config,
     logger,
     messageDB,
@@ -247,6 +251,7 @@ socketIO.on('connection', function (socket) {
   const adminSocket = new AdminSocketHandler(
     socket,
     socketIO,
+    broadcasterService,
     config,
     logger,
     messageDB,

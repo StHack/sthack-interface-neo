@@ -3,10 +3,12 @@ var redis = require('redis');
 class SharedConfigRedisService {
   constructor(
     config,
-    imageService
+    imageService,
+    broadcasterService
   ) {
     this.config = config;
     this.imageService = imageService;
+    this.broadcasterService = broadcasterService;
   }
 
   Initialize() {
@@ -58,6 +60,10 @@ class SharedConfigRedisService {
         const task = JSON.parse(message.replace('notifyNewTask,', ''))
         this.imageService.initialize([task.img]);
       }
+      else if (message.startsWith('broadcast,')) {
+        const broadcastInfo = JSON.parse(message.replace('broadcast,', ''))
+        this.broadcasterService.broadcastCallback(broadcastInfo.actionName, broadcastInfo.options);
+      }
     });
   }
 
@@ -79,6 +85,10 @@ class SharedConfigRedisService {
 
   notifyNewTask(task) {
     this.redisAdminPub.publish('adminAction', 'notifyNewTask,' + JSON.stringify(task));
+  }
+
+  serverBroadcast(actionName, options) {
+    this.redisAdminPub.publish('adminAction', 'broadcast,' + JSON.stringify({ actionName: actionName, options: options }));
   }
 }
 

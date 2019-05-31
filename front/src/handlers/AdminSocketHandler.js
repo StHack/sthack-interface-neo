@@ -1,7 +1,8 @@
 class AdminSocketHandler {
   constructor(
     socket,
-    socketBroadcast,
+    socketIO,
+    broadcasterService,
     config,
     logger,
     messageDB,
@@ -11,7 +12,8 @@ class AdminSocketHandler {
     sharedConfigService,
     sessionStore) {
     this.socket = socket;
-    this.socketBroadcast = socketBroadcast;
+    this.socketIO = socketIO;
+    this.broadcasterService = broadcasterService;
     this.config = config;
     this.logger = logger;
 
@@ -74,7 +76,7 @@ class AdminSocketHandler {
 
   async Break(data) {
     await this.taskDB.breakTask(data.title, data.broken);
-    this.socketBroadcast.emit('breakTask', data);
+    this.broadcasterService.emitBreakTask(data);
   }
 
   CloseRegistration(data) {
@@ -98,7 +100,7 @@ class AdminSocketHandler {
   }
 
   Refresh(data) {
-    this.socketBroadcast.emit('refresh');
+    this.broadcasterService.emitRefresh();
   }
 
   async AddTask(data) {
@@ -122,7 +124,7 @@ class AdminSocketHandler {
 
     const teams = await this.teamDB.list();
 
-    this.socketBroadcast.emit('newTeam');
+    this.broadcasterService.emitNewTeam();
     this.socket.emit('updateTeams', teams);
   }
 
@@ -154,12 +156,12 @@ class AdminSocketHandler {
 
     this._disconnectTeam(teamNameToDelete);
 
-    this.socketBroadcast.emit('newTeam');
+    this.broadcasterService.emitNewTeam();
     this.socket.emit('updateTeams', teams);
   }
 
   _disconnectTeam(teamNameToDisconnect) {
-    var handshakes = this.socketBroadcast.sockets.connected;
+    var handshakes = this.socketIO.sockets.connected;
     for (var key in handshakes) {
       let authenticatedTeamName = handshakes[key].conn.request.authenticated;
       let authenticatedSessionID = handshakes[key].conn.request.sessionID;
@@ -198,13 +200,13 @@ class AdminSocketHandler {
       this.socket.emit('adminInfo', 'Message added');
     }
 
-    this.socketBroadcast.emit('message', data);
+    this.broadcasterService.emitMessage(data);
   }
 
   async _refreshTasks() {
     const tasks = await this.taskDB.list();
 
-    //this.socketBroadcast.emit('refresh');
+    this.Refresh();
     this.socket.emit('updateTasks', tasks);
   }
 }

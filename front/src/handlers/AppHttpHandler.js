@@ -6,7 +6,7 @@ class AppHttpHandler {
     teamDB,
     taskDB,
     scoreService,
-    socketBroadcast
+    broadcasterService
   ) {
     this.config = config;
     this.logger = logger;
@@ -14,7 +14,7 @@ class AppHttpHandler {
     this.teamDB = teamDB;
     this.taskDB = taskDB;
     this.scoreService = scoreService;
-    this.socketBroadcast = socketBroadcast;
+    this.broadcasterService = broadcasterService;
 
     this.home = this.home.bind(this);
     this.login = this.login.bind(this);
@@ -64,7 +64,7 @@ class AppHttpHandler {
         await this.teamDB.addTeam(req.body.name, req.body.password);
 
         this.logger.logExpressRequest(req, [req.body.name, 'ok']);
-        this.socketBroadcast.emit('newTeam');
+        this.broadcasterService.emitNewTeam();
         res.redirect(302, '/');
       } catch (error) {
         this.logger.logExpressError(req, error);
