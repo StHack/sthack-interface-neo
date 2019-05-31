@@ -154,7 +154,7 @@ app.use(session({
 );
 
 const unAuthRoute = ['/register', '/', '', '/rules'];
-const authRoute = ['/scoreboard', '/', '', '/rules', adminPath, '/simple', '/submitFlag'];
+const authRoute = ['/scoreboard', '/', '', '/rules', adminPath ];
 
 /* à revoir en mode authentificationMiddleware */
 app.use(function(req, res, next){

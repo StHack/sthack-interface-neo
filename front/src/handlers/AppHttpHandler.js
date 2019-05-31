@@ -21,8 +21,6 @@ class AppHttpHandler {
     this.register = this.register.bind(this);
     this.rules = this.rules.bind(this);
     this.scoreboard = this.scoreboard.bind(this);
-    this.teamScoreboard = this.teamScoreboard.bind(this);
-    this.submitFlag = this.submitFlag.bind(this);
     this.admin = this.admin.bind(this);
   }
 
@@ -32,8 +30,6 @@ class AppHttpHandler {
     app.all('/register', this.register);
     app.get('/rules', this.rules);
     app.get('/scoreboard', this.scoreboard);
-    app.get('/simple', this.teamScoreboard);
-    app.post('/submitFlag', this.submitFlag);
     app.get(this.config.adminPath, this.admin);
   }
 
@@ -147,48 +143,6 @@ class AppHttpHandler {
       socketIOUrl: req.headers.host,
       Images: JSON.stringify(this.imageDB.getList())
     });
-  }
-
-  async teamScoreboard(req, res) {
-    try {
-      const tasks = await this.taskDB.getAllTasks();
-      const teamScore = await this.scoreService.getScoreOfTeam(req.session.authenticated);
-
-      res.render('simple', { tasks: tasks, title: this.config.siteTitle, score: teamScore.value });
-    } catch (error) {
-      res.render('simple', { tasks: [], title: this.config.siteTitle, score: 0 });
-    }
-  }
-
-  async submitFlag(req, res) {
-    if (this.config.ctfOpen) {
-      this.logger.logExpressRequest(req, error, [req.session.authenticated, req.body.title, 'closed']);
-      res.redirect(302, '/simple');
-      return;
-    }
-
-    if (req.body.title
-      && req.body.flag) {
-
-      try {
-        await this.taskDB.solveTask(req.body.title, req.body.flag, req.session.authenticated);
-
-        this.logger.logExpressRequest(req, [req.session.authenticated, req.body.title, 'ok'])
-
-        this.socketBroadcast.emit('validation', { title: req.body.title, team: req.session.authenticated });
-
-        if (this.config.closedTaskDelay > 0) {
-          setTimeout(function () {
-            this.socketService.sendToAll('reopenTask', req.body.title);
-          }, this.config.closedTaskDelay);
-        }
-
-      } catch (error) {
-        this.logger.logExpressError(req, error, [req.session.authenticated, req.body.title]);
-      }
-    }
-
-    res.redirect(302, '/simple');
   }
 
   admin(req, res) {
