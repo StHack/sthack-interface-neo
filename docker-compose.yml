@@ -27,12 +27,12 @@ services:
     environment:
     - REDIS_HOST=redis
     - REDIS_PORT=6379
-    - DB_CONNECTION_STRING=mongodb://sthackadmin:S74cK_1s_Aw3s0mE@mongo:27017/admin
-    - ADMIN_NAME=admin
+    - DB_CONNECTION_STRING=mongodb://sthackadmin:gxwv3mcntd7rjyrv64ho07vetw0k1lli@mongo:27017/admin
+    - ADMIN_NAME=admin_sthack
     - CLOSED_TASK_DELAY=0
-    - SESSION_SECRET=randomstring
+    - SESSION_SECRET=0d0807c26595bf67a0437e9f2d49eb3e
     - SESSION_KEY=sthackSession
-    - ADMIN_PATH=/admin_secret_section
+    - ADMIN_PATH=/la_page_admin_secret_sthack_pouet
     - TITLE=Sthack
     - BASE_SCORE=50
     networks:
@@ -54,7 +54,7 @@ services:
     restart: always
     environment:
     - MONGO_INITDB_ROOT_USERNAME=sthackadmin
-    - MONGO_INITDB_ROOT_PASSWORD=S74cK_1s_Aw3s0mE
+    - MONGO_INITDB_ROOT_PASSWORD=gxwv3mcntd7rjyrv64ho07vetw0k1lli
     networks:
     - main
     volumes:
