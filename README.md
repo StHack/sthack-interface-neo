@@ -19,8 +19,8 @@ For the prod deployment, we recommand using swarm.
 3. Customize `docker-compose.prod.yml` file by replacing `localhost` with the DNS name you will use once deployed. e.g. : `https://ctf.sthack.fr`
 4. Change settings if needed into `docker-compose.yml` file
 5. Deploy with :
-  a. `docker-compose stack deploy -c docker-compose.yml -c docker-compose.prod.yml sthack`
-  b. or `docker-compose stack deploy -c docker-compose.yml -c docker-compose.registry.yml -c docker-compose.prod.yml sthack`
+  a. `docker stack deploy -c docker-compose.yml -c docker-compose.prod.yml sthack`
+  b. or `CI_COMMIT_REF_NAME=<docker_image_tag_name> docker stack deploy --with-registry-auth -c docker-compose.yml -c docker-compose.registry.yml -c docker-compose.prod.yml sthack`
 
 ## Introduction
 
