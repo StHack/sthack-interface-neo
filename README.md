@@ -24,7 +24,7 @@ For the prod deployment, we recommand using swarm.
 
 ## Introduction
 
-The NodeJS interface for St'Hack CTF game.
+The NodeJS interface for Sthack CTF game.
 More information on the  event : <https://www.sthack.fr/>
 
 ## Installation
