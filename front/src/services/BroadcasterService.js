@@ -1,8 +1,10 @@
 class BroadcasterService {
-  constructor() {
+  constructor(logger) {
     this.socket = null;
     this.broadcastEnabled = false;
     this.sharedConfigRedis = null;
+    this.imageService = null;
+    this.logger = logger;
   }
 
   initialize(options) {
@@ -17,6 +19,10 @@ class BroadcasterService {
     if (options.sharedConfigRedis) {
       this.sharedConfigRedis = options.sharedConfigRedis;
       this.broadcastEnabled = true;
+    }
+
+    if (options.imageService) {
+      this.imageService = options.imageService;
     }
   }
 
@@ -50,12 +56,18 @@ class BroadcasterService {
     this._emitCallback('emitMessage', message);
   }
 
+  emitNewImage(imgName) {
+    this.imageService.initialize([imgName]);
+    this._emitCallback('emitNewImage', imgName);
+  }
+
   broadcastCallback(actionName, options) {
     if (!this.broadcastEnabled) {
       return;
     }
 
     this.broadcastEnabled = false;
+    this.logger.logInfo(`receiving broadcast ${actionName}`);
     try {
       this[actionName](options);
     } finally {
@@ -69,6 +81,7 @@ class BroadcasterService {
       return;
     }
 
+    this.logger.logInfo(`sending broadcast ${actionName}`);
     this.sharedConfigRedis.serverBroadcast(actionName, options);
   }
 }

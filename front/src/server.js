@@ -114,11 +114,11 @@ var config = {
 const logger = new LoggerService();
 const db = new DB(DBConnectionString);
 const scoreInfoService = new ScoreInfoService(config);
-const imageService = new Image();
+const broadcasterService = new BroadcasterService(logger);
+const imageService = new Image(broadcasterService);
 const teamDB = new Team(db);
 const taskDB = new Task(db, config, imageService, scoreInfoService);
 const messageDB = new Message(db);
-const broadcasterService = new BroadcasterService();
 let sharedConfigService = new SharedConfigService(config);
 const scoreService = new ScoreService(teamDB, taskDB, scoreInfoService);
 
@@ -127,9 +127,12 @@ let app = express();
 let sessionStore = null;
 
 if (process.env.NODE_ENV === 'production') {
-  sharedConfigService = new SharedConfigRedisService(config, imageService, broadcasterService);
+  sharedConfigService = new SharedConfigRedisService(config, broadcasterService);
   sharedConfigService.Initialize();
-  broadcasterService.initialize({ sharedConfigRedis:sharedConfigService });
+  broadcasterService.initialize({
+    sharedConfigRedis: sharedConfigService,
+    imageService: imageService
+  });
 
   sessionStore = new RedisStore({
     client: sharedConfigService.getMainClient()

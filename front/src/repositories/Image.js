@@ -1,7 +1,8 @@
 var { writeFileSync } = require('fs');
 
 class Image {
-  constructor() {
+  constructor(broadcasterService) {
+    this.broadcasterService = broadcasterService;
     this.resources = {
       backdoor: 'categorie/backdoor.png',
       crypto: 'categorie/crypto.png',
@@ -44,6 +45,7 @@ class Image {
     writeFileSync(__dirname + '/../../public/img/tasks/' + imageName + '.png', buf);
 
     this._insertResources(imageName);
+    this.broadcasterService.emitNewImage(imageName);
 
     return imageName;
   }

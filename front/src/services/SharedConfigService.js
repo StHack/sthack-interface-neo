@@ -21,9 +21,6 @@ class SharedConfigService {
   openRegistration() {
     this.config.registrationOpen = true;
   }
-
-  notifyNewTask(task) {
-  }
 }
 
 exports.SharedConfigService = SharedConfigService;

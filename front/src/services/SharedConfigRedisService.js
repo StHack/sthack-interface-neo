@@ -3,11 +3,9 @@ var redis = require('redis');
 class SharedConfigRedisService {
   constructor(
     config,
-    imageService,
     broadcasterService
   ) {
     this.config = config;
-    this.imageService = imageService;
     this.broadcasterService = broadcasterService;
   }
 
@@ -56,10 +54,6 @@ class SharedConfigRedisService {
       else if (message === 'openRegistration') {
         this.config.registrationOpen = true;
       }
-      else if (message.startsWith('notifyNewTask,')) {
-        const task = JSON.parse(message.replace('notifyNewTask,', ''))
-        this.imageService.initialize([task.img]);
-      }
       else if (message.startsWith('broadcast,')) {
         const broadcastInfo = JSON.parse(message.replace('broadcast,', ''))
         this.broadcasterService.broadcastCallback(broadcastInfo.actionName, broadcastInfo.options);
@@ -81,10 +75,6 @@ class SharedConfigRedisService {
 
   openRegistration() {
     this.redisAdminPub.publish('adminAction', 'openRegistration');
-  }
-
-  notifyNewTask(task) {
-    this.redisAdminPub.publish('adminAction', 'notifyNewTask,' + JSON.stringify(task));
   }
 
   serverBroadcast(actionName, options) {
