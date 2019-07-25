@@ -18,7 +18,7 @@ services:
           cpus: '1'
       labels:
       - traefik.enable=true
-      - traefik.frontend.rule=Host:scoreboard.sthack.fr
+      - traefik.frontend.rule=Host:localhost
       - traefik.port=3000
       - traefik.protocol=http
       - traefik.backend.loadbalancer.stickiness=true
